@@ -634,14 +634,8 @@ window.withdraw = () => form('طلب سحب',
     Security.limit('wd', 3, 36e5); 
     const a = Security.amount($('f_a').value, 50, 50000);
     if (a > me.balance) throw new Error('الرصيد غير كافٍ'); 
-
-    Swal.fire({title: 'جاري التحقق من هويتك...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
-    try {
-      await reauthenticateWithPopup(auth, new GoogleAuthProvider());
-    } catch(e) {
-      Swal.close();
-      throw new Error('فشل التحقق من الهوية. حاول مرة أخرى.');
-    }
+    
+    // تمت إزالة إعادة تسجيل الدخول (Reauth) لأنها تسبب تعطل النافذة في الهواتف
     
     const idToken = await auth.currentUser.getIdToken();
     const response = await fetch(WORKER_URL + "/withdraw", {
@@ -658,9 +652,11 @@ window.withdraw = () => form('طلب سحب',
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
     
-    Swal.close();
-    ok('تم تسجيل طلب السحب'); 
-    go('wallet'); 
+    // تأخير بسيط لإغلاق النافذة بنجاح
+    setTimeout(() => { 
+        ok('تم تسجيل طلب السحب'); 
+        go('wallet'); 
+    }, 100);
 });
 
 window.coupon = () => form('استبدال كوبون', inp('f_k','كود الكوبون'), async () => { const k = $('f_k').value.trim(); if (!/^[A-Za-z0-9_-]{4,40}$/.test(k)) throw new Error('كود غير صالح'); await set(R(`credit_queue/${me.uid}/${k}`), {userId: me.uid, code: k, amount: 0, status: 'pending', createdAt: Date.now()}); ok('تم إرسال الكوبون للمراجعة'); });
