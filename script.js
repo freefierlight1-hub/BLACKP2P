@@ -1,4 +1,4 @@
-import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut, reauthenticateWithPopup} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getDatabase,ref,get,set,update,push,onValue,runTransaction,remove,query,orderByChild,equalTo,limitToLast} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
@@ -133,9 +133,15 @@ window.go = v => {
     ({feed, add, chats, notes, wallet, me: profile, orders, chat: null}[v]||feed)();
 };
 
-window.signIn = () => signInWithRedirect(auth, new GoogleAuthProvider()).catch(bad);
+// استخدام Popup بدلاً من Redirect لضمان العمل
+window.signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => {
+    if(e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        bad(new Error('المتصفح يمنع النوافذ المنبثقة. يرجى فتح الرابط في متصفح كروم (وليس من داخل فيسبوك).'));
+    } else {
+        bad(e);
+    }
+});
 window.logout = () => signOut(auth);
-getRedirectResult(auth).catch(e => { if(e.code !== 'auth/no-auth-event') bad(e); });
 
 onAuthStateChanged(auth, async u => {
   clearU(); clearGU();
@@ -159,20 +165,17 @@ onAuthStateChanged(auth, async u => {
   }
   
   try {
-    // 1. تعيين البيانات الأساسية فوراً وفتح الموقع (لحل مشكلة التعليق)
     me = { uid: u.uid, name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, verified: false, role: 'user' };
     $('nav').classList.remove('hidden');
     $('bal').textContent = '0 ج';
     
     if (!initialized) {
         initialized = true;
-        go('feed'); // فتح صفحة السوق فوراً!
+        go('feed');
     }
 
-    // 2. محاولة قراءة البيانات من قاعدة البيانات في الخلفية
     const r = R('users/' + u.uid);
     
-    // 3. مستمع التحديثات الحية
     GU.push(onValue(r, s => {
       if (s.exists()) {
         me = {uid: u.uid, ...s.val()}; 
@@ -188,12 +191,10 @@ onAuthStateChanged(auth, async u => {
             return;
           }
         }
-        // تحديث الشاشة الحالية إذا كان المستخدم في المحفظة أو الملف الشخصي
         if (view === 'wallet' || view === 'me') { go(view); }
       }
     }));
 
-    // 4. محاولة حفظ المستخدم الجديد (تتم في الخلفية ولا توقف الموقع)
     const snap = await get(r);
     if (!snap.exists()) {
       set(r, {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, verified: false, role: 'user', suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now()})
