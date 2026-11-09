@@ -1173,32 +1173,7 @@ function adminChat(cid){
     $('fz').innerHTML=`<button class="icon-btn" style="width:30px;height:30px;${c.frozen?'background:var(--info-bg);color:var(--info-tx);border-color:var(--info-bd)':'background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn-bd)'}" onclick="event.stopPropagation(); A('${kFreeze}')" title="${c.frozen?'إلغاء':'تجميد'}"><i class="fa-solid fa-${c.frozen?'lock-open':'snowflake'}" style="font-size:10px"></i></button>`;
     const kClose='h'+(hc++);H[kClose]=async()=>{if(!await ask('إغلاق؟'))return;await update(R('chats/'+cid),{status:'closed'});await log('إغلاق',cid);ok('تم');show('chats')};
     if(c.status !== 'closed') { $('cl').innerHTML=`<button class="icon-btn" style="width:30px;height:30px;background:var(--danger-bg);color:var(--danger-tx);border-color:var(--danger-bd)" onclick="event.stopPropagation(); A('${kClose}')" title="إغلاق"><i class="fa-solid fa-xmark" style="font-size:11px"></i></button>`; }
-    else { $('cl').innerHTML=''; $('mi').disabled = true; $('mb').disabled = true; $('mb').style.opacity=0.5; }
-    
-    if(c.dealId && typeof c.dealId === 'string' && c.dealId.trim() !== '') {
-        const dp = $('dp');
-        live.push(onValue(R('deals/'+c.dealId),x=>{
-            const d = x.val(); if(!d) return;
-            const steps = ['held','delivered','completed']; const idx = steps.indexOf(d.status);
-            dp.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${d.amount} ج</b>${statusBadge(d.status)}</div><div class="deal-steps"><div class="deal-step"><div class="deal-step-circle done"><i class="fa-solid fa-check"></i></div><span class="deal-step-label done">الدفع</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=1?'done':''}"><i class="fa-solid fa-box"></i></div><span class="deal-step-label ${idx>=1?'done':''}">التسليم</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=2?'done':''}"><i class="fa-solid fa-flag-checkered"></i></div><span class="deal-step-label ${idx>=2?'done':''}">الاكتمال</span></div></div></div>`;
-        }));
-    } else { $('dp').innerHTML = ''; }
-  }));
-  
-  live.push(onValue(query(R(`chats/${cid}/messages`),limitToLast(200)),s=>{
-    const a=Object.values(s.val()||{}).sort((x,y)=>x.createdAt-y.createdAt);
-    $('ms').innerHTML=a.map(m=>{
-        const time = new Date(m.createdAt).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-        if(m.type === 'image' && m.imageUrl) { const isMe = m.senderId === me.uid; return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}" style="padding:3px"><img src="${m.imageUrl}" style="max-height:180px;border-radius:10px;display:block;cursor:pointer" onclick="zoom(this.src)"><span class="msg-time">${time}</span></div></div>`; }
-        else if(m.type === 'transaction') { return `<div class="msg-system"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:280px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span>${statusBadge(m.status)}</div></div></div>`; }
-        else if(m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
-        else if(m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble" style="white-space:pre-line;text-align:right;direction:rtl;"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
-        const isMe = m.senderId === me.uid;
-        return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}">${E(m.text)}<span class="msg-time">${time}</span></div></div>`;
-    }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-4);font-size:12px">لا توجد رسائل</div>';
-    $('ms').scrollTop=1e9;
-  }));
-}
+
 
 window.saveAdminNote = async (uid) => {
     if (!uid) return;
@@ -1234,7 +1209,185 @@ window.sendQuickNote = async (uid) => {
 };
 
 window.sendUserInfoCard = async () => {
-    const uid = window._chatCtx.uid;
+    cfunction adminChat(cid){
+  clearLive();H={};hc=0;let c={}, currentUserData = null;
+  
+  window._chatCtx = { cid: cid, uid: null, postId: null };
+
+  const compressImageToBlob = (file) => new Promise((resolve) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (event) => { const img = new Image(); img.src = event.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let { width, height } = img; const MAX = 800; if (width > height && width > MAX) { height *= MAX / width; width = MAX; } else if (height > MAX) { width *= MAX / height; height = MAX; } canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height); canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.6); }; }; });
+  
+  const uploadAdminImage = async (file) => {
+      const blob = await compressImageToBlob(file);
+      const formData = new FormData();
+      formData.append('image', blob, 'image.jpg');
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=53bcd76af848af724a74013f151c9743`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) return data.data.url;
+      throw new Error('فشل الرفع');
+  };
+
+  const quickReplies = ["أهلاً، جاري المراجعة.","تم الاستلام، انتظر قليلاً.","تم الرفض لعدم تطابق البيانات.","أرفق صورة واضحة للإيصال.","تمت الموافقة، شكراً لثقتك."];
+
+  $('v').innerHTML = `
+  <div id="panel-overlay" class="panel-overlay" onclick="togglePanel()"></div>
+  <div id="side-panel" class="side-panel">
+      <div class="panel-header">
+          <div id="panel-avatar" style="width:64px;height:64px;border-radius:16px;background:#18181b;color:#fff;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">?</div>
+          <b id="panel-name" style="font-size:15px;font-weight:900;display:block;color:var(--text);">—</b>
+          <span id="panel-email" style="font-size:10px;color:var(--text-3);font-weight:700;direction:ltr;display:block;margin-top:2px;cursor:pointer;" onclick="window.copyText(this.innerText)">—</span>
+          <div id="panel-status" style="margin-top:5px;font-size:10px;font-weight:800;"></div>
+          <div id="panel-balance" style="margin-top:10px;background:var(--success-bg);color:var(--success-tx);padding:5px 10px;border-radius:8px;font-size:12px;font-weight:900;display:inline-block;">الرصيد: 0 ج</div>
+      </div>
+      <div class="panel-body">
+          <div class="action-grid">
+              <button class="action-btn info" onclick="window.sendUserInfoCard()"><i class="fa-solid fa-address-card"></i> بطاقة المستخدم</button>
+              <button class="action-btn" onclick="window.openUserTransactions(window._chatCtx.uid, window._chatCtx.cid)"><i class="fa-solid fa-receipt" style="color:var(--info-solid)"></i> المعاملات</button>
+              <button class="action-btn warning" onclick="window.adminAdjustBalance(window._chatCtx.uid)"><i class="fa-solid fa-wallet"></i> تعديل الرصيد</button>
+              <button class="action-btn danger" onclick="window.adminToggleBan(window._chatCtx.uid)"><i class="fa-solid fa-ban"></i> حظر / إلغاء</button>
+              <button class="action-btn" onclick="userInfo(window._chatCtx.uid)"><i class="fa-solid fa-user-gear" style="color:var(--purple-solid)"></i> الملف الشخصي</button>
+              <button class="action-btn success" onclick="window.sendQuickNote(window._chatCtx.uid)"><i class="fa-solid fa-bell"></i> إشعار سريع</button>
+              <button class="action-btn danger" style="background:#7f1d1d;color:#fca5a5;border-color:#991b1b;" onclick="window.banDevice(window._chatCtx.uid)"><i class="fa-solid fa-laptop-circle-xmark"></i> حظر الجهاز</button>
+              <button class="action-btn warning" onclick="window.adminAddStrike(window._chatCtx.uid)"><i class="fa-solid fa-triangle-exclamation"></i> إعطاء تحذير</button>
+              <button class="action-btn" style="grid-column: 1/-1; display:none;" id="btn-view-post" onclick="viewPrivateInfo(window._chatCtx.postId)"><i class="fa-solid fa-file-shield" style="color:var(--warn-solid)"></i> بيانات إعلان الصفقة</button>
+          </div>
+          
+          <div class="internal-notes" id="notes-container" style="display:none;">
+             <b style="font-size:11px; color:var(--warn-tx); display:block; margin-bottom:5px;"><i class="fa-solid fa-pen-nib"></i> ملاحظات داخلية (لن يراها المستخدم)</b>
+             <textarea id="admin-note-input" style="font-size:11px; height:60px; margin-bottom:5px; padding:6px;" placeholder="اكتب ملاحظة عن هذا المستخدم..."></textarea>
+             <button class="btn btn-warning" style="width:100%; font-size:10px; min-height:28px;" onclick="window.saveAdminNote(window._chatCtx.uid)">حفظ الملاحظة</button>
+          </div>
+      </div>
+  </div>
+
+  <div class="chat-shell">
+    <div class="chat-header" style="cursor:pointer;" onclick="togglePanel()">
+      <button class="icon-btn" onclick="event.stopPropagation(); go('chats')" style="width:30px;height:30px;flex-shrink:0"><i class="fa-solid fa-arrow-right" style="font-size:11px"></i></button>
+      <div id="chat-avatar-wrap" class="chat-avatar">?</div>
+      <div class="chat-info">
+          <div id="chat-title" class="chat-name" style="display:flex;align-items:center;gap:5px;">— <i class="fa-solid fa-circle-info" style="font-size:10px;color:var(--text-4)"></i></div>
+          <div id="chat-status" class="chat-status"><span class="status-dot"></span><span>—</span></div>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0"><span id="fz"></span><span id="cl"></span></div>
+    </div>
+    <div id="dp"></div>
+    <div id="ms" class="chat-messages"></div>
+    
+    <div class="chat-input-bar">
+      <input type="file" id="fi" accept="image/*" style="display:none">
+      <button class="icon-btn" id="btn-img" title="صورة"><i class="fa-solid fa-image"></i></button>
+      <button class="icon-btn" id="btn-tx" title="معاملة"><i class="fa-solid fa-receipt"></i></button>
+      <button class="icon-btn" id="btn-qr" title="ردود سريعة" style="color:var(--warn-tx);background:var(--warn-bg);border-color:var(--warn-bd)"><i class="fa-solid fa-bolt"></i></button>
+      <input id="mi" placeholder="اكتب ردك...">
+      <button class="btn btn-primary" id="mb" style="padding:8px 12px;min-height:38px"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>`;
+  
+  window.togglePanel = () => {
+      $('side-panel').classList.toggle('open');
+      $('panel-overlay').classList.toggle('open');
+  };
+
+  window.copyText = (txt) => { navigator.clipboard.writeText(txt); ok('تم النسخ'); };
+
+  $('btn-qr').onclick = () => {
+      Swal.fire({
+          title: 'ردود سريعة',
+          html: `<div style="display:flex;flex-direction:column;gap:8px;">${quickReplies.map(r=>`<button class="btn btn-ghost" style="justify-content:flex-start;text-align:right;font-size:12px;padding:10px;" onclick="window.applyQR('${r.replace(/'/g,"\\'")}')">${r}</button>`).join('')}</div>`,
+          showConfirmButton: false, showCloseButton: true
+      });
+  };
+  window.applyQR = (text) => { $('mi').value = text; Swal.close(); $('mi').focus(); };
+  
+  const sendText=async()=>{ const t=$('mi').value.trim().slice(0,1000); if(!t)return; try{ await set(push(R(`chats/${cid}/messages`)),{senderId:me.uid,type:'admin',text:t,createdAt:Date.now(),read:false}); await update(R('chats/'+cid),{lastMessage:t.slice(0,60),updatedAt:Date.now(), adminRead: true}); $('mi').value=''; }catch(e){bad(e)} };
+  $('mb').onclick=sendText; $('mi').onkeydown=e=>e.key==='Enter'&&sendText();
+  $('btn-img').onclick = () => $('fi').click();
+  
+  $('fi').onchange = async (e) => { 
+      const file = e.target.files[0]; 
+      if(!file) return; 
+      try { 
+          Swal.fire({title:'جاري رفع الصورة...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
+          const imageUrl = await uploadAdminImage(file); 
+          await set(push(R(`chats/${cid}/messages`)), { senderId: me.uid, type: 'image', imageUrl: imageUrl, text: '📸', createdAt: Date.now(), read: false }); 
+          await update(R('chats/'+cid), {lastMessage: '📸 صورة', updatedAt: Date.now(), adminRead: true}); 
+          Swal.close(); 
+          $('fi').value = ''; 
+      } catch (err) { Swal.close(); bad(err); } 
+  };
+  
+  $('btn-tx').onclick = () => { if(!window._chatCtx.uid) return bad(new Error('لم يتم التعرف على المستخدم')); window.openUserTransactions(window._chatCtx.uid, cid); };
+  
+  live.push(onValue(R('chats/'+cid), async s => {
+    c=s.val()||{};
+    if (c.adminRead === false) { update(R('chats/'+cid), {adminRead: true}); }
+
+    window._chatCtx.uid = c.buyerId !== 'admin_support' ? c.buyerId : c.sellerId;
+    window._chatCtx.postId = c.postId;
+    
+    if (window._chatCtx.postId) { $('btn-view-post').style.display = 'flex'; }
+
+    if (window._chatCtx.uid && (!currentUserData || currentUserData.uid !== window._chatCtx.uid)) {
+        currentUserData = { uid: window._chatCtx.uid, ...(await get(R('users/'+window._chatCtx.uid))).val() };
+        if(currentUserData) {
+            $('panel-avatar').textContent = (currentUserData.name || '?').charAt(0);
+            $('panel-name').textContent = currentUserData.name || 'غير معروف';
+            $('panel-email').textContent = currentUserData.email || 'لا يوجد إيميل';
+            
+            const statusEl = $('panel-status');
+            let stText = [];
+            if (currentUserData.verified) stText.push('<span style="color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> موثق</span>');
+            if (currentUserData.strikes) stText.push(`<span style="color:var(--warn-tx);"><i class="fa-solid fa-triangle-exclamation"></i> ${currentUserData.strikes} تحذيرات</span>`);
+            statusEl.innerHTML = stText.join(' | ');
+
+            $('notes-container').style.display = 'block';
+            $('admin-note-input').value = currentUserData.adminNote || '';
+
+            $('panel-balance').textContent = 'الرصيد: ' + (currentUserData.balance || 0) + ' ج';
+            $('panel-balance').style.background = currentUserData.suspended ? 'var(--danger-bg)' : 'var(--success-bg)';
+            $('panel-balance').style.color = currentUserData.suspended ? 'var(--danger-tx)' : 'var(--success-tx)';
+            $('panel-balance').textContent = currentUserData.suspended ? 'محظور 🚫' : 'الرصيد: ' + (currentUserData.balance || 0) + ' ج';
+        }
+    }
+
+    const displayName = c.buyerId === 'admin_support' ? c.sellerName : c.buyerName;
+    $('chat-title').innerHTML = displayName + (c.buyerId !== 'admin_support' && c.sellerId !== 'admin_support' ? ' ↔ ' + c.sellerName : '') + ' <i class="fa-solid fa-circle-info" style="font-size:10px;color:var(--text-4)"></i>';
+    $('chat-avatar-wrap').textContent = (displayName || '?').charAt(0);
+    
+    const statusEl = $('chat-status');
+    if(c.status === 'closed') { statusEl.innerHTML = '<span class="status-dot closed"></span><span>مغلقة</span>'; }
+    else if(c.frozen) { statusEl.innerHTML = '<span class="status-dot frozen"></span><span>مجمدة</span>'; }
+    else { statusEl.innerHTML = '<span class="status-dot"></span><span>نشطة</span>'; }
+
+    const kFreeze='h'+(hc++);H[kFreeze]=async()=>{await update(R('chats/'+cid),{frozen:!c.frozen});await log(c.frozen?'رفع تجميد':'تجميد',cid)};
+    $('fz').innerHTML=`<button class="icon-btn" style="width:30px;height:30px;${c.frozen?'background:var(--info-bg);color:var(--info-tx);border-color:var(--info-bd)':'background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn-bd)'}" onclick="event.stopPropagation(); A('${kFreeze}')" title="${c.frozen?'إلغاء':'تجميد'}"><i class="fa-solid fa-${c.frozen?'lock-open':'snowflake'}" style="font-size:10px"></i></button>`;
+    const kClose='h'+(hc++);H[kClose]=async()=>{if(!await ask('إغلاق؟'))return;await update(R('chats/'+cid),{status:'closed'});await log('إغلاق',cid);ok('تم');show('chats')};
+    if(c.status !== 'closed') { $('cl').innerHTML=`<button class="icon-btn" style="width:30px;height:30px;background:var(--danger-bg);color:var(--danger-tx);border-color:var(--danger-bd)" onclick="event.stopPropagation(); A('${kClose}')" title="إغلاق"><i class="fa-solid fa-xmark" style="font-size:11px"></i></button>`; }
+    else { $('cl').innerHTML=''; $('mi').disabled = true; $('mb').disabled = true; $('mb').style.opacity=0.5; }
+    
+    if(c.dealId && typeof c.dealId === 'string' && c.dealId.trim() !== '') {
+        const dp = $('dp');
+        live.push(onValue(R('deals/'+c.dealId),x=>{
+            const d = x.val(); if(!d) return;
+            const steps = ['held','delivered','completed']; const idx = steps.indexOf(d.status);
+            dp.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${d.amount} ج</b>${statusBadge(d.status)}</div><div class="deal-steps"><div class="deal-step"><div class="deal-step-circle done"><i class="fa-solid fa-check"></i></div><span class="deal-step-label done">الدفع</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=1?'done':''}"><i class="fa-solid fa-box"></i></div><span class="deal-step-label ${idx>=1?'done':''}">التسليم</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=2?'done':''}"><i class="fa-solid fa-flag-checkered"></i></div><span class="deal-step-label ${idx>=2?'done':''}">الاكتمال</span></div></div></div>`;
+        }));
+    } else { $('dp').innerHTML = ''; }
+  }));
+  
+  live.push(onValue(query(R(`chats/${cid}/messages`),limitToLast(200)),s=>{
+    const a=Object.values(s.val()||{}).sort((x,y)=>x.createdAt-y.createdAt);
+    $('ms').innerHTML=a.map(m=>{
+        const time = new Date(m.createdAt).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+        if(m.type === 'image' && m.imageUrl) { const isMe = m.senderId === me.uid; return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}" style="padding:3px"><img src="${m.imageUrl}" style="max-height:180px;border-radius:10px;display:block;cursor:pointer" onclick="zoom(this.src)"><span class="msg-time">${time}</span></div></div>`; }
+        else if(m.type === 'transaction') { return `<div class="msg-system"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:280px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span>${statusBadge(m.status)}</div></div></div>`; }
+        else if(m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
+        else if(m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble" style="white-space:pre-line;text-align:right;direction:rtl;"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
+        const isMe = m.senderId === me.uid;
+        return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}">${E(m.text)}<span class="msg-time">${time}</span></div></div>`;
+    }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-4);font-size:12px">لا توجد رسائل</div>';
+    $('ms').scrollTop=1e9;
+  }));
+  }onst uid = window._chatCtx.uid;
     const cid = window._chatCtx.cid;
     if (!uid || uid === 'undefined') return bad(new Error('لم يتم التعرف على المستخدم بعد. انتظر ثانية.'));
     try {
