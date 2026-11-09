@@ -180,7 +180,7 @@ const adminApp=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",a
 const auth=getAuth(adminApp),db=getDatabase(adminApp),R=p=>ref(db,p),$=id=>document.getElementById(id);
 
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const imgs=a=>Object.values(a||{}).filter(x=>/^data:image\/(jpeg|png|webp);base64,/.test(x));
+const imgs=a=>Object.values(a||{}).filter(x=>typeof x === 'string' && (x.startsWith('http') || x.startsWith('data:image/')));
 const ok=t=>Swal.fire({icon:'success',title:t,timer:1400,showConfirmButton:false});
 const bad=e=>e&&e.message==='CANCEL'?0:Swal.fire({icon:'error',title:'تعذر التنفيذ',text:e.message||String(e)});
 const ask=t=>Swal.fire({icon:'question',title:t,showCancelButton:true,confirmButtonText:'تأكيد',cancelButtonText:'إلغاء'}).then(r=>r.isConfirmed);
