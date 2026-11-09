@@ -5,8 +5,9 @@ import {getDatabase,ref,get,set,update,push,onValue,runTransaction,remove,query,
 const app=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",authDomain:"blackp2p.firebaseapp.com",databaseURL:"https://blackp2p-default-rtdb.firebaseio.com",projectId:"blackp2p",storageBucket:"blackp2p.firebasestorage.app",messagingSenderId:"875717005059",appId:"1:875717005059:web:4e91211f751dddf7a2e336"});
 const auth=getAuth(app),db=getDatabase(app),R=p=>ref(db,p);
 
-// رابط الـ Worker الخاص بك
+// روابط ومفاتيح الخدمات
 const WORKER_URL = "https://late-haze-3fe4.freefierlight1.workers.dev";
+const IMGBB_API_KEY = "53bcd76af848af724a74013f151c9743";
 
 const $=id=>document.getElementById(id);
 window.$ = $; 
@@ -19,7 +20,8 @@ const Security = {
   hits:{},
   limit(k,max,ms){const n=Date.now(),a=(this.hits[k]||[]).filter(t=>n-t<ms);if(a.length>=max)throw new Error('تجاوزت الحد المسموح، حاول لاحقاً');a.push(n);this.hits[k]=a},
   esc:s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
-  img: a => { if (!a) return []; let arr = typeof a === 'string' ? [a] : Object.values(a); return arr.filter(x => typeof x === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(x)); }
+  // تم التعديل هنا لدعم روابط ImgBB والصور القديمة
+  img: a => { if (!a) return []; let arr = typeof a === 'string' ? [a] : Object.values(a); return arr.filter(x => typeof x === 'string' && (x.startsWith('http') || /^data:image\/(jpeg|png|webp);base64,/.test(x))); }
 };
 const E=Security.esc;
 
@@ -51,10 +53,11 @@ const form=(title,html,fn,btn='إرسال')=>Swal.fire({
 
 const inp=(id,ph,t='text')=>`<input id="${id}" type="${t}" placeholder="${ph}">`;
 
-const compress = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
+// دالة ضغط الصورة وإضافة العلامة المائية
+const compressToBlob = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
     const i = new Image();
     i.onload = () => {
-        const s = Math.min(1, 600 / Math.max(i.width, i.height));
+        const s = Math.min(1, 800 / Math.max(i.width, i.height));
         const c = document.createElement('canvas');
         c.width = i.width * s; c.height = i.height * s;
         const ctx = c.getContext('2d');
@@ -63,12 +66,30 @@ const compress = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
         ctx.fillStyle = 'rgba(24, 24, 27, 0.2)';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(text, c.width / 2, c.height / 2);
-        res(c.toDataURL('image/jpeg', 0.5));
+        c.toBlob((blob) => res(blob), 'image/jpeg', 0.7); 
     };
     i.onerror = () => rej(new Error('تعذر قراءة الصورة'));
     i.src = URL.createObjectURL(f);
 });
-const img=async f=>compress(Security.file(f));
+
+// دالة الرفع إلى ImgBB
+const img = async f => {
+    const file = Security.file(f);
+    const blob = await compressToBlob(file);
+    const formData = new FormData();
+    formData.append('image', blob, 'image.jpg');
+    
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: 'POST',
+        body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+        return data.data.url;
+    } else {
+        throw new Error('فشل رفع الصورة، حاول مرة أخرى.');
+    }
+};
 
 const ago=t=>{const m=(Date.now()-t)/6e4;return m<1?'الآن':m<60?`${m|0}د`:m<1440?`${m/60|0}س`:`${m/1440|0}ي`};
 const timeOnly=t=>new Date(t).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
@@ -376,8 +397,13 @@ window.add = function() {
       const g = Security.text($('a_g').value, 2, 40), sv = Security.text($('a_s').value, 1, 40), d = Security.text($('a_d').value, 10, 800), pr = Security.amount($('a_p').value, 1, 1e6), em = Security.text($('a_e').value, 3, 120), pw = Security.text($('a_w').value, 3, 120);
       const fs = [...$('a_f').files]; if (fs.length !== 5) throw new Error('ارفع 5 صور بالضبط');
       
-      $('a_b').disabled = true; $('a_b').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري النشر...';
-      Swal.fire({title:'جاري معالجة وضغط الصور...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); const photos = []; for (const f of fs) photos.push(await img(f));
+      $('a_b').disabled = true; $('a_b').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة ورفع الصور...';
+      Swal.fire({title:'جاري رفع الصور للسيرفر...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
+      
+      const photos = []; 
+      for (const f of fs) {
+          photos.push(await img(f));
+      }
       
       const TEMP_KEY = "A7x!9pQ2$mW5vB8@kL1zR4tY6nC3hJ0sX9fG2dE5w";
       const encryptAES = async (text, secret) => {
@@ -479,11 +505,22 @@ window.openChat = cid => {
   const doSend = async (t, i) => { try { await send(cid, t, i); if (!i) $('mi').value = ''; } catch(e) { bad(e); } };
   $('mb').onclick = () => doSend($('mi').value);
   $('mi').onkeydown = e => e.key === 'Enter' && doSend($('mi').value);
-  $('mf').onchange = async e => { try { if (e.target.files[0]) await doSend('', await img(e.target.files[0])); } catch(x) { bad(x); } };
+  
+  $('mf').onchange = async e => { 
+      try { 
+          if (e.target.files[0]) {
+              Swal.fire({title:'جاري رفع الصورة...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+              const url = await img(e.target.files[0]); 
+              await doSend('', url); 
+              Swal.close();
+          } 
+      } catch(x) { Swal.close(); bad(x); } 
+  };
+  
   $('mi').oninput = () => { if (Date.now() - last > 2500) { last = Date.now(); set(R(`chats/${cid}/typing/${me.uid}`), last).catch(()=>{}); } };
   
   const renderMsg = m => {
-    if (m.type === 'image' && /^data:image\//.test(m.imageUrl)) { return `<img src="${m.imageUrl}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="zoom(this.src)">`; }
+    if (m.type === 'image' && (m.imageUrl.startsWith('http') || /^data:image\//.test(m.imageUrl))) { return `<img src="${m.imageUrl}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="zoom(this.src)">`; }
     else if (m.type === 'transaction') { return `<div style="width:100%;display:flex;justify-content:center;margin:6px 0"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:260px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span><b style="color:${m.status==='approved'||m.status==='completed'?'var(--success-tx)':'var(--warn-tx)'}">${m.status}</b></div></div></div>`; }
     else if (m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
     else if (m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble" style="white-space:pre-line;text-align:right;direction:rtl;"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
@@ -547,7 +584,6 @@ function dealPanel(cid, c, d) {
 
 window.deliver = async cid => { try { if (!await ask('هل سلّمت بيانات الحساب بالكامل؟')) return; const chat = (await get(R('chats/' + cid))).val(); if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); const updates = {}; updates[`deals/${chat.dealId}/status`] = 'delivered'; updates[`chats/${cid}/dealStatus`] = 'delivered'; await update(ref(db), updates); notify(chat.buyerId, 'تم تسليم حسابك', 'راجع الدردشة ثم أكّد الاستلام.', 'deal'); ok('تم تحديد الحساب كمسلم'); } catch(e) { bad(e); } };
 
-// دالة عرض البيانات للمشتري (آمنة عبر Worker)
 window.reveal = async pid => { 
     try { 
         Swal.fire({title:'جاري فك التشفير...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
@@ -589,7 +625,6 @@ async function wallet() {
 const fetchList = async p => Object.entries((await get(R(p))).val() || {}).map(([id, o]) => ({id, ...o})).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 window.deposit = () => form('شحن الرصيد', `<p style="font-size:11px;font-weight:800;color:var(--danger-tx);background:var(--danger-bg);padding:8px;border-radius:8px;border:1px solid var(--danger-bd);margin-bottom:8px">${E(S.depositWarning || 'يرجى تحويل المبلغ ثم إرفاق صورة الإيصال.')}</p><p style="font-size:11px;font-weight:800;background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border);margin-bottom:10px">${E(S.bankName || '')} · ${E(S.accountName || '')} · <b style="color:var(--success-tx);font-size:12px">${E(S.walletNumber || '')}</b></p>${inp('f_a','المبلغ (ج)','number')}<input id="f_f" type="file" accept="image/*" style="font-size:11px;padding:8px">`, async () => { const a = Security.amount($('f_a').value, 10, 50000); const url = await img($('f_f').files[0]); await set(push(R('deposits')), {userId: me.uid, userName: me.name, amount: a, receiptUrl: url, status: 'pending', createdAt: Date.now()}); ok('تم إرسال الإيصال للمراجعة'); go('wallet'); });
 
-// دالة السحب الآمنة عبر Cloudflare Worker
 window.withdraw = () => form('طلب سحب', 
   inp('f_a','المبلغ (ج)','number') + 
   inp('f_m','الطريقة (مثال: فودافون كاش)') + 
@@ -608,7 +643,6 @@ window.withdraw = () => form('طلب سحب',
       throw new Error('فشل التحقق من الهوية. حاول مرة أخرى.');
     }
     
-    // إرسال الطلب للخادم
     const idToken = await auth.currentUser.getIdToken();
     const response = await fetch(WORKER_URL + "/withdraw", {
         method: 'POST',
