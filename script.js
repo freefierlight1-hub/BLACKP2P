@@ -5,7 +5,6 @@ import {getDatabase,ref,get,set,update,push,onValue,runTransaction,remove,query,
 const app=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",authDomain:"blackp2p.firebaseapp.com",databaseURL:"https://blackp2p-default-rtdb.firebaseio.com",projectId:"blackp2p",storageBucket:"blackp2p.firebasestorage.app",messagingSenderId:"875717005059",appId:"1:875717005059:web:4e91211f751dddf7a2e336"});
 const auth=getAuth(app),db=getDatabase(app),R=p=>ref(db,p);
 
-// روابط ومفاتيح الخدمات
 const WORKER_URL = "https://late-haze-3fe4.freefierlight1.workers.dev";
 const IMGBB_API_KEY = "53bcd76af848af724a74013f151c9743";
 
@@ -13,14 +12,13 @@ const $=id=>document.getElementById(id);
 window.$ = $; 
 
 const Security = {
-  amount(v,min=1,max=100000){const n=Math.round(Number(v));if(!Number.isFinite(n)||n<min||n>max)throw new Error(`المبلغ غير صالح`);return n},
+  amount(v,min=1,max=100000000){const n=Math.round(Number(v));if(!Number.isFinite(n)||n<min||n>max)throw new Error(`المبلغ غير صالح`);return n},
   text(v,min=1,max=500){v=String(v||'').trim();if(v.length<min||v.length>max)throw new Error(`النص يجب أن يكون بين ${min} و ${max} حرفاً`);return v},
   file(f){if(!f||!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>8e6)throw new Error('الملف يجب أن يكون صورة JPG/PNG/WebP بحجم أقصى 8MB');return f},
   chat(t){if(/(whats|telegram|واتس|تيليجرام|تلجرام|\d{10,}|\S+@\S+\.\S+)/i.test(t))throw new Error('ممنوع مشاركة وسائل تواصل خارج المنصة');return t},
   hits:{},
   limit(k,max,ms){const n=Date.now(),a=(this.hits[k]||[]).filter(t=>n-t<ms);if(a.length>=max)throw new Error('تجاوزت الحد المسموح، حاول لاحقاً');a.push(n);this.hits[k]=a},
   esc:s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
-  // تم التعديل هنا لدعم روابط ImgBB والصور القديمة
   img: a => { if (!a) return []; let arr = typeof a === 'string' ? [a] : Object.values(a); return arr.filter(x => typeof x === 'string' && (x.startsWith('http') || /^data:image\/(jpeg|png|webp);base64,/.test(x))); }
 };
 const E=Security.esc;
@@ -53,7 +51,6 @@ const form=(title,html,fn,btn='إرسال')=>Swal.fire({
 
 const inp=(id,ph,t='text')=>`<input id="${id}" type="${t}" placeholder="${ph}">`;
 
-// دالة ضغط الصورة وإضافة العلامة المائية
 const compressToBlob = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
     const i = new Image();
     i.onload = () => {
@@ -72,23 +69,15 @@ const compressToBlob = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
     i.src = URL.createObjectURL(f);
 });
 
-// دالة الرفع إلى ImgBB
 const img = async f => {
     const file = Security.file(f);
     const blob = await compressToBlob(file);
     const formData = new FormData();
     formData.append('image', blob, 'image.jpg');
-    
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-        method: 'POST',
-        body: formData
-    });
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
     const data = await res.json();
-    if (data.success) {
-        return data.data.url;
-    } else {
-        throw new Error('فشل رفع الصورة، حاول مرة أخرى.');
-    }
+    if (data.success) return data.data.url;
+    throw new Error('فشل رفع الصورة، حاول مرة أخرى.');
 };
 
 const ago=t=>{const m=(Date.now()-t)/6e4;return m<1?'الآن':m<60?`${m|0}د`:m<1440?`${m/60|0}س`:`${m/1440|0}ي`};
@@ -315,26 +304,75 @@ window.openPost = async id => {
     clearU(); view = 'post'; const p = (await get(R('posts/' + id))).val(); if (!p) return go('feed');
     const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; T[p.sellerId] = avg;
     const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const mainImg = ph.length > 0 ? ph[0] : null; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
+    
+    // تصميم السلايدر الجديد
+    const sliderHtml = ph.length > 0 ? `
+        <div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:8px;padding-bottom:8px;margin:0 -12px;padding-left:12px;padding-right:12px;">
+            ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;max-height:400px;border-radius:12px;background:var(--surface-2);cursor:pointer;" onclick="zoom('${img}')">`).join('')}
+        </div>
+    ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
+
     $('app').innerHTML = `
     <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة</button>
-    <div class="card" style="padding:0;overflow:hidden">
-      <div style="position:relative">${mainImg ? `<img src="${mainImg}" style="width:100%;height:auto;max-height:400px;object-fit:cover;cursor:pointer" onclick="zoom('${mainImg}')" alt="">` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px"><i class="fa-regular fa-image"></i></div>`}</div>
-      ${ph.length > 1 ? `<div style="display:flex;gap:6px;padding:10px;overflow-x:auto;background:var(--surface-2);border-bottom:1px solid var(--border)" class="hide-scroll">${ph.map(x => `<img src="${x}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--border);flex-shrink:0" onclick="zoom('${x}')">`).join('')}</div>` : ''}
-      <div style="padding:14px">
-        <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:10px">
-          <div style="flex:1;min-width:0"><b style="font-size:18px;font-weight:900;color:var(--text);display:block;margin-bottom:6px">${E(p.game)}</b><span class="badge badge-neutral">${E(p.server)}</span></div>
-          <div style="text-align:left;flex-shrink:0"><b style="font-size:20px;font-weight:900;color:var(--text);display:block">${p.price} <span style="font-size:12px;font-weight:700">ج</span></b><button id="lk" style="margin-top:6px;padding:4px 10px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);font-size:11px;font-weight:800;color:var(--text-3)" onclick="like('${id}')"></button></div>
+    
+    <div class="card" style="padding:14px;overflow:hidden;padding-bottom:80px;"> <!-- مساحة لزر الشراء السفلي -->
+      
+      ${sliderHtml}
+
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-top:14px;margin-bottom:10px">
+        <div style="flex:1;min-width:0">
+          <b style="font-size:20px;font-weight:900;color:var(--text);display:block;margin-bottom:6px">${E(p.game)}</b>
+          <span class="badge badge-neutral">${E(p.server)}</span>
         </div>
-        <div style="padding-top:12px;border-top:1px solid var(--border);margin-bottom:12px"><b style="font-size:12px;font-weight:900;color:var(--text);display:block;margin-bottom:6px">الوصف</b><p style="font-size:12.5px;color:var(--text-2);font-weight:600;line-height:1.7;white-space:pre-line">${E(p.desc)}</p></div>
-        <div class="info-grid"><div class="info-cell"><span class="info-label">نوع الربط</span><span class="info-value" style="font-size:11px">${E(p.linkType)}</span></div><div class="info-cell"><span class="info-label">السيرفر</span><span class="info-value" style="font-size:11px">${E(p.server)}</span></div></div>
+        <div style="text-align:left;flex-shrink:0">
+          <b style="font-size:24px;font-weight:900;color:var(--success-tx);display:block">${p.price} <span style="font-size:12px;font-weight:700">ج</span></b>
+          <button id="lk" style="margin-top:6px;padding:4px 12px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text-3)" onclick="like('${id}')"></button>
+        </div>
+      </div>
+      
+      <div style="padding-top:12px;border-top:1px solid var(--border);margin-bottom:14px">
+        <b style="font-size:13px;font-weight:900;color:var(--text);display:block;margin-bottom:6px">الوصف</b>
+        <p style="font-size:13px;color:var(--text-2);font-weight:600;line-height:1.7;white-space:pre-line">${E(p.desc)}</p>
+      </div>
+      
+      <div class="info-grid" style="margin-bottom:14px">
+        <div class="info-cell"><span class="info-label">نوع الربط</span><span class="info-value" style="font-size:12px">${E(p.linkType)}</span></div>
+        <div class="info-cell"><span class="info-label">السيرفر</span><span class="info-value" style="font-size:12px">${E(p.server)}</span></div>
+      </div>
+
+      <!-- معلومات البائع وتقييمه -->
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <b style="font-size:12px;font-weight:900;color:var(--text)">معلومات البائع</b>
+            <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;min-height:28px;border-color:var(--warn-bd);color:var(--warn-tx);background:var(--warn-bg)" onclick="rate('${p.sellerId}')">
+                <i class="fa-solid fa-star"></i> تقييم البائع
+            </button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div class="avatar-initial" style="width:44px;height:44px;font-size:16px">${E(initials(p.sellerName))}</div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
+                    <b style="font-size:14px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b>
+                    ${p.sellerVerified ? '<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:12px"></i>' : ''}
+                </div>
+                <span style="font-size:10px;color:var(--text-3);font-weight:700">عضو منذ ${new Date(p.sellerSince||Date.now()).toLocaleDateString('ar-EG')}</span>
+            </div>
+            <div style="text-align:center">
+                <span class="trust-meter ${trc}" style="margin-bottom:4px"><span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>${tr}% ثقة</span>
+                <span class="info-value" style="color:var(--warn-tx);font-size:12px;display:block">${avg ? '⭐ ' + avg.toFixed(1) : 'لا يوجد تقييم'}</span>
+            </div>
+        </div>
       </div>
     </div>
-    <div class="card">
-      <b style="font-size:13px;font-weight:900;color:var(--text);display:block;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">معلومات البائع</b>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="avatar-initial" style="width:44px;height:44px;font-size:16px">${E(initials(p.sellerName))}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><b style="font-size:13px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b>${p.sellerVerified ? '<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:11px"></i>' : ''}</div><span style="font-size:10px;color:var(--text-3);font-weight:700">عضو منذ ${new Date(p.sellerSince||Date.now()).toLocaleDateString('ar-EG')}</span></div></div>
-      <div class="info-grid"><div class="info-cell" style="text-align:center"><span class="info-label">نسبة الثقة</span><span class="info-value" style="color:${tr>70?'var(--success-tx)':tr>40?'var(--warn-tx)':'var(--danger-tx)'}">${tr}%</span></div><div class="info-cell" style="text-align:center"><span class="info-label">التقييم</span><span class="info-value" style="color:var(--warn-tx)">${avg ? '⭐ ' + avg.toFixed(1) : '—'}</span></div></div>
-    </div>
-    ${p.status === 'active' && !mine ? `<button class="btn btn-primary" style="width:100%;padding:16px;font-size:15px;margin-top:4px" onclick="buy('${id}')"><i class="fa-solid fa-shield-halved"></i> شراء بضمان المنصة</button>` : `<p style="text-align:center;font-size:12px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
+
+    <!-- زر الشراء الثابت في الأسفل -->
+    ${p.status === 'active' && !mine ? `
+    <div style="position:fixed;bottom:60px;left:0;right:0;padding:10px 15px;background:var(--glass-strong);backdrop-filter:blur(10px);border-top:1px solid var(--border);z-index:40;max-width:640px;margin:0 auto;">
+        <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;box-shadow:var(--shadow-lg);" onclick="buy('${id}')">
+            <i class="fa-solid fa-shield-halved"></i> شراء بضمان المنصة (${p.price} ج)
+        </button>
+    </div>` : `<p style="text-align:center;font-size:12px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
+    
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
   } catch(e) { bad(e); }
 };
@@ -343,27 +381,20 @@ const paintLike = (l, n) => { $('lk').innerHTML = `<i class="fa-${l ? 'solid tex
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
 window.zoom = u => Swal.fire({imageUrl: u, imageWidth: '100%', showConfirmButton: false, showCloseButton: true, background: '#0a0a0a'});
 
-// دالة الشراء الآمنة عبر Cloudflare Worker
 window.buy = async function(id) {
   try {
     Security.limit('buy', 3, 6e4);
     if (!await ask('هل أنت متأكد من الشراء؟ سيتم حجز المبلغ حتى تؤكد الاستلام.')) return;
-    
     Swal.fire({title:'جاري تنفيذ الشراء بأمان...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-    
     const idToken = await auth.currentUser.getIdToken();
     const response = await fetch(WORKER_URL + "/buy", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
         body: JSON.stringify({ postId: id })
     });
-    
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
-    
-    Swal.close();
-    ok('تم الشراء بنجاح');
-    openChat(result.chatId);
+    Swal.close(); ok('تم الشراء بنجاح'); openChat(result.chatId);
   } catch(e) { Swal.close(); bad(e); }
 };
 
@@ -383,19 +414,28 @@ window.add = function() {
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">وصف الحساب</label><textarea id="a_d" placeholder="اكتب تفاصيل الحساب..." rows="4" style="margin-bottom:12px"></textarea>
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">السعر (ج)</label><input id="a_p" type="number" placeholder="مثال: 500" style="margin-bottom:12px">
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">نوع الربط</label><select id="a_l" style="margin-bottom:12px" onchange="updateLinkInput()">${linkTypes.map(l => `<option value="${l}">${l}</option>`).join('')}</select>
-    <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">صور الحساب (5 صور)</label>
-    <div style="position:relative;border:2px dashed var(--border-2);background:var(--surface-2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px"><input id="a_f" type="file" accept="image/*" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer"><i class="fa-solid fa-cloud-arrow-up" style="font-size:26px;color:var(--text-3);margin-bottom:6px;display:block"></i><span style="font-size:12px;font-weight:800;color:var(--text-2);display:block">اضغط لاختيار 5 صور</span><span id="file-count" style="font-size:10.5px;color:var(--text-3);font-weight:700;margin-top:4px;display:block"></span></div>
+    
+    <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">صور الحساب (حتى 10 صور)</label>
+    <div style="position:relative;border:2px dashed var(--border-2);background:var(--surface-2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px"><input id="a_f" type="file" accept="image/*" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer"><i class="fa-solid fa-cloud-arrow-up" style="font-size:26px;color:var(--text-3);margin-bottom:6px;display:block"></i><span style="font-size:12px;font-weight:800;color:var(--text-2);display:block">اضغط لاختيار الصور</span><span id="file-count" style="font-size:10.5px;color:var(--text-3);font-weight:700;margin-top:4px;display:block"></span></div>
     <div style="background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:11px;margin-bottom:14px"><p style="font-size:11px;color:var(--warn-tx);font-weight:900;margin-bottom:8px"><i class="fa-solid fa-lock"></i> بيانات الدخول (مشفرة)</p><input id="a_e" type="text" placeholder="إيميل / اسم الحساب" style="background:var(--surface);border-color:var(--warn-bd);margin-bottom:6px;font-size:12px"><input id="a_w" type="password" placeholder="كلمة المرور" style="background:var(--surface);border-color:var(--warn-bd);margin:0;font-size:12px"></div>
     <button class="btn btn-primary" style="width:100%;padding:14px;font-size:13px" id="a_b">نشر للمراجعة</button>
   </div>`;
   window.updateLinkInput = () => { const type = $('a_l').value; const input = $('a_e'); if (type === 'Facebook') { input.type = 'tel'; input.placeholder = 'رقم الهاتف'; } else if (type === 'Google' || type === 'Apple' || type === 'Email') { input.type = 'email'; input.placeholder = 'البريد الإلكتروني'; } else { input.type = 'text'; input.placeholder = 'اسم الحساب'; } };
   updateLinkInput();
-  $('a_f').onchange = e => { $('file-count').textContent = `تم اختيار ${e.target.files.length} صور`; };
+  
+  $('a_f').onchange = e => { 
+      const len = e.target.files.length;
+      if(len > 10) { bad(new Error('الحد الأقصى 10 صور')); e.target.value=''; $('file-count').textContent = ''; return; }
+      $('file-count').textContent = `تم اختيار ${len} صور`; 
+  };
+  
   $('a_b').onclick = async () => {
     try {
       Security.limit('post', 5, 36e5);
-      const g = Security.text($('a_g').value, 2, 40), sv = Security.text($('a_s').value, 1, 40), d = Security.text($('a_d').value, 10, 800), pr = Security.amount($('a_p').value, 1, 1e6), em = Security.text($('a_e').value, 3, 120), pw = Security.text($('a_w').value, 3, 120);
-      const fs = [...$('a_f').files]; if (fs.length !== 5) throw new Error('ارفع 5 صور بالضبط');
+      const g = Security.text($('a_g').value, 2, 40), sv = Security.text($('a_s').value, 1, 40), d = Security.text($('a_d').value, 10, 800), pr = Security.amount($('a_p').value, 1, 100000000), em = Security.text($('a_e').value, 3, 120), pw = Security.text($('a_w').value, 3, 120);
+      const fs = [...$('a_f').files]; 
+      if (fs.length === 0) throw new Error('ارفع صور الحساب');
+      if (fs.length > 10) throw new Error('الحد الأقصى 10 صور');
       
       $('a_b').disabled = true; $('a_b').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة ورفع الصور...';
       Swal.fire({title:'جاري رفع الصور للسيرفر...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
@@ -623,7 +663,15 @@ async function wallet() {
 }
 
 const fetchList = async p => Object.entries((await get(R(p))).val() || {}).map(([id, o]) => ({id, ...o})).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-window.deposit = () => form('شحن الرصيد', `<p style="font-size:11px;font-weight:800;color:var(--danger-tx);background:var(--danger-bg);padding:8px;border-radius:8px;border:1px solid var(--danger-bd);margin-bottom:8px">${E(S.depositWarning || 'يرجى تحويل المبلغ ثم إرفاق صورة الإيصال.')}</p><p style="font-size:11px;font-weight:800;background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border);margin-bottom:10px">${E(S.bankName || '')} · ${E(S.accountName || '')} · <b style="color:var(--success-tx);font-size:12px">${E(S.walletNumber || '')}</b></p>${inp('f_a','المبلغ (ج)','number')}<input id="f_f" type="file" accept="image/*" style="font-size:11px;padding:8px">`, async () => { const a = Security.amount($('f_a').value, 10, 50000); const url = await img($('f_f').files[0]); await set(push(R('deposits')), {userId: me.uid, userName: me.name, amount: a, receiptUrl: url, status: 'pending', createdAt: Date.now()}); ok('تم إرسال الإيصال للمراجعة'); go('wallet'); });
+
+// شاشة الإيداع: تم تعديل الحد الأدنى والأقصى
+window.deposit = () => form('شحن الرصيد', `<p style="font-size:11px;font-weight:800;color:var(--danger-tx);background:var(--danger-bg);padding:8px;border-radius:8px;border:1px solid var(--danger-bd);margin-bottom:8px">${E(S.depositWarning || 'يرجى تحويل المبلغ ثم إرفاق صورة الإيصال.')}</p><p style="font-size:11px;font-weight:800;background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border);margin-bottom:10px">${E(S.bankName || '')} · ${E(S.accountName || '')} · <b style="color:var(--success-tx);font-size:12px">${E(S.walletNumber || '')}</b></p>${inp('f_a','المبلغ (ج)','number')}<input id="f_f" type="file" accept="image/*" style="font-size:11px;padding:8px">`, async () => { 
+    // تعديل الحد الأدنى 100 والأقصى 10,000,000
+    const a = Security.amount($('f_a').value, 100, 10000000); 
+    const url = await img($('f_f').files[0]); 
+    await set(push(R('deposits')), {userId: me.uid, userName: me.name, amount: a, receiptUrl: url, status: 'pending', createdAt: Date.now()}); 
+    ok('تم إرسال الإيصال للمراجعة'); go('wallet'); 
+});
 
 window.withdraw = () => form('طلب سحب', 
   inp('f_a','المبلغ (ج)','number') + 
@@ -632,10 +680,16 @@ window.withdraw = () => form('طلب سحب',
   inp('f_n','اسم صاحب الحساب'), 
   async () => { 
     Security.limit('wd', 3, 36e5); 
-    const a = Security.amount($('f_a').value, 50, 50000);
+    const a = Security.amount($('f_a').value, 50, 10000000); // سماح بالسحب حتى 10 ملايين
     if (a > me.balance) throw new Error('الرصيد غير كافٍ'); 
-    
-    // تمت إزالة إعادة تسجيل الدخول (Reauth) لأنها تسبب تعطل النافذة في الهواتف
+
+    Swal.fire({title: 'جاري التحقق من هويتك...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
+    try {
+      await reauthenticateWithPopup(auth, new GoogleAuthProvider());
+    } catch(e) {
+      Swal.close();
+      throw new Error('فشل التحقق من الهوية. حاول مرة أخرى.');
+    }
     
     const idToken = await auth.currentUser.getIdToken();
     const response = await fetch(WORKER_URL + "/withdraw", {
@@ -652,11 +706,9 @@ window.withdraw = () => form('طلب سحب',
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
     
-    // تأخير بسيط لإغلاق النافذة بنجاح
-    setTimeout(() => { 
-        ok('تم تسجيل طلب السحب'); 
-        go('wallet'); 
-    }, 100);
+    Swal.close();
+    ok('تم تسجيل طلب السحب'); 
+    go('wallet'); 
 });
 
 window.coupon = () => form('استبدال كوبون', inp('f_k','كود الكوبون'), async () => { const k = $('f_k').value.trim(); if (!/^[A-Za-z0-9_-]{4,40}$/.test(k)) throw new Error('كود غير صالح'); await set(R(`credit_queue/${me.uid}/${k}`), {userId: me.uid, code: k, amount: 0, status: 'pending', createdAt: Date.now()}); ok('تم إرسال الكوبون للمراجعة'); });
