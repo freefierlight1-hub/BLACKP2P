@@ -1,6 +1,6 @@
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut, reauthenticateWithPopup} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut, reauthenticateWithPopup} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getDatabase,ref,get,set,update,push,onValue,runTransaction,remove,query,orderByChild,equalTo,limitToLast} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 const app=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",authDomain:"blackp2p.firebaseapp.com",databaseURL:"https://blackp2p-default-rtdb.firebaseio.com",projectId:"blackp2p",storageBucket:"blackp2p.firebasestorage.app",messagingSenderId:"875717005059",appId:"1:875717005059:web:4e91211f751dddf7a2e336"});
 const auth=getAuth(app),db=getDatabase(app),R=p=>ref(db,p);
@@ -125,8 +125,10 @@ window.go = v => {
     ({feed, add, chats, notes, wallet, me: profile, orders, chat: null}[v]||feed)();
 };
 
-window.signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(bad);
+// تسجيل الدخول الجديد بـ Redirect
+window.signIn = () => signInWithRedirect(auth, new GoogleAuthProvider()).catch(bad);
 window.logout = () => signOut(auth);
+getRedirectResult(auth).catch(e => { if(e.code !== 'auth/no-auth-event') bad(e); });
 
 onAuthStateChanged(auth, async u => {
   clearU(); clearGU();
@@ -305,7 +307,6 @@ window.openPost = async id => {
     const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; T[p.sellerId] = avg;
     const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const mainImg = ph.length > 0 ? ph[0] : null; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
-    // تصميم السلايدر الجديد
     const sliderHtml = ph.length > 0 ? `
         <div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:8px;padding-bottom:8px;margin:0 -12px;padding-left:12px;padding-right:12px;">
             ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;max-height:400px;border-radius:12px;background:var(--surface-2);cursor:pointer;" onclick="zoom('${img}')">`).join('')}
@@ -315,7 +316,7 @@ window.openPost = async id => {
     $('app').innerHTML = `
     <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة</button>
     
-    <div class="card" style="padding:14px;overflow:hidden;padding-bottom:80px;"> <!-- مساحة لزر الشراء السفلي -->
+    <div class="card" style="padding:14px;overflow:hidden;padding-bottom:80px;"> 
       
       ${sliderHtml}
 
@@ -340,7 +341,6 @@ window.openPost = async id => {
         <div class="info-cell"><span class="info-label">السيرفر</span><span class="info-value" style="font-size:12px">${E(p.server)}</span></div>
       </div>
 
-      <!-- معلومات البائع وتقييمه -->
       <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
             <b style="font-size:12px;font-weight:900;color:var(--text)">معلومات البائع</b>
@@ -365,7 +365,6 @@ window.openPost = async id => {
       </div>
     </div>
 
-    <!-- زر الشراء الثابت في الأسفل -->
     ${p.status === 'active' && !mine ? `
     <div style="position:fixed;bottom:60px;left:0;right:0;padding:10px 15px;background:var(--glass-strong);backdrop-filter:blur(10px);border-top:1px solid var(--border);z-index:40;max-width:640px;margin:0 auto;">
         <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;box-shadow:var(--shadow-lg);" onclick="buy('${id}')">
@@ -664,9 +663,7 @@ async function wallet() {
 
 const fetchList = async p => Object.entries((await get(R(p))).val() || {}).map(([id, o]) => ({id, ...o})).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-// شاشة الإيداع: تم تعديل الحد الأدنى والأقصى
 window.deposit = () => form('شحن الرصيد', `<p style="font-size:11px;font-weight:800;color:var(--danger-tx);background:var(--danger-bg);padding:8px;border-radius:8px;border:1px solid var(--danger-bd);margin-bottom:8px">${E(S.depositWarning || 'يرجى تحويل المبلغ ثم إرفاق صورة الإيصال.')}</p><p style="font-size:11px;font-weight:800;background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border);margin-bottom:10px">${E(S.bankName || '')} · ${E(S.accountName || '')} · <b style="color:var(--success-tx);font-size:12px">${E(S.walletNumber || '')}</b></p>${inp('f_a','المبلغ (ج)','number')}<input id="f_f" type="file" accept="image/*" style="font-size:11px;padding:8px">`, async () => { 
-    // تعديل الحد الأدنى 100 والأقصى 10,000,000
     const a = Security.amount($('f_a').value, 100, 10000000); 
     const url = await img($('f_f').files[0]); 
     await set(push(R('deposits')), {userId: me.uid, userName: me.name, amount: a, receiptUrl: url, status: 'pending', createdAt: Date.now()}); 
@@ -680,17 +677,10 @@ window.withdraw = () => form('طلب سحب',
   inp('f_n','اسم صاحب الحساب'), 
   async () => { 
     Security.limit('wd', 3, 36e5); 
-    const a = Security.amount($('f_a').value, 50, 10000000); // سماح بالسحب حتى 10 ملايين
+    const a = Security.amount($('f_a').value, 50, 10000000); 
     if (a > me.balance) throw new Error('الرصيد غير كافٍ'); 
-
-    Swal.fire({title: 'جاري التحقق من هويتك...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
-    try {
-      await reauthenticateWithPopup(auth, new GoogleAuthProvider());
-    } catch(e) {
-      Swal.close();
-      throw new Error('فشل التحقق من الهوية. حاول مرة أخرى.');
-    }
     
+    // تمت إزالة إعادة تسجيل الدخول (Reauth) لأنها تسبب تعطل النافذة في الهواتف
     const idToken = await auth.currentUser.getIdToken();
     const response = await fetch(WORKER_URL + "/withdraw", {
         method: 'POST',
@@ -706,9 +696,7 @@ window.withdraw = () => form('طلب سحب',
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
     
-    Swal.close();
-    ok('تم تسجيل طلب السحب'); 
-    go('wallet'); 
+    setTimeout(() => { ok('تم تسجيل طلب السحب'); go('wallet'); }, 100);
 });
 
 window.coupon = () => form('استبدال كوبون', inp('f_k','كود الكوبون'), async () => { const k = $('f_k').value.trim(); if (!/^[A-Za-z0-9_-]{4,40}$/.test(k)) throw new Error('كود غير صالح'); await set(R(`credit_queue/${me.uid}/${k}`), {userId: me.uid, code: k, amount: 0, status: 'pending', createdAt: Date.now()}); ok('تم إرسال الكوبون للمراجعة'); });
