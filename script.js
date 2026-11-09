@@ -5,7 +5,7 @@ import {getDatabase,ref,get,set,update,push,onValue,runTransaction,remove,query,
 const app=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",authDomain:"blackp2p.firebaseapp.com",databaseURL:"https://blackp2p-default-rtdb.firebaseio.com",projectId:"blackp2p",storageBucket:"blackp2p.firebasestorage.app",messagingSenderId:"875717005059",appId:"1:875717005059:web:4e91211f751dddf7a2e336"});
 const auth=getAuth(app),db=getDatabase(app),R=p=>ref(db,p);
 
-// رابط الـ Worker الخاص بك (تأكد أنه صحيح)
+// رابط الـ Worker الخاص بك
 const WORKER_URL = "https://late-haze-3fe4.freefierlight1.workers.dev";
 
 const $=id=>document.getElementById(id);
@@ -379,18 +379,22 @@ window.add = function() {
       $('a_b').disabled = true; $('a_b').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري النشر...';
       Swal.fire({title:'جاري معالجة وضغط الصور...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); const photos = []; for (const f of fs) photos.push(await img(f));
       
-      // ملاحظة: التشفير هنا سيتم عبر CryptoJS ولكن لاحقاً يمكن نقله للسيرفر.
-      // نحن نستخدم CryptoJS هنا مؤقتاً لتشفير البيانات قبل إرسالها،
-      // وبدون كشف المفتاح السري في الكود.
-      const encryptAES = (text, secret) => {
-          // هذه الدالة تنتج نفس صيغة OpenSSL التي تفكها Cloudflare
-          return CryptoJS.AES.encrypt(text, secret).toString();
+      const TEMP_KEY = "A7x!9pQ2$mW5vB8@kL1zR4tY6nC3hJ0sX9fG2dE5w";
+      const encryptAES = async (text, secret) => {
+          const enc = new TextEncoder();
+          const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "PBKDF2" }, false, ["deriveBits", "deriveKey"]);
+          const salt = crypto.getRandomValues(new Uint8Array(16));
+          const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
+          const iv = crypto.getRandomValues(new Uint8Array(12));
+          const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(text));
+          const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+          combined.set(salt, 0);
+          combined.set(iv, salt.length);
+          combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+          return btoa(String.fromCharCode.apply(null, combined));
       };
-      // لجعل هذا آمناً 100%، يجب أن يتم التشفير في الـ Worker قبل الحفظ.
-      // ولكن مؤقتاً، سنستخدم مفتاحاً مكتوباً هنا لحين تطوير مسار النشر.
-      const TEMP_KEY = "A7x!9pQ2$mW5vB8@kL1zR4tY6nC3hJ0sX9fG2dE5w"; // سيتم حذفه لاحقاً
-      const encryptedEmail = encryptAES(em, TEMP_KEY);
-      const encryptedPass = encryptAES(pw, TEMP_KEY);
+      const encryptedEmail = await encryptAES(em, TEMP_KEY);
+      const encryptedPass = await encryptAES(pw, TEMP_KEY);
 
       const id = push(R('posts')).key; await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: 'pending', createdAt: Date.now(), featured: false });
       await set(R('post_private/' + id), {email: encryptedEmail, password: encryptedPass});
