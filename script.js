@@ -148,7 +148,7 @@ onAuthStateChanged(auth, async u => {
     try { 
         isAdmin = (await get(R('admins/' + u.uid))).exists(); 
     } catch(err) { 
-        isAdmin = false; // هذا السطر يحل مشكلة تعليق المستخدمين الجدد
+        isAdmin = false; 
     }
   }
   
@@ -168,14 +168,53 @@ onAuthStateChanged(auth, async u => {
   }
   
   try {
+    // تعيين البيانات الأساسية فوراً لمنع الشاشة البيضاء
+    me = { uid: u.uid, name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, verified: false, role: 'user' };
+    $('nav').classList.remove('hidden');
+    $('bal').textContent = '0 ج';
+
     const r = R('users/' + u.uid);
+    
+    // تشغيل المستمع أولاً
+    GU.push(onValue(r, s => {
+      if (s.exists()) {
+        me = {uid: u.uid, ...s.val()}; 
+        userLoaded = true;
+        $('bal').textContent = (me.balance || 0) + ' ج';
+        
+        if (me.suspended) {
+          if (me.banUntil && Date.now() > me.banUntil) {
+            update(R('users/' + u.uid), {suspended: false, banReason: null, banUntil: null});
+          } else {
+            $('nav').classList.add('hidden');
+            $('app').innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;padding:20px;text-align:center">
+              <div style="width:80px;height:80px;border-radius:22px;background:var(--danger-bg);border:2px solid var(--danger-bd);display:flex;align-items:center;justify-content:center;color:var(--danger-tx);font-size:36px;margin-bottom:20px"><i class="fa-solid fa-ban"></i></div>
+              <h2 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">تم تعليق حسابك</h2>
+              <div style="background:var(--danger-bg);border:1px solid var(--danger-bd);border-radius:10px;padding:12px;margin-bottom:16px;max-width:340px">
+                <p style="font-size:11px;font-weight:800;color:var(--danger-tx);margin-bottom:4px">السبب:</p>
+                <p style="font-size:12px;font-weight:700;color:var(--danger-tx)">${E(me.banReason || 'غير محدد')}</p>
+              </div>
+              <button class="btn btn-primary" onclick="logout()">تسجيل الخروج</button>
+            </div>`;
+            return;
+          }
+        }
+        if (maintenanceActive) { showMaintenanceScreen(); return; }
+        if (!initialized && settingsLoaded) { initialized = true; $('nav').classList.remove('hidden'); if (view === 'feed' || !view) go('feed'); }
+        else if (view === 'wallet' || view === 'me') { go(view); }
+      }
+    }));
+
+    // محاولة إنشاء أو تحديث الحساب في الخلفية (بدون تعطيل الموقع)
     const snap = await get(r);
     if (!snap.exists()) {
-      await set(r, {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, verified: false, role: 'user', suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now()});
+      set(r, {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, verified: false, role: 'user', suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now()})
+        .catch(err => console.log("Error saving new user:", err)); // حفظ الخطأ في الكونسول بدلاً من إيقاف الموقع
     } else {
-      update(r, {lastSeen: Date.now(), deviceInfo: navigator.userAgent.slice(0,120)});
+      update(r, {lastSeen: Date.now(), deviceInfo: navigator.userAgent.slice(0,120)}).catch(()=>{});
     }
-    
+
     GU.push(onValue(R('settings'), s => {
       S = s.val() || {}; settingsLoaded = true;
       $('ttl').textContent = S.siteName || 'BLACKP2P';
@@ -185,33 +224,6 @@ onAuthStateChanged(auth, async u => {
       maintenanceActive = !!S.maintenanceMode;
       if (maintenanceActive && !wasMaintenance) { showMaintenanceScreen(); }
       if (!maintenanceActive && wasMaintenance && me) { $('nav').classList.remove('hidden'); go('feed'); }
-    }));
-    
-    GU.push(onValue(r, s => {
-      me = {uid: u.uid, ...(s.val() || {})}; userLoaded = true;
-      $('bal').textContent = me.balance + ' ج';
-      
-      if (me.suspended) {
-        if (me.banUntil && Date.now() > me.banUntil) {
-          update(R('users/' + u.uid), {suspended: false, banReason: null, banUntil: null});
-        } else {
-          $('nav').classList.add('hidden');
-          $('app').innerHTML = `
-          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;padding:20px;text-align:center">
-            <div style="width:80px;height:80px;border-radius:22px;background:var(--danger-bg);border:2px solid var(--danger-bd);display:flex;align-items:center;justify-content:center;color:var(--danger-tx);font-size:36px;margin-bottom:20px"><i class="fa-solid fa-ban"></i></div>
-            <h2 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px">تم تعليق حسابك</h2>
-            <div style="background:var(--danger-bg);border:1px solid var(--danger-bd);border-radius:10px;padding:12px;margin-bottom:16px;max-width:340px">
-              <p style="font-size:11px;font-weight:800;color:var(--danger-tx);margin-bottom:4px">السبب:</p>
-              <p style="font-size:12px;font-weight:700;color:var(--danger-tx)">${E(me.banReason || 'غير محدد')}</p>
-            </div>
-            <button class="btn btn-primary" onclick="logout()">تسجيل الخروج</button>
-          </div>`;
-          return;
-        }
-      }
-      if (maintenanceActive) { showMaintenanceScreen(); return; }
-      if (!initialized && settingsLoaded) { initialized = true; $('nav').classList.remove('hidden'); if (view === 'feed' || !view) go('feed'); }
-      else if (view === 'wallet' || view === 'me') { go(view); }
     }));
     
     GU.push(onValue(R('posts'), s => {
@@ -238,7 +250,9 @@ onAuthStateChanged(auth, async u => {
         if (view === 'me') profile(); 
     }));
     
-  } catch(e) { bad(e); }
+  } catch(e) { 
+    console.error(e); 
+  }
 });
 
 const trust = p => { const age = Math.min(30, (Date.now() - (p.sellerSince || Date.now())) / 864e5 / 10); return Math.round((p.sellerVerified ? 40 : 0) + age + (T[p.sellerId] || 0) / 5 * 30); };
