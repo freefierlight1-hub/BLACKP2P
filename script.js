@@ -958,8 +958,35 @@ window.withdraw = () => { if(!requireAuth()) return; form('طلب سحب',
     setTimeout(() => { ok('تم تسجيل طلب السحب'); go('wallet'); }, 100);
 }); };
 
-window.coupon = () => { if(!requireAuth()) return; form('استبدال كوبون', inp('f_k','كود الكوبون'), async () => { const k = $('f_k').value.trim(); if (!/^[A-Za-z0-9_-]{4,40}$/.test(k)) throw new Error('كود غير صالح'); await set(R(`credit_queue/${me.uid}/${k}`), {userId: me.uid, code: k, amount: 0, status: 'pending', createdAt: Date.now()}); ok('تم إرسال الكوبون للمراجعة'); }); };
+window.coupon = () => { 
+    if(!requireAuth()) return; 
+    form('استبدال كوبون', inp('f_k','كود الكوبون'), async () => { 
+        const k = $('f_k').value.trim().toUpperCase(); 
+        if (!/^[A-Z0-9_-]{4,40}$/.test(k)) throw new Error('كود غير صالح'); 
+        
+        // 1. التحقق مما إذا كان الكوبون منشأً من الإدارة (promo_codes)
+        const promoSnap = await get(R('promo_codes/' + k));
+        if (promoSnap.exists()) {
+            const promo = promoSnap.val();
+            if (promo.status === 'used') throw new Error('هذا الكوبون تم استخدامه بالفعل');
+            if (promo.targetUser && promo.targetUser !== me.uid) throw new Error('هذا الكوبون مخصص لمستخدم آخر');
+            
+            // تعيينه كمستخدم
+            await update(R('promo_codes/' + k), { status: 'used', usedBy: me.uid, usedAt: Date.now() });
+            
+            // شحن الرصيد فوراً
+            await credit(me.uid, promo.amount);
+            await notify(me.uid, 'تم شحن رصيدك بكوبون', `+${promo.amount} ج`);
+            ok('تم شحن رصيدك بنجاح!'); 
+            go('wallet');
+            return;
+        }
 
+        // 2. النظام القديم (في حال أرسل المستخدم كوداً يدوياً بدون إنشائه مسبقاً)
+        await set(R(`credit_queue/${me.uid}/${k}`), {userId: me.uid, code: k, amount: 0, status: 'pending', createdAt: Date.now()}); 
+        ok('تم إرسال الكوبون للمراجعة، انتظر موافقة الإدارة'); 
+    }); 
+};
 function notes() {
   if(!requireAuth()) return;
   const a = Object.entries(N).sort((x, y) => y[1].createdAt - x[1].createdAt);
