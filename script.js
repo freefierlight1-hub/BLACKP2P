@@ -373,17 +373,11 @@ window.openPost = async id => {
     const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; T[p.sellerId] = avg;
     const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const mainImg = ph.length > 0 ? ph[0] : null; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
-    // سلايدر الصور المحسن
+    // عرض الصور طولياً (مثل فيسبوك)
     const sliderHtml = ph.length > 0 ? `
-        <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000;">
-            <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
-                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:320px;background:var(--surface-2);" onclick="zoom('${img}')">`).join('')}
-            </div>
+        <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+            ${ph.map(img => `<img src="${img}" style="width:100%; border-radius:12px; object-fit:cover; max-height:500px; background:var(--surface-2); cursor:pointer;" onclick="zoom('${img}')">`).join('')}
         </div>
-        ${ph.length > 1 ? `
-        <div style="display:flex; gap:6px; overflow-x:auto; padding:10px 0; scrollbar-width:none;" class="hide-scroll">
-            ${ph.map(img => `<img src="${img}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; border:1px solid var(--border); cursor:pointer; flex-shrink:0;" onclick="document.getElementById('post-slider').scrollTo({left: document.getElementById('post-slider').scrollWidth * ${ph.indexOf(img)} / ${ph.length}, behavior: 'smooth'})">`).join('')}
-        </div>` : ''}
     ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
 
     $('app').innerHTML = `
@@ -453,7 +447,6 @@ window.openPost = async id => {
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
   } catch(e) { bad(e); }
 };
-
 const paintLike = (l, n) => { $('lk').innerHTML = `<i class="fa-${l ? 'solid text-red' : 'regular'} fa-heart" style="${l ? 'color:#dc2626' : ''}"></i> ${n}`; };
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
 window.zoom = u => Swal.fire({imageUrl: u, imageWidth: '100%', showConfirmButton: false, showCloseButton: true, background: '#0a0a0a'});
