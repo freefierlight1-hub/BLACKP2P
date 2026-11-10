@@ -35,7 +35,30 @@ const requireAuth = () => {
     return true;
 };
 
-// تحسين ضغط الصور (WebP)
+const form=(title,html,fn,btn='إرسال')=>Swal.fire({
+  title,html,
+  showCancelButton:true,
+  confirmButtonText:btn,
+  cancelButtonText:'إلغاء',
+  preConfirm:async()=>{
+    try{
+      const cbtn = Swal.getConfirmButton();
+      cbtn.disabled = true;
+      cbtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري المعالجة...';
+      await fn();
+      return true;
+    }catch(e){
+      const cbtn = Swal.getConfirmButton();
+      cbtn.disabled = false;
+      cbtn.innerHTML = btn;
+      Swal.showValidationMessage(e.message);
+      return false;
+    }
+  }
+});
+
+const inp=(id,ph,t='text')=>`<input id="${id}" type="${t}" placeholder="${ph}">`;
+
 const compressToBlob = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
     const i = new Image();
     i.onload = () => {
@@ -75,7 +98,7 @@ let me=null,isAdmin=false,S={},P={},N={},T={},view='feed',VS='',OT='run',OD=[],M
 let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized=false;
 let pendingPostId = new URLSearchParams(window.location.search).get('post');
 let refCode = new URLSearchParams(window.location.search).get('ref');
-let feedLimit = 20; // جلب البيانات على دفعات
+let feedLimit = 20;
 
 const clearU = () => { U.forEach(f => f()); U = []; };
 const clearGU = () => { GU.forEach(f => f()); GU = []; };
@@ -85,7 +108,6 @@ document.getElementById('theme-toggle')?.addEventListener('click', () => {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
 });
 
-// الشارات (Badges)
 const getBadges = (user) => {
     if (!user) return '';
     let badges = [];
@@ -93,11 +115,9 @@ const getBadges = (user) => {
     if (isPro) badges.push('<span title="عضو برو" style="color:#eab308; margin-right:4px;"><i class="fa-solid fa-crown"></i></span>');
     if (user.verified) badges.push('<span title="حساب موثق" style="color:#059669; margin-right:4px;"><i class="fa-solid fa-circle-check"></i></span>');
     if ((user.completedDeals || 0) >= 50) badges.push('<span title="خبير (50+ صفقة)" style="color:#ea580c; margin-right:4px;"><i class="fa-solid fa-star"></i></span>');
-    if (user.rating >= 4.5) badges.push('<span title="تقييم ممتاز" style="color:#3b82f6; margin-right:4px;"><i class="fa-solid fa-medal"></i></span>');
     return badges.join('');
 };
 
-// شرح نسبة الثقة
 window.showTrust = (score, verified, deals, rating) => {
     Swal.fire({
         title: 'تفاصيل نسبة الثقة',
@@ -164,7 +184,15 @@ window.go = v => {
     if (maintenanceActive) { showMaintenanceScreen(); return; }
     clearU(); view = v;
     document.querySelectorAll('.nav-item').forEach(b => { b.classList.toggle('active', b.dataset.tab === v); });
-    ({feed, add, wanted, chats, notes, wallet, me: profile, orders, favorites, chat: null, terms: showTermsPage}[v]||feed)();
+    ({feed, add, wanted, chats, notes, wallet, me: profile, orders, favorites, seller: null, chat: null, terms: showTermsPage}[v]||feed)();
+};
+
+window.goToSeller = async (uid) => {
+    if (!uid) return;
+    if (me && uid === me.uid) return go('me');
+    clearU(); view = 'seller';
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    await sellerProfile(uid);
 };
 
 window.signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => {
@@ -194,7 +222,7 @@ onAuthStateChanged(auth, async u => {
   }
   
   try {
-    me = { uid: u.uid, name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, verified: false, role: 'user' };
+    me = { uid: u.uid, name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, verified: false, role: 'user', followersCount: 0 };
     $('nav').classList.remove('hidden');
     $('bal').textContent = '0 ج';
     
@@ -227,9 +255,8 @@ onAuthStateChanged(auth, async u => {
 
     const snap = await get(r);
     if (!snap.exists()) {
-      const newUser = {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now(), completedDeals: 0, refCount: 0, refEarnings: 0};
+      const newUser = {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now(), completedDeals: 0, refCount: 0, refEarnings: 0, followersCount: 0};
       
-      // نظام الإحالات المتقدم
       if (refCode && refCode !== u.uid) {
           try {
               const refSnap = await get(R('users/' + refCode));
@@ -264,6 +291,7 @@ onAuthStateChanged(auth, async u => {
       P = Object.fromEntries(Object.entries(allPosts).filter(([id, p]) => p && p.status === 'active'));
       if (view === 'feed' && $('list')) renderFeed();
       if (view === 'favorites') favorites();
+      if (view === 'seller' && currentSellerId) sellerProfile(currentSellerId);
     }));
     
     GU.push(onValue(R('notifications/' + u.uid), s => {
@@ -271,7 +299,6 @@ onAuthStateChanged(auth, async u => {
       const c = Object.values(N).filter(n => !n.read).length;
       $('nb').textContent = c; $('nb').classList.toggle('hidden', !c);
       
-      // التنبيهات الفورية
       Object.entries(N).forEach(([id, n]) => {
         if (n.popup && !n.read && !n.fields && !shown.has(id)) {
           shown.add(id);
@@ -294,38 +321,143 @@ async function loadT(ids) {
   let n = 0;
   for (const s of ids) if (!(s in T)) { T[s] = 0; n++; const x = await get(R('ratings/' + s)); const v = Object.values(x.val() || {}).map(o => o.rating); T[s] = v.length ? v.reduce((a,b) => a+b) / v.length : 0; }
   if (n && view === 'feed') renderFeed();
+  if (n && view === 'seller') sellerProfile(currentSellerId);
 }
 
-// طلبات الشراء (Wanted)
-async function wanted() {
-    if(!requireAuth()) return;
-    $('app').innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><h2 style="font-size:18px; font-weight:900; color:var(--text);"><i class="fa-solid fa-bullhorn" style="color:var(--warn-solid);"></i> طلبات الشراء</h2><button class="btn btn-primary" style="padding:8px 12px; font-size:12px;" onclick="addWanted()"><i class="fa-solid fa-plus"></i> أضف طلبك</button></div><div id="wanted-list" style="display:grid; gap:8px;"><div class="skeleton" style="height:80px;"></div><div class="skeleton" style="height:80px;"></div></div>`;
-    U.push(onValue(query(R('wanted_posts'), limitToLast(50)), s => {
-        const w = Object.entries(s.val() || {}).map(([id, p]) => ({id, ...p})).sort((a,b) => b.createdAt - a.createdAt);
-        if(w.length === 0) { $('wanted-list').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-4); font-weight:700;">لا توجد طلبات شراء حالياً.</div>'; return; }
-        $('wanted-list').innerHTML = w.map(p => `<div class="card" style="padding:12px;"><div style="display:flex; justify-content:space-between; margin-bottom:6px;"><b style="font-size:14px; color:var(--text);">${E(p.game)}</b><b style="font-size:14px; color:var(--success-tx);">${p.budget} ج</b></div><p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">${E(p.desc)}</p><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:var(--text-4);">بواسطة ${E(p.buyerName)} · ${ago(p.createdAt)}</span><button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="chatWithBuyer('${p.buyerId}', '${p.id}')">تواصل معه</button></div></div>`).join('');
-    }));
-}
-window.addWanted = () => {
-    if(!requireAuth()) return;
-    const gamesList = S.games && S.games.length > 0 ? S.games : ['فري فاير','ببجي موبايل','كلاش أوف كلانس','فورتنايت','روبلوكس'];
-    form('طلب شراء جديد', `<select id="w_g">${gamesList.map(g => `<option value="${E(g)}">${E(g)}</option>`).join('')}</select><input id="w_b" type="number" placeholder="ميزانيتك (ج)"><textarea id="w_d" placeholder="اكتب تفاصيل الحساب الذي تبحث عنه..."></textarea>`, async () => {
-        const g = Security.text($('w_g').value, 2, 40), b = Security.amount($('w_b').value, 1, 100000000), d = Security.text($('w_d').value, 5, 500);
-        await set(push(R('wanted_posts')), { buyerId: me.uid, buyerName: me.name, game: g, budget: b, desc: d, createdAt: Date.now() });
-        ok('تم نشر طلب الشراء'); wanted();
-    });
-};
-window.chatWithBuyer = async (buyerId, wantedId) => {
-    if(!requireAuth()) return;
-    if(buyerId === me.uid) return bad(new Error('هذا طلبك الخاص.'));
+// =========================================
+// صفحة البائع العامة والمتابعة (جديد)
+// =========================================
+let currentSellerId = null;
+let currentSellerData = null;
+let isFollowingSeller = false;
+
+window.sellerProfile = async (uid) => {
+    currentSellerId = uid;
+    $('app').innerHTML = `<div class="card" style="padding:20px; text-align:center;"><div class="skeleton" style="width:80px; height:80px; border-radius:50%; margin:0 auto 10px;"></div><div class="skeleton" style="height:20px; width:50%; margin:0 auto 10px;"></div><div class="skeleton" style="height:40px; width:100%;"></div></div>`;
+    
     try {
-        Swal.fire({title:'جاري التحميل...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        const cid = `wanted_${wantedId}_${me.uid}_${Date.now()}`;
-        await set(R('chats/' + cid), { buyerId, sellerId: me.uid, buyerName: (await get(R('users/'+buyerId+'/name'))).val() || 'مشتري', sellerName: me.name, lastMessage: 'استفسار عن طلبك', dealStatus: '', status: 'open', updatedAt: Date.now(), adminRead: false });
-        await set(R(`user_chats/${buyerId}/${cid}`), true);
-        await set(R(`user_chats/${me.uid}/${cid}`), true);
-        Swal.close(); openChat(cid);
-    } catch(e) { Swal.close(); bad(e); }
+        const userSnap = await get(R('users/' + uid));
+        if (!userSnap.exists()) return bad(new Error('البائع غير موجود.'));
+        const u = userSnap.val();
+        currentSellerData = u;
+        
+        const postsSnap = await get(query(R('posts'), orderByChild('sellerId'), equalTo(uid)));
+        const posts = Object.entries(postsSnap.val() || {}).map(([id, p]) => ({id, ...p})).filter(p => p.status === 'active').sort((a,b) => b.createdAt - a.createdAt);
+        
+        const rtSnap = await get(R('ratings/' + uid));
+        const rs = Object.values(rtSnap.val() || {}).map(o => o.rating);
+        const avg = rs.length ? (rs.reduce((a,b) => a+b,0) / rs.length).toFixed(1) : 'جديد';
+        
+        // التحقق من حالة المتابعة
+        isFollowingSeller = false;
+        if (me && me.uid !== uid) {
+            const followSnap = await get(R(`followers/${uid}/${me.uid}`));
+            isFollowingSeller = followSnap.exists();
+        }
+
+        const isPro = u.isPro && (u.proUntil || 0) > Date.now();
+        const tr = trust({sellerId: uid, sellerSince: u.createdAt, sellerVerified: u.verified});
+        const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
+
+        let followBtnHtml = '';
+        if (me && me.uid !== uid) {
+            followBtnHtml = isFollowingSeller 
+                ? `<button class="btn btn-ghost" style="width:100%; border-color:var(--success-bd); color:var(--success-tx); background:var(--success-bg); margin-top:12px;" onclick="toggleFollow('${uid}')"><i class="fa-solid fa-check"></i> متابَع</button>`
+                : `<button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="toggleFollow('${uid}')"><i class="fa-solid fa-plus"></i> متابعة</button>`;
+        }
+
+        const postsHtml = posts.length === 0 
+            ? '<div class="empty-state"><i class="fa-regular fa-folder-open"></i><p>لا توجد إعلانات نشطة لهذا البائع.</p></div>'
+            : `<div class="posts-grid">${posts.map(p => {
+                const ph = Security.img(p.photos);
+                const imgHtml = ph.length > 0 ? `<img src="${ph[0]}" loading="lazy" alt="">` : `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`;
+                return `<div class="post-card" onclick="openPost('${p.id}')">
+                  <div class="post-img-wrap">${imgHtml}<div class="post-price-badge">${p.price} ج</div></div>
+                  <div class="post-body"><b style="font-size:14px;font-weight:900;color:var(--text);">${E(p.game)}</b><p style="font-size:11px;color:var(--text-3);margin-top:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${E(p.desc)}</p></div>
+                </div>`;
+            }).join('')}</div>`;
+
+        $('app').innerHTML = `
+        <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px; padding:7px 12px; font-size:11px;"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
+        
+        <div class="seller-profile-header">
+            <div style="position:relative; display:inline-block; margin-bottom:10px;">
+                <img src="${E(u.photo || '')}" style="width:80px; height:80px; border-radius:20px; object-fit:cover; border:3px solid var(--surface); box-shadow:var(--shadow-lg); background:var(--surface-2);" alt="">
+                ${u.verified ? '<div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)"><i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:13px"></i></div>' : ''}
+            </div>
+            <h2 style="font-size:18px; font-weight:900; color:var(--text); margin-bottom:4px;">${E(u.name)} ${isPro ? '<i class="fa-solid fa-crown" style="color:var(--gold-solid);font-size:14px;" title="عضو برو"></i>' : ''}</h2>
+            <p style="font-size:11px; color:var(--text-3); font-weight:700;">عضو منذ ${new Date(u.createdAt || Date.now()).toLocaleDateString('ar-EG')}</p>
+            
+            <div class="seller-stats-grid">
+                <div class="seller-stat-box" style="background:var(--success-bg); border-color:var(--success-bd);">
+                    <span class="seller-stat-value" style="color:var(--success-tx);">${u.completedDeals || 0}</span>
+                    <span class="seller-stat-label" style="color:var(--success-tx);">صفقات مكتملة</span>
+                </div>
+                <div class="seller-stat-box" style="background:var(--warn-bg); border-color:var(--warn-bd);">
+                    <span class="seller-stat-value" style="color:var(--warn-tx);">${avg !== 'جديد' ? '⭐ ' + avg : 'جديد'}</span>
+                    <span class="seller-stat-label" style="color:var(--warn-tx);">التقييم</span>
+                </div>
+                <div class="seller-stat-box" style="background:var(--purple-bg); border-color:var(--purple-bd);">
+                    <span class="seller-stat-value" style="color:var(--purple-tx);">${u.followersCount || 0}</span>
+                    <span class="seller-stat-label" style="color:var(--purple-tx);">متابع</span>
+                </div>
+            </div>
+            
+            <div style="margin-top:12px; display:flex; justify-content:center; gap:10px;">
+                <span class="trust-meter ${trc}" style="cursor:pointer; font-size:10px; padding:4px 10px;" onclick="showTrust(${tr}, ${u.verified}, ${u.completedDeals}, ${avg !== 'جديد' ? avg : 0})"><i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة</span>
+            </div>
+            
+            ${followBtnHtml}
+        </div>
+        
+        <h3 style="font-size:15px; font-weight:900; color:var(--text); margin-bottom:10px;"><i class="fa-solid fa-store" style="color:var(--text-3);"></i> إعلانات البائع (${posts.length})</h3>
+        ${postsHtml}`;
+        
+        loadT([uid]);
+    } catch(e) { bad(e); }
+};
+
+window.toggleFollow = async (sellerId) => {
+    if (!requireAuth()) return;
+    if (me.uid === sellerId) return bad(new Error('لا يمكنك متابعة نفسك.'));
+    try {
+        const r = R(`followers/${sellerId}/${me.uid}`);
+        if (isFollowingSeller) {
+            await remove(r);
+            await runTransaction(R(`users/${sellerId}/followersCount`), v => Math.max(0, (v || 1) - 1));
+            ok('تم إلغاء المتابعة');
+        } else {
+            await set(r, true);
+            await runTransaction(R(`users/${sellerId}/followersCount`), v => (v || 0) + 1);
+            ok('تمت المتابعة بنجاح');
+            // إرسال إشعار للبائع
+            notify(sellerId, 'متابع جديد', `قام ${me.name} بمتابعة حسابك.`);
+        }
+        sellerProfile(sellerId);
+    } catch(e) { bad(e); }
+};
+
+// =========================================
+// المعرض العمودي (مثل فيسبوك)
+// =========================================
+window.previewAllImagesVertical = (ph) => {
+    if(ph.length === 0) return;
+    const imagesHtml = ph.map(img => `
+        <img src="${img}" class="vertical-gallery-img" onclick="zoom('${img}')" loading="lazy">
+    `).join('');
+    
+    Swal.fire({
+        html: `<div class="vertical-gallery-container">${imagesHtml}</div>`,
+        width: '100vw',
+        padding: '0',
+        showConfirmButton: false,
+        showCloseButton: true,
+        background: '#000',
+        customClass: { 
+            popup: 'fullscreen-gallery-popup',
+            closeButton: 'fullscreen-gallery-close'
+        }
+    });
 };
 
 function feed() {
@@ -391,6 +523,7 @@ function renderFeed() {
         ${gridHtml}
         <div class="post-price-badge" style="font-size:14px; padding:4px 10px;">${p.price} ج</div>
         ${p.featured ? '<div class="post-featured-badge"><i class="fa-solid fa-star"></i> مميز</div>' : ''}
+        ${p.isAutoBuy ? '<div class="post-featured-badge" style="top:auto; bottom:8px; right:auto; left:8px; background:var(--gold-solid);"><i class="fa-solid fa-bolt"></i> شراء فوري</div>' : ''}
       </div>
       <div class="post-body" style="padding:12px;">
         <div>
@@ -403,7 +536,7 @@ function renderFeed() {
           </div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border)">
-          <div style="display:flex;align-items:center;gap:6px;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;min-width:0" onclick="event.stopPropagation(); goToSeller('${p.sellerId}')">
             <div class="avatar-initial" style="width:24px; height:24px; font-size:10px;">${E(initials(p.sellerName))}</div>
             <span style="font-size:11px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span> ${getBadges(p)}
           </div>
@@ -476,9 +609,9 @@ window.openPost = async id => {
     const sliderHtml = ph.length > 0 ? `
         <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:10px;">
             <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
-                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:auto;max-height:60vh;min-height:250px;background:#000;cursor:pointer;" onclick="zoom('${img}')">`).join('')}
+                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:auto;max-height:60vh;min-height:250px;background:#000;cursor:zoom-in;" onclick="previewAllImagesVertical(${JSON.stringify(ph).replace(/"/g, '&quot;')})">`).join('')}
             </div>
-            ${ph.length > 1 ? `<button class="btn btn-ghost" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; border:none; font-size:11px; padding:5px 12px; border-radius:20px;" onclick="previewAllImages()"><i class="fa-solid fa-images"></i> معاينة الكل (${ph.length})</button>` : ''}
+            ${ph.length > 1 ? `<button class="btn btn-ghost" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; border:none; font-size:11px; padding:5px 12px; border-radius:20px;" onclick="previewAllImagesVertical(${JSON.stringify(ph).replace(/"/g, '&quot;')})"><i class="fa-solid fa-images"></i> معاينة الكل (${ph.length})</button>` : ''}
         </div>
     ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
 
@@ -519,13 +652,10 @@ window.openPost = async id => {
         <p style="font-size:13px;color:var(--text-2);font-weight:600;line-height:1.8;white-space:pre-line; background:var(--surface-2); padding:10px; border-radius:10px;">${E(p.desc)}</p>
       </div>
 
-      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px;">
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px; cursor:pointer;" onclick="goToSeller('${p.sellerId}')">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
             <b style="font-size:13px;font-weight:900;color:var(--text)">البائع</b>
-            <div style="display:flex; gap:5px;">
-                ${avg >= 4.5 ? `<span class="badge badge-success" style="font-size:9px;"><i class="fa-solid fa-crown"></i> بائع ممتاز</span>` : ''}
-                <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;min-height:28px;border-color:var(--warn-bd);color:var(--warn-tx);background:var(--warn-bg)" onclick="rate('${p.sellerId}')"><i class="fa-solid fa-star"></i> تقييم</button>
-            </div>
+            <span style="font-size:10px; color:var(--info-tx); font-weight:800;">عرض الملف الشخصي <i class="fa-solid fa-chevron-left" style="font-size:8px;"></i></span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
             <div class="avatar-initial" style="width:46px;height:46px;font-size:18px">${E(initials(p.sellerName))}</div>
@@ -536,7 +666,7 @@ window.openPost = async id => {
                 <span style="font-size:11px;color:var(--text-3);font-weight:700">عضو منذ ${new Date(p.sellerSince||Date.now()).toLocaleDateString('ar-EG')}</span>
             </div>
             <div style="text-align:center">
-                <span class="trust-meter ${trc}" style="margin-bottom:4px; font-size:10px; cursor:pointer;" onclick="showTrust(${tr}, ${p.sellerVerified}, 0, ${avg})"><i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة</span>
+                <span class="trust-meter ${trc}" style="margin-bottom:4px; font-size:10px;" onclick="event.stopPropagation(); showTrust(${tr}, ${p.sellerVerified}, 0, ${avg})"><i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة</span>
                 <span class="info-value" style="color:var(--warn-tx);font-size:12px;display:block">${avg ? '⭐ ' + avg.toFixed(1) : 'لا يوجد تقييم'}</span>
             </div>
         </div>
@@ -549,12 +679,6 @@ window.openPost = async id => {
     </div>` : `<p style="text-align:center;font-size:13px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
     
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
-    
-    window.previewAllImages = () => {
-        if(ph.length === 0) return;
-        const imagesHtml = ph.map(img => `<div style="width:100%; margin-bottom:10px; background:#000; display:flex; justify-content:center;"><img src="${img}" style="width:100%; max-height:80vh; object-fit:contain; cursor:pointer;" onclick="zoom('${img}')"></div>`).join('');
-        Swal.fire({ title: 'معرض الصور', html: `<div style="max-height:85vh; overflow-y:auto; width:100%; margin:0; padding:0;">${imagesHtml}</div>`, width: '100vw', padding: '0', showConfirmButton: false, showCloseButton: true, background: '#0a0a0a', color: '#fff' });
-    };
   } catch(e) { bad(e); }
 };
 
@@ -638,6 +762,37 @@ window.add = function() {
       Swal.close(); ok('تم الإرسال للمراجعة'); go('feed');
     } catch(e) { Swal.close(); bad(e); $('a_b').disabled = false; $('a_b').innerHTML = 'نشر للمراجعة'; }
   };
+};
+
+async function wanted() {
+    if(!requireAuth()) return;
+    $('app').innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><h2 style="font-size:18px; font-weight:900; color:var(--text);"><i class="fa-solid fa-bullhorn" style="color:var(--warn-solid);"></i> طلبات الشراء</h2><button class="btn btn-primary" style="padding:8px 12px; font-size:12px;" onclick="addWanted()"><i class="fa-solid fa-plus"></i> أضف طلبك</button></div><div id="wanted-list" style="display:grid; gap:8px;"><div class="skeleton" style="height:80px;"></div><div class="skeleton" style="height:80px;"></div></div>`;
+    U.push(onValue(query(R('wanted_posts'), limitToLast(50)), s => {
+        const w = Object.entries(s.val() || {}).map(([id, p]) => ({id, ...p})).sort((a,b) => b.createdAt - a.createdAt);
+        if(w.length === 0) { $('wanted-list').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-4); font-weight:700;">لا توجد طلبات شراء حالياً.</div>'; return; }
+        $('wanted-list').innerHTML = w.map(p => `<div class="card" style="padding:12px;"><div style="display:flex; justify-content:space-between; margin-bottom:6px;"><b style="font-size:14px; color:var(--text);">${E(p.game)}</b><b style="font-size:14px; color:var(--success-tx);">${p.budget} ج</b></div><p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">${E(p.desc)}</p><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:var(--text-4);">بواسطة ${E(p.buyerName)} · ${ago(p.createdAt)}</span><button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="chatWithBuyer('${p.buyerId}', '${p.id}')">تواصل معه</button></div></div>`).join('');
+    }));
+}
+window.addWanted = () => {
+    if(!requireAuth()) return;
+    const gamesList = S.games && S.games.length > 0 ? S.games : ['فري فاير','ببجي موبايل','كلاش أوف كلانس','فورتنايت','روبلوكس'];
+    form('طلب شراء جديد', `<select id="w_g">${gamesList.map(g => `<option value="${E(g)}">${E(g)}</option>`).join('')}</select><input id="w_b" type="number" placeholder="ميزانيتك (ج)"><textarea id="w_d" placeholder="اكتب تفاصيل الحساب الذي تبحث عنه..."></textarea>`, async () => {
+        const g = Security.text($('w_g').value, 2, 40), b = Security.amount($('w_b').value, 1, 100000000), d = Security.text($('w_d').value, 5, 500);
+        await set(push(R('wanted_posts')), { buyerId: me.uid, buyerName: me.name, game: g, budget: b, desc: d, createdAt: Date.now() });
+        ok('تم نشر طلب الشراء'); wanted();
+    });
+};
+window.chatWithBuyer = async (buyerId, wantedId) => {
+    if(!requireAuth()) return;
+    if(buyerId === me.uid) return bad(new Error('هذا طلبك الخاص.'));
+    try {
+        Swal.fire({title:'جاري التحميل...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+        const cid = `wanted_${wantedId}_${me.uid}_${Date.now()}`;
+        await set(R('chats/' + cid), { buyerId, sellerId: me.uid, buyerName: (await get(R('users/'+buyerId+'/name'))).val() || 'مشتري', sellerName: me.name, lastMessage: 'استفسار عن طلبك', dealStatus: '', status: 'open', updatedAt: Date.now(), adminRead: false });
+        await set(R(`user_chats/${buyerId}/${cid}`), true);
+        await set(R(`user_chats/${me.uid}/${cid}`), true);
+        Swal.close(); openChat(cid);
+    } catch(e) { Swal.close(); bad(e); }
 };
 
 async function chats() {
@@ -869,6 +1024,7 @@ function profile() {
   if(!requireAuth()) return;
   const rating = T[me.uid] ? T[me.uid].toFixed(1) : 'جديد';
   const isPro = me.isPro && (me.proUntil || 0) > Date.now();
+  const proPrice = S.proPrice || 50;
   
   const vb = me.verified ? `<span class="badge badge-success" style="padding:4px 10px; font-size:11px; border-radius:20px; background:rgba(16,185,129,0.1); border:1px solid var(--success-bd); color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> حساب موثق</span>` : VS === 'pending' ? `<div style="margin-top:12px;background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-tx);border-radius:10px;padding:10px;font-size:11px;font-weight:800"><i class="fa-solid fa-hourglass-half"></i> طلب التوثيق قيد المراجعة</div>` : `${VS === 'rejected' ? '<p style="font-size:11px;font-weight:800;color:var(--danger-tx);background:var(--danger-bg);padding:10px;border-radius:10px;border:1px solid var(--danger-bd);margin-top:10px">تم رفض الطلب. أعد المحاولة بصور أوضح.</p>' : ''}<button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px;font-size:12.5px" onclick="verify()"><i class="fa-solid fa-shield-halved"></i> توثيق الحساب الآن</button>`;
 
@@ -883,18 +1039,22 @@ function profile() {
       <div style="margin-top:10px">${vb}</div>
       
       <!-- إحصائيات المستخدم -->
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:16px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-top:16px;">
           <div style="background:var(--success-bg); border:1px solid var(--success-bd); border-radius:10px; padding:10px 4px;">
-              <span style="font-size:10px; color:var(--success-tx); font-weight:800; display:block; margin-bottom:4px;">الرصيد</span>
-              <b style="font-size:14px; color:var(--success-tx); font-weight:900;">${me.balance||0} ج</b>
+              <span style="font-size:9px; color:var(--success-tx); font-weight:800; display:block; margin-bottom:4px;">الرصيد</span>
+              <b style="font-size:13px; color:var(--success-tx); font-weight:900;">${me.balance||0}</b>
           </div>
           <div style="background:var(--warn-bg); border:1px solid var(--warn-bd); border-radius:10px; padding:10px 4px;">
-              <span style="font-size:10px; color:var(--warn-tx); font-weight:800; display:block; margin-bottom:4px;">التقييم</span>
-              <b style="font-size:14px; color:var(--warn-tx); font-weight:900;">${rating !== 'جديد' ? '⭐ ' + rating : 'جديد'}</b>
+              <span style="font-size:9px; color:var(--warn-tx); font-weight:800; display:block; margin-bottom:4px;">التقييم</span>
+              <b style="font-size:13px; color:var(--warn-tx); font-weight:900;">${rating !== 'جديد' ? '⭐ ' + rating : 'جديد'}</b>
           </div>
           <div style="background:var(--info-bg); border:1px solid var(--info-bd); border-radius:10px; padding:10px 4px;">
-              <span style="font-size:10px; color:var(--info-tx); font-weight:800; display:block; margin-bottom:4px;">الصفقات</span>
-              <b style="font-size:14px; color:var(--info-tx); font-weight:900;">${me.completedDeals||0}</b>
+              <span style="font-size:9px; color:var(--info-tx); font-weight:800; display:block; margin-bottom:4px;">الصفقات</span>
+              <b style="font-size:13px; color:var(--info-tx); font-weight:900;">${me.completedDeals||0}</b>
+          </div>
+          <div style="background:var(--purple-bg); border:1px solid var(--purple-bd); border-radius:10px; padding:10px 4px;">
+              <span style="font-size:9px; color:var(--purple-tx); font-weight:800; display:block; margin-bottom:4px;">المتابعون</span>
+              <b style="font-size:13px; color:var(--purple-tx); font-weight:900;">${me.followersCount||0}</b>
           </div>
       </div>
   </div>
@@ -913,7 +1073,7 @@ function profile() {
   </div>
 
   <div style="display:grid;gap:8px">
-      ${isPro ? '' : `<button class="btn btn-gold" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="upgradePro()"><i class="fa-solid fa-crown" style="margin-left:8px; color:#fff;"></i> ترقية الحساب إلى الباقة المميزة (برو)</button>`}
+      ${isPro ? '' : `<button class="btn btn-gold" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="upgradePro()"><i class="fa-solid fa-crown" style="margin-left:8px; color:#fff;"></i> ترقية الحساب إلى الباقة المميزة (برو) - ${proPrice} ج</button>`}
       <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="go('orders')"><i class="fa-solid fa-receipt" style="margin-left:8px; color:var(--text-3); width:20px; text-align:center;"></i> طلباتي وإعلاناتي</button>
       <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="go('favorites')"><i class="fa-solid fa-heart" style="margin-left:8px; color:var(--text-3); width:20px; text-align:center;"></i> المفضلة (الإعلانات المحفوظة)</button>
       <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="supportChat()"><i class="fa-solid fa-headset" style="margin-left:8px; color:var(--text-3); width:20px; text-align:center;"></i> الدعم الفني</button>
