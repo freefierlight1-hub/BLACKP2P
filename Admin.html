@@ -247,7 +247,11 @@ const empty=`<div style="display:flex;flex-direction:column;align-items:center;j
 const thumbs=a=>`<div style="display:flex;gap:6px;overflow-x:auto;margin:8px 0;padding-bottom:4px" class="hide-scroll">${a.map(s=>`<img src="${s}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--border);flex-shrink:0" onclick="zoom(this.src)">`).join('')}</div>`;
 const NM={};const uname=async u=>NM[u]||(NM[u]=await get(R('users/'+u+'/name')).then(x=>x.val()||u).catch(()=>u));
 const claim=async(path,from,to)=>{const r=await runTransaction(R(path+'/status'),v=>v===from||v===null?to:undefined);if(!r.committed)throw new Error('تمت المعالجة مسبقاً')};
-const credit=(uid,n)=>runTransaction(R(`users/${uid}/balance`),v=>{const x=(v||0)+n;return x>=0?x:undefined}).then(r=>{if(!r.committed)throw new Error('الرصيد لا يكفي')});
+const credit=(uid,n)=>runTransaction(R(`users/${uid}/balance`),v=>{
+    const numV = Number(v) || 0; // تحويل الرصيد إلى رقم إجباري
+    const x = numV + n;
+    return x >= 0 ? x : undefined;
+}).then(r=>{if(!r.committed)throw new Error('الرصيد لا يكفي')});
 const notify=(uid,title,body)=>set(push(R('notifications/'+uid)),{title,body,type:'info',popup:true,read:false,createdAt:Date.now()});
 const fetchList = async p => Object.entries((await get(R(p))).val() || {}).map(([id, o]) => ({id, ...o})).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 const fetchLogs = async () => {
@@ -657,18 +661,40 @@ window.adminToggleBan = async (uid) => { if (!uid || uid === 'admin_support') re
 window.adminAdjustBalance = async (uid) => { 
     if (!uid || uid === 'admin_support') return; 
     try { 
+        // جلب الرصيد الحالي لعرضه للمشرف
+        const userSnap = await get(R('users/'+uid));
+        const currentBalance = Number(userSnap.val().balance) || 0;
+
         const {value: opType} = await Swal.fire({
             title: 'نوع العملية',
+            html: `<p style="margin-bottom:10px; font-size:14px; font-weight:bold;">الرصيد الحالي للمستخدم: <span style="color:green;">${currentBalance} ج</span></p>`,
             input: 'select',
             inputOptions: { 'add': 'إضافة رصيد (+)', 'deduct': 'خصم رصيد (-)' },
             showCancelButton: true, confirmButtonText: 'متابعة', cancelButtonText: 'إلغاء'
         });
         if (!opType) return;
-        const r = await Swal.fire({title:'المبلغ',input:'number',showCancelButton:true,confirmButtonText:'متابعة',cancelButtonText:'إلغاء'});
+
+        const r = await Swal.fire({
+            title: opType === 'add' ? 'المبلغ المراد إضافته' : 'المبلغ المراد خصمه', 
+            input:'number',
+            inputAttributes: { min: 1, max: opType === 'deduct' ? currentBalance : 10000000 },
+            showCancelButton:true,
+            confirmButtonText:'متابعة',
+            cancelButtonText:'إلغاء'
+        });
+        
         if(!r.isConfirmed || !r.value) return;
+        
         let n = Math.abs(Math.round(+r.value));
-        if(!n) throw new Error('مبلغ غير صالح');
+        if(!n || n <= 0) throw new Error('مبلغ غير صالح');
+        
         if (opType === 'deduct') n = -n;
+
+        // التأكد من أن الرصيد لن يصبح سالباً
+        if ((currentBalance + n) < 0) {
+            throw new Error(`لا يمكن الخصم. الرصيد الحالي ${currentBalance} ج فقط.`);
+        }
+
         const why = await reason('سبب التعديل');
         await confirmPIN('تعديل رصيد '+n);
         await credit(uid, n);
