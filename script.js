@@ -5,6 +5,7 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase
 const app=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",authDomain:"blackp2p.firebaseapp.com",databaseURL:"https://blackp2p-default-rtdb.firebaseio.com",projectId:"blackp2p",storageBucket:"blackp2p.firebasestorage.app",messagingSenderId:"875717005059",appId:"1:875717005059:web:4e91211f751dddf7a2e336"});
 const auth=getAuth(app),db=getDatabase(app),R=p=>ref(db,p);
 
+// رابط الـ Cloudflare Worker (لحماية المفاتيح والتشفير)
 const WORKER_URL = "https://late-haze-3fe4.freefierlight1.workers.dev";
 
 const $=id=>document.getElementById(id);
@@ -96,11 +97,21 @@ let me=null,isAdmin=false,S={},P={},N={},T={},view='feed',VS='',OT='run',OD=[],M
 let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized=false;
 
 // ==========================================
-// نظام عرض الصور (Facebook Lightbox)
+// نظام عرض الصور الاحترافي (Lightbox & Zoom)
 // ==========================================
 let currentLbImages = [];
 let currentLbIndex = 0;
 let touchStartX = 0;
+let touchStartY = 0;
+
+let currentScale = 1;
+let startDistance = 0;
+let startScale = 1;
+let translateX = 0;
+let translateY = 0;
+let startTranslateX = 0;
+let startTranslateY = 0;
+let isZooming = false;
 
 window.openLightbox = (images, index = 0) => {
     if (!images || images.length === 0) return;
@@ -112,31 +123,89 @@ window.openLightbox = (images, index = 0) => {
         lb = document.createElement('div');
         lb.id = 'fb-lightbox';
         lb.className = 'fb-lightbox';
+        // تم إزالة الأسهم بناءً على طلبك
         lb.innerHTML = `
             <div class="fb-lb-close fb-lb-btn" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></div>
             <div class="fb-lb-counter" id="fb-lb-counter"></div>
-            <div class="fb-lb-prev fb-lb-btn" id="fb-lb-prev" onclick="navLightbox(-1)"><i class="fa-solid fa-chevron-right"></i></div>
-            <div class="fb-lb-next fb-lb-btn" id="fb-lb-next" onclick="navLightbox(1)"><i class="fa-solid fa-chevron-left"></i></div>
-            <div class="fb-lightbox-img-wrap" id="fb-lb-img-wrap" onclick="if(event.target.tagName !== 'IMG') closeLightbox()">
+            <div class="fb-lightbox-img-wrap" id="fb-lb-img-wrap">
                 <img id="fb-lb-img" src="" alt="">
             </div>
         `;
         document.body.appendChild(lb);
 
         const wrap = document.getElementById('fb-lb-img-wrap');
-        wrap.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
-        wrap.addEventListener('touchend', e => {
-            let touchEndX = e.changedTouches[0].screenX;
-            if (touchStartX - touchEndX > 50) navLightbox(1);
-            if (touchEndX - touchStartX > 50) navLightbox(-1);
+        const imgEl = document.getElementById('fb-lb-img');
+
+        const resetZoom = () => {
+            currentScale = 1; translateX = 0; translateY = 0;
+            imgEl.style.transform = `scale(1) translate(0px, 0px)`;
+            imgEl.style.transition = 'transform 0.2s ease-out';
+        };
+
+        wrap.addEventListener('touchstart', e => {
+            imgEl.style.transition = 'none';
+            if (e.touches.length === 2) {
+                isZooming = true;
+                startDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                startScale = currentScale;
+            } else if (e.touches.length === 1) {
+                isZooming = false;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                startTranslateX = translateX;
+                startTranslateY = translateY;
+            }
         }, {passive: true});
-        
-        document.addEventListener('keydown', e => {
-            if (!lb.classList.contains('active')) return;
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowLeft') navLightbox(-1);
-            if (e.key === 'ArrowRight') navLightbox(1);
+
+        wrap.addEventListener('touchmove', e => {
+            if (isZooming && e.touches.length === 2) {
+                e.preventDefault();
+                const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                currentScale = Math.max(1, Math.min(startScale * (dist / startDistance), 4));
+                imgEl.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+            } else if (!isZooming && e.touches.length === 1 && currentScale > 1) {
+                e.preventDefault();
+                translateX = startTranslateX + (e.touches[0].clientX - touchStartX);
+                translateY = startTranslateY + (e.touches[0].clientY - touchStartY);
+                imgEl.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+            }
+        }, {passive: false});
+
+        wrap.addEventListener('touchend', e => {
+            if (isZooming && e.touches.length < 2) {
+                isZooming = false;
+                if (currentScale <= 1.05) resetZoom();
+            } else if (!isZooming && e.changedTouches.length === 1 && currentScale === 1) {
+                let touchEndX = e.changedTouches[0].clientX;
+                let diffX = touchStartX - touchEndX;
+                if (Math.abs(diffX) > 50) {
+                    if (diffX > 0) navLightbox(1);
+                    else navLightbox(-1);
+                }
+            }
+        }, {passive: true});
+
+        let lastTap = 0;
+        wrap.addEventListener('click', e => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0 && e.target.tagName === 'IMG') {
+                if (currentScale > 1) resetZoom();
+                else {
+                    currentScale = 2.5;
+                    imgEl.style.transform = `scale(2.5)`;
+                    imgEl.style.transition = 'transform 0.2s ease-out';
+                }
+            }
+            lastTap = currentTime;
         });
+    }
+
+    currentScale = 1; translateX = 0; translateY = 0;
+    const imgEl = document.getElementById('fb-lb-img');
+    if (imgEl) {
+        imgEl.style.transform = `scale(1) translate(0px, 0px)`;
+        imgEl.style.transition = 'opacity 0.2s';
     }
 
     updateLightboxImage();
@@ -158,27 +227,15 @@ window.navLightbox = (dir) => {
 function updateLightboxImage() {
     const imgEl = document.getElementById('fb-lb-img');
     const counter = document.getElementById('fb-lb-counter');
-    const prevBtn = document.getElementById('fb-lb-prev');
-    const nextBtn = document.getElementById('fb-lb-next');
 
     imgEl.style.opacity = 0;
     setTimeout(() => {
         imgEl.src = currentLbImages[currentLbIndex];
         imgEl.style.opacity = 1;
+        imgEl.style.transform = `scale(1) translate(0px, 0px)`;
     }, 50);
     
-    imgEl.style.transition = 'opacity 0.2s';
     counter.textContent = `${currentLbIndex + 1} / ${currentLbImages.length}`;
-    
-    if (currentLbImages.length <= 1) {
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-        counter.style.display = 'none';
-    } else {
-        prevBtn.style.display = 'flex';
-        nextBtn.style.display = 'flex';
-        counter.style.display = 'block';
-    }
 }
 // ==========================================
 
@@ -402,7 +459,7 @@ function renderFeed() {
     const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     const phJson = JSON.stringify(photos).replace(/"/g, '&quot;');
 
-    // شبكة الصور في السوق
+    // تصميم شبكة الصور في السوق (متناسق بدون تشوه)
     let gridHtml = '';
     if (photos.length === 0) {
         gridHtml = `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`;
@@ -421,7 +478,7 @@ function renderFeed() {
     }
 
     return `<div class="post-card" onclick="openPost('${p.id}')" style="display:flex; flex-direction:column; position:relative;">
-      <div class="post-img-wrap" style="aspect-ratio:16/12; background:var(--surface-2);">
+      <div class="post-img-wrap" style="background:var(--surface-2);">
         ${gridHtml}
         <div class="post-price-badge" style="font-size:14px; padding:4px 10px;">${p.price} ج</div>
         ${p.featured ? '<div class="post-featured-badge"><i class="fa-solid fa-star"></i> مميز</div>' : ''}
@@ -468,6 +525,7 @@ window.openPost = async id => {
     const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     const phJson = JSON.stringify(ph).replace(/"/g, '&quot;');
 
+    // السلايدر الأفقي (السحب يمين ويسار)
     const sliderHtml = ph.length > 0 ? `
         <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:14px;">
             <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
