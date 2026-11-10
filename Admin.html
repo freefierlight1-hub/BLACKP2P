@@ -223,14 +223,9 @@ const log=async(action, detail, oldVal=null, newVal=null)=>{
   await push(R('audit_logs'), entry);
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ✅ تأمين العمليات الحساسة عبر إعادة التحقق من Google بدلاً من PIN
-// ═══════════════════════════════════════════════════════════════════════════
+// ✅ تأمين العمليات الحساسة عبر إعادة التحقق من Google
 const confirmPIN = async (actionName) => {
     try {
-        // التأكد من وجود مستخدم مسجل قبل طلب التأكيد
-        if (!auth.currentUser) throw new Error('انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.');
-
         const r = await Swal.fire({
             title: 'تأكيد أمني مطلوب',
             html: `<div style="text-align:right;direction:rtl;">
@@ -244,18 +239,14 @@ const confirmPIN = async (actionName) => {
             cancelButtonText: 'إلغاء'
         });
         if (!r.isConfirmed) throw new Error('CANCEL');
-        
         const provider = new GoogleAuthProvider();
-        // التعديل هنا: تمرير auth.currentUser بدلاً من auth
-        const result = await signInWithPopup(auth, provider);
-        if (result.user.uid !== auth.currentUser.uid) throw new Error('يجب التأكيد بنفس حساب المشرف.');
-        
+        await reauthenticateWithPopup(auth.currentUser, provider);
         await log('تأكيد أمني', `تم تأكيد العملية: ${actionName}`);
         return true;
     } catch (e) {
         if (e.message === 'CANCEL') throw e;
         if (e.code === 'auth/popup-closed-by-user') throw new Error('تم إغلاق نافذة التأكيد.');
-        if (e.code === 'auth/user-mismatch') throw new Error('يجب التأكيد بنفس حساب المشرف المسجل حالياً.');
+        if (e.code === 'auth/user-mismatch') throw new Error('يجب التأكيد بنفس حساب المشرف المسجل.');
         if (e.code === 'auth/popup-blocked') throw new Error('المتصفح يمنع النوافذ المنبثقة. اسمح بها وأعد المحاولة.');
         throw new Error('فشل التحقق من الهوية: ' + (e.message || e.code));
     }
@@ -408,6 +399,54 @@ window.openDatabaseManager = async () => {
     renderUI(); document.body.appendChild(overlay);
 };
 
+// ✅ ميزة إنشاء كوبونات جديدة
+window.createPromoCode = async () => {
+    const { value: formValues } = await Swal.fire({
+        title: 'إنشاء كوبون جديد',
+        html: `
+            <p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">اترك حقل UID فارغاً لإنشاء كوبون عام يمكن لأي شخص استخدامه.</p>
+            <input id="swal-uid" class="swal2-input" placeholder="UID المستخدم (اختياري)" dir="ltr" style="text-align:left">
+            <input id="swal-amount" class="swal2-input" placeholder="قيمة الكوبون (ج)" type="number">
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'إنشاء الكوبون',
+        cancelButtonText: 'إلغاء',
+        preConfirm: () => {
+            const uid = document.getElementById('swal-uid').value.trim();
+            const amount = document.getElementById('swal-amount').value.trim();
+            if (!amount || amount < 1) {
+                Swal.showValidationMessage('أدخل مبلغاً صالحاً');
+                return false;
+            }
+            return { uid, amount: Number(amount) };
+        }
+    });
+    if (!formValues) return;
+
+    const code = 'BLCK-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    try {
+        Swal.fire({title: 'جاري الإنشاء...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+        await set(R('promo_codes/' + code), { 
+            amount: formValues.amount, 
+            status: 'active', 
+            createdAt: Date.now(), 
+            targetUser: formValues.uid || null 
+        });
+        Swal.close();
+        
+        Swal.fire({ 
+            title: 'تم إنشاء الكوبون بنجاح!', 
+            html: `<p style="font-size:13px;margin-bottom:10px;">أعط هذا الكود للمستخدم ليقوم بإدخاله في المحفظة:</p>
+                   <b style="font-size:24px; color:var(--success-tx); letter-spacing:2px; background:var(--surface-2); padding:5px 15px; border-radius:8px; display:inline-block;">${code}</b>
+                   <p style="font-size:12px;margin-top:10px;">القيمة: ${formValues.amount} ج</p>`, 
+            confirmButtonText: 'نسخ الكود' 
+        }).then(r => { if(r.isConfirmed) navigator.clipboard.writeText(code); });
+        
+        show('cpn');
+    } catch(e) { Swal.close(); bad(e); }
+};
+
 const V = {
 async dash(){
   const roleTitle = me?.role === 'owner' ? 'المالك 👑' : me?.role === 'accountant' ? 'المحاسب 💼' : me?.role === 'support' ? 'الدعم الفني 🎧' : 'المدير 🛡️';
@@ -469,7 +508,16 @@ async ver(){ const s=st('pending'); const all=(await fetchList('user_verificatio
 async pay(){ const p=(await fetchList('pending_payouts')).filter(x=>x.status==='pending'); return p.map(x=>card(`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><b style="color:var(--text);display:block;margin-bottom:3px;font-size:12.5px">أرباح صفقة <span style="font-size:10px;color:var(--text-4)">#${E(x.id).slice(0,6)}</span></b><span style="color:var(--success-tx);font-weight:900;font-size:15px">${x.amount} ج</span></div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('البائع',()=>userInfo(x.sellerId))}${btn('صرف',async()=>{await confirmPIN('صرف '+x.amount);await claim('pending_payouts/'+x.id,'pending','processed');await credit(x.sellerId,x.amount);await notify(x.sellerId,'تم الصرف',`+${x.amount} ج`)},'btn-success','صرف أرباح')}</div></div><div style="font-size:10px;color:var(--text-3);margin-top:6px">عمولة: ${x.commission} من ${x.grossAmount}</div>`)).join('')||empty; },
 async ref(){ const all = await fetchList('refund_queue'); const pending = all.filter(x=>x.status==='pending'); if(pending.length === 0) return empty; const html = await Promise.all(pending.map(async f => { const deal = (await get(R('deals/'+f.id))).val() || {}; return card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">نزاع <span style="font-size:10px;color:var(--text-4)" dir="ltr">#${E(f.id).slice(0,8)}</span></b><span style="color:var(--danger-tx);font-weight:900;font-size:13px">${f.amount} ج</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;font-size:11px"><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">المشتري</span>${ulink(f.buyerId,await uname(f.buyerId))}</div><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">البائع</span>${ulink(f.sellerId,await uname(f.sellerId))}</div></div><div style="background:var(--danger-bg);border:1px solid var(--danger-bd);color:var(--danger-tx);font-size:11px;padding:8px;border-radius:8px;margin-bottom:8px"><b>مقدم النزاع:</b> ${f.raisedByRole || '—'}<br><b>السبب:</b> ${E(f.reason)}</div><div style="display:flex;gap:5px;flex-wrap:wrap">${btn('استرداد',async()=>{await confirmPIN('استرداد '+f.amount);await claim('refund_queue/'+f.id,'pending','approved');await credit(f.buyerId,f.amount);const updates={};updates['deals/'+f.id+'/status']='refunded';if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='refunded'}await update(ref(db),updates);await notify(f.buyerId,'تم الاسترداد',`+${f.amount} ج`);await notify(f.sellerId,'استرداد صفقة','');if(deal.chatId)await set(push(R(`chats/${deal.chatId}/messages`)),{senderId:me.uid,type:'admin',text:'تم استرداد المبلغ',createdAt:Date.now()});await log('استرداد '+f.id,'')},'btn-success','استرداد')}${btn('رفض النزاع',async()=>{await confirmPIN('رفض');await claim('refund_queue/'+f.id,'pending','rejected');const com=Math.round(deal.amount*(Number(S.commission)||0)/100);const updates={};updates['deals/'+f.id+'/status']='completed';updates['pending_payouts/'+f.id]={sellerId:f.sellerId,buyerId:f.buyerId,amount:deal.amount-com,grossAmount:deal.amount,commission:com,status:'pending',createdAt:Date.now()};if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='completed'}await update(ref(db),updates);await notify(f.sellerId,'رفض النزاع','تم تحويل أرباحك');await notify(f.buyerId,'رفض النزاع','');await log('رفض نزاع '+f.id,'')},'btn-danger','رفض نزاع')}${op('بيانات',()=>viewPrivateInfo(deal.postId))}</div>`); })); return html.join(''); },
 async deals(){ const s=st('all'); let all=(await fetchList('deals')).filter(d=>s==='all'||d.status===s); await Promise.all(all.flatMap(d=>[uname(d.buyerId),uname(d.sellerId)])); all=all.filter(d=>hit({...d,b:NM[d.buyerId],s:NM[d.sellerId]},['id','b','s'])); all = filterByDate(all); const limit = pageState[view] ? pageState[view]*30 : 30; const a = all.slice(0, limit); return bar([['all','الكل'],['held','محجوزة'],['delivered','مسلمة'],['completed','مكتملة'],['disputed','نزاع']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:14px;color:var(--success-tx)">${d.amount} ج</b>${statusBadge(d.status)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;margin-bottom:6px"><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">المشتري</span>${ulink(d.buyerId,NM[d.buyerId])}</div><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">البائع</span>${ulink(d.sellerId,NM[d.sellerId])}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('دردشة',()=>adminChat(d.chatId))}${op('الإعلان',()=>postInfo(d.postId))}${(d.status === 'held' || d.status === 'delivered') ? op('إلغاء وإرجاع', async () => { if (!await ask('هل تريد إلغاء هذه الصفقة وإرجاع المبلغ كاملاً للمشتري؟')) return; await confirmPIN('إلغاء الصفقة'); await credit(d.buyerId, d.amount); await update(R('deals/' + d.id), { status: 'cancelled' }); if(d.chatId) { await update(R('chats/' + d.chatId), { dealStatus: 'cancelled', frozen: false }); await set(push(R(`chats/${d.chatId}/messages`)), {senderId: me.uid, type: 'admin', text: 'تم إلغاء الصفقة وإرجاع المبلغ للمشتري.', createdAt: Date.now()}); } await notify(d.buyerId, 'إلغاء الصفقة', 'تم إلغاء الصفقة وإرجاع المبلغ لرصيدك.'); await log('إلغاء صفقة', `تم إلغاء الصفقة #${d.id}`); ok('تم الإلغاء بنجاح'); }, 'btn-danger') : ''}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); },
-async cpn(){ const o=(await get(R('credit_queue'))).val()||{},a=[];Object.entries(o).forEach(([u,c])=>Object.entries(c).forEach(([k,x])=>x.status==='pending'&&a.push({u,k,...x}))); return (await Promise.all(a.map(async c=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:12.5px;color:var(--text)">${await uname(c.u)}</b><code dir="ltr" style="background:var(--neutral-bg);padding:3px 8px;border-radius:6px;color:var(--text);font-weight:900;font-size:11px">${E(c.k)}</code></div><div style="display:flex;gap:5px">${op('المستخدم',()=>userInfo(c.u))}${btn('قبول',async()=>{const {value:v}=await Swal.fire({title:'القيمة',input:'number',showCancelButton:true});const n=Math.round(+v);if(!n||n<1)throw new Error('قيمة غير صالحة');await confirmPIN('قبول كوبون '+n);const p=`credit_queue/${c.u}/${c.k}`;await claim(p,'pending','approved');await update(R(p),{amount:n});await credit(c.u,n);await notify(c.u,'كوبون',`+${n} ج`)},'btn-success','قبول كوبون')}${btn('رفض',()=>claim(`credit_queue/${c.u}/${c.k}`,'pending','rejected'),'btn-danger','رفض كوبون')}</div>`)))).join('')||empty; },
+async cpn(){ 
+    const createBtn = `<button class="btn btn-primary" style="margin-bottom:14px; width:100%" onclick="window.createPromoCode()"><i class="fa-solid fa-plus"></i> إنشاء كوبون / شحن يدوي</button>`;
+    
+    const o=(await get(R('credit_queue'))).val()||{},a=[];
+    Object.entries(o).forEach(([u,c])=>Object.entries(c).forEach(([k,x])=>x.status==='pending'&&a.push({u,k,...x}))); 
+    
+    const listHtml = (await Promise.all(a.map(async c=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:12.5px;color:var(--text)">${await uname(c.u)}</b><code dir="ltr" style="background:var(--neutral-bg);padding:3px 8px;border-radius:6px;color:var(--text);font-weight:900;font-size:11px">${E(c.k)}</code></div><div style="display:flex;gap:5px">${op('المستخدم',()=>userInfo(c.u))}${btn('قبول وتحديد القيمة',async()=>{const {value:v}=await Swal.fire({title:'القيمة',input:'number',showCancelButton:true});const n=Math.round(+v);if(!n||n<1)throw new Error('قيمة غير صالحة');await confirmPIN('قبول كوبون '+n);const p=`credit_queue/${c.u}/${c.k}`;await claim(p,'pending','approved');await update(R(p),{amount:n});await credit(c.u,n);await notify(c.u,'كوبون',`+${n} ج`)},'btn-success')}${btn('رفض',()=>claim(`credit_queue/${c.u}/${c.k}`,'pending','rejected'),'btn-danger')}</div>`)))).join('');
+    
+    return createBtn + (listHtml || empty); 
+},
 async users(){ 
     const s=st('all'); let all=(await fetchList('users')).sort((x,y)=>(y.lastSeen||0)-(x.lastSeen||0)); 
     all.forEach(u => { if(u.suspended && u.banUntil && Date.now() > u.banUntil) { update(R('users/'+u.id), {suspended: false, banReason: null, banUntil: null}); u.suspended = false; } }); 
@@ -563,7 +611,6 @@ function adminChat(cid){
   clearLive();H={};hc=0;let c={}, currentUserData = null;
   window._chatCtx = { cid: cid, uid: null, postId: null };
   const compressImageToBlob = (file) => new Promise((resolve) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (event) => { const img = new Image(); img.src = event.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let { width, height } = img; const MAX = 800; if (width > height && width > MAX) { height *= MAX / width; width = MAX; } else if (height > MAX) { width *= MAX / height; height = MAX; } canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height); canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.6); }; }; });
-  // ✅ تم التحديث: الصور تُرفع عبر الـ Worker الآمن بدلاً من ImgBB المباشر
   const uploadAdminImage = async (file) => { 
       const blob = await compressImageToBlob(file); 
       const formData = new FormData(); 
