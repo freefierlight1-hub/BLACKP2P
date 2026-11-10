@@ -339,26 +339,26 @@ function renderFeed() {
     if (photos.length === 0) {
         gridHtml = `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`;
     } else if (photos.length === 1) {
-        gridHtml = `<img src="${photos[0]}" class="post-card-image" loading="lazy" alt="">`;
+        gridHtml = `<div class="post-media-grid single"><div class="post-media-item"><img src="${photos[0]}" loading="lazy" alt=""></div></div>`;
     } else {
         const count = Math.min(photos.length, 4);
-        gridHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2px; width:100%; height:100%;">
+        gridHtml = `<div class="post-media-grid multi">
             ${photos.slice(0, count).map((img, i) => `
-                <div style="position:relative; width:100%; height:100%; overflow:hidden;">
-                    <img src="${img}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
-                    ${i === 3 && photos.length > 4 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:900;">+${photos.length - 4}</div>` : ''}
+                <div class="post-media-item">
+                    <img src="${img}" loading="lazy">
+                    ${i === 3 && photos.length > 4 ? `<div class="post-media-more">+${photos.length - 4}</div>` : ''}
                 </div>
             `).join('')}
         </div>`;
     }
 
-    return `<div class="post-card" onclick="openPost('${p.id}')" style="display:flex; flex-direction:column; position:relative;">
-      <div class="post-img-wrap" style="aspect-ratio:16/12; background:var(--surface-2);">
+    return `<div class="post-card" onclick="openPost('${p.id}')">
+      <div class="post-img-wrap">
         ${gridHtml}
-        <div class="post-price-badge" style="font-size:14px; padding:4px 10px;">${p.price} ج</div>
+        <div class="post-price-badge">${p.price} ج</div>
         ${p.featured ? '<div class="post-featured-badge"><i class="fa-solid fa-star"></i> مميز</div>' : ''}
       </div>
-      <div class="post-body" style="padding:12px;">
+      <div class="post-body">
         <div>
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px;">
               <div style="font-size:14px;font-weight:900;color:var(--text);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.game)}</div>
@@ -370,10 +370,10 @@ function renderFeed() {
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border)">
           <div style="display:flex;align-items:center;gap:6px;min-width:0">
-            <div class="avatar-initial" style="width:24px; height:24px; font-size:10px;">${E(initials(p.sellerName))}</div>
+            <div class="avatar-initial">${E(initials(p.sellerName))}</div>
             <span style="font-size:11px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span>
           </div>
-          <span class="trust-meter ${trc}" style="font-size:9px; padding:2px 6px;"><i class="fa-solid fa-shield-halved"></i> ${tr}%</span>
+          <span class="trust-meter ${trc}"><i class="fa-solid fa-shield-halved"></i> ${tr}%</span>
         </div>
       </div>
     </div>`;
@@ -381,24 +381,16 @@ function renderFeed() {
   loadT([...new Set(a.map(p => p.sellerId))]);
 }
 
-// --- تعديل دالة المشاركة لحل مشكلة التكرار ---
 window.sharePost = (game, price, id) => {
     const url = window.location.origin + window.location.pathname + '?post=' + id;
     const text = `تصفح هذا الحساب على منصة BLACKP2P الآمنة:\n🎮 ${game}\n💰 السعر: ${price} ج`;
     if (navigator.share) {
-        // إذا كان المتصفح يدعم المشاركة، نرسل النص والرابط منفصلين حتى لا يتكرر
-        navigator.share({ 
-            title: 'BLACKP2P - ' + game, 
-            text: text, 
-            url: url 
-        }).catch(()=>{});
+        navigator.share({ title: 'BLACKP2P - ' + game, text: text, url: url }).catch(()=>{});
     } else {
-        // إذا لم يدعم المتصفح المشاركة، ننسخ النص والرابط معاً
         navigator.clipboard.writeText(text + '\n🔗 الرابط: ' + url);
         ok('تم نسخ رابط الإعلان للمشاركة');
     }
 };
-// -------------------------------------------
 
 window.toggleFav = async postId => {
     if (!me) return signIn();
@@ -419,7 +411,6 @@ window.toggleFav = async postId => {
     } catch(e) { bad(e); }
 };
 
-// --- تعديل دالة فتح المنشور لضمان عملها مع الروابط المباشرة ---
 window.openPost = async id => {
   try {
     clearU(); view = 'post'; 
@@ -490,7 +481,7 @@ window.openPost = async id => {
       </div>
       
       <div style="background:var(--success-bg); border:1px solid var(--success-bd); border-radius:10px; padding:10px; display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <i class="fa-solid fa-shield-check" style="color:var(--success-tx); font-size:18px;"></i>
+          <i class="fa-solid fa-shield-halved" style="color:var(--success-tx); font-size:18px;"></i>
           <div>
               <b style="font-size:12px; color:var(--success-tx); display:block;">ضمان BLACKP2P</b>
               <span style="font-size:10px; color:var(--success-tx); font-weight:700;">أموالك محجوزة بأمان حتى تستلم الحساب وتغيّر بياناته.</span>
@@ -546,7 +537,6 @@ window.openPost = async id => {
 
   } catch(e) { bad(e); }
 };
-// -----------------------------------------------------------
 
 const paintLike = (l, n) => { if($('lk')) $('lk').innerHTML = `<i class="fa-${l ? 'solid text-red' : 'regular'} fa-heart" style="${l ? 'color:#dc2626' : ''}"></i> ${n}`; };
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
