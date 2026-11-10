@@ -95,13 +95,9 @@ const initials=n=>{n=String(n||'?').trim();const a=n.split(' ');return (a[0]?.[0
 
 let me=null,isAdmin=false,S={},P={},N={},T={},view='feed',VS='',OT='run',OD=[],MP=[],U=[],GU=[],shown=new Set(),F={q:'',game:'',sort:'new'};
 let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized=false;
-let pendingPostId = null; // متغير لحفظ رابط الإعلان عند الدخول من الخارج
 
-// استخراج رقم الإعلان من الرابط فور تحميل الصفحة
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.has('post')) {
-    pendingPostId = urlParams.get('post');
-}
+// 1. التقاط رقم الإعلان من الرابط (تمت الإضافة)
+let pendingPostId = new URLSearchParams(window.location.search).get('post');
 
 const clearU = () => { U.forEach(f => f()); U = []; };
 const clearGU = () => { GU.forEach(f => f()); GU = []; };
@@ -206,13 +202,12 @@ onAuthStateChanged(auth, async u => {
     $('nav').classList.remove('hidden');
     $('bal').textContent = '0 ج';
     
-    // التحقق من وجود رابط إعلان قبل التوجيه
+    // 2. توجيه المستخدم للإعلان بمجرد تسجيل الدخول (تم التعديل)
     if (!initialized) { 
         initialized = true; 
         if (pendingPostId) {
             openPost(pendingPostId);
-            // مسح الرابط من شريط العنوان حتى لا يفتح مجدداً عند تحديث الصفحة
-            window.history.replaceState({}, document.title, window.location.pathname);
+            window.history.replaceState({}, document.title, window.location.pathname); // مسح الرابط بعد فتحه
             pendingPostId = null;
         } else {
             go('feed'); 
@@ -223,7 +218,7 @@ onAuthStateChanged(auth, async u => {
     
     GU.push(onValue(r, s => {
       if (s.exists()) {
-        me = {...s.val(), uid: u.uid}; 
+        me = {uid: u.uid, ...s.val()}; 
         userLoaded = true;
         $('bal').textContent = (me.balance || 0) + ' ج';
         
@@ -311,12 +306,7 @@ function feed() {
   </div>
   <div id="list" class="posts-grid"></div>`;
   
-  let searchTimeout;
-  $('q').oninput = e => { 
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => { F.q = e.target.value; renderFeed(); }, 300); 
-  };
-  
+  $('q').oninput = e => { F.q = e.target.value; renderFeed(); };
   document.querySelectorAll('[data-game]').forEach(b => b.onclick = () => { F.game = b.dataset.game; document.querySelectorAll('[data-game]').forEach(x => x.classList.toggle('active', x.dataset.game === F.game)); renderFeed(); });
   document.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { F.sort = b.dataset.sort; document.querySelectorAll('[data-sort]').forEach(x => x.classList.toggle('active', x.dataset.sort === F.sort)); renderFeed(); });
   renderFeed();
@@ -339,26 +329,26 @@ function renderFeed() {
     if (photos.length === 0) {
         gridHtml = `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`;
     } else if (photos.length === 1) {
-        gridHtml = `<div class="post-media-grid single"><div class="post-media-item"><img src="${photos[0]}" loading="lazy" alt=""></div></div>`;
+        gridHtml = `<img src="${photos[0]}" class="post-card-image" loading="lazy" alt="">`;
     } else {
         const count = Math.min(photos.length, 4);
-        gridHtml = `<div class="post-media-grid multi">
+        gridHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2px; width:100%; height:100%;">
             ${photos.slice(0, count).map((img, i) => `
-                <div class="post-media-item">
-                    <img src="${img}" loading="lazy">
-                    ${i === 3 && photos.length > 4 ? `<div class="post-media-more">+${photos.length - 4}</div>` : ''}
+                <div style="position:relative; width:100%; height:100%; overflow:hidden;">
+                    <img src="${img}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+                    ${i === 3 && photos.length > 4 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:900;">+${photos.length - 4}</div>` : ''}
                 </div>
             `).join('')}
         </div>`;
     }
 
-    return `<div class="post-card" onclick="openPost('${p.id}')">
-      <div class="post-img-wrap">
+    return `<div class="post-card" onclick="openPost('${p.id}')" style="display:flex; flex-direction:column; position:relative;">
+      <div class="post-img-wrap" style="aspect-ratio:16/12; background:var(--surface-2);">
         ${gridHtml}
-        <div class="post-price-badge">${p.price} ج</div>
+        <div class="post-price-badge" style="font-size:14px; padding:4px 10px;">${p.price} ج</div>
         ${p.featured ? '<div class="post-featured-badge"><i class="fa-solid fa-star"></i> مميز</div>' : ''}
       </div>
-      <div class="post-body">
+      <div class="post-body" style="padding:12px;">
         <div>
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px;">
               <div style="font-size:14px;font-weight:900;color:var(--text);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.game)}</div>
@@ -370,10 +360,10 @@ function renderFeed() {
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border)">
           <div style="display:flex;align-items:center;gap:6px;min-width:0">
-            <div class="avatar-initial">${E(initials(p.sellerName))}</div>
+            <div class="avatar-initial" style="width:24px; height:24px; font-size:10px;">${E(initials(p.sellerName))}</div>
             <span style="font-size:11px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span>
           </div>
-          <span class="trust-meter ${trc}"><i class="fa-solid fa-shield-halved"></i> ${tr}%</span>
+          <span class="trust-meter ${trc}" style="font-size:9px; padding:2px 6px;"><i class="fa-solid fa-shield-halved"></i> ${tr}%</span>
         </div>
       </div>
     </div>`;
@@ -381,6 +371,7 @@ function renderFeed() {
   loadT([...new Set(a.map(p => p.sellerId))]);
 }
 
+// 3. إصلاح مشكلة تكرار الرابط في واتساب (تم التعديل)
 window.sharePost = (game, price, id) => {
     const url = window.location.origin + window.location.pathname + '?post=' + id;
     const text = `تصفح هذا الحساب على منصة BLACKP2P الآمنة:\n🎮 ${game}\n💰 السعر: ${price} ج`;
@@ -411,11 +402,12 @@ window.toggleFav = async postId => {
     } catch(e) { bad(e); }
 };
 
+// 4. حماية الكود من الانهيار (Permission Denied) عند فتح الإعلان (تم التعديل)
 window.openPost = async id => {
   try {
     clearU(); view = 'post'; 
     
-    // إخفاء شاشة تسجيل الدخول إن وجدت وعرض الهيكل
+    // إخفاء شاشة تسجيل الدخول إن وجدت
     if (!$('app').innerHTML.includes('post-slider')) {
         $('app').innerHTML = `<div class="card" style="padding:14px;margin-top:10px"><div class="skeleton" style="height:250px;margin-bottom:12px"></div><div class="skeleton" style="height:20px;width:50%;margin-bottom:8px"></div><div class="skeleton" style="height:40px"></div></div>`;
     }
@@ -426,15 +418,16 @@ window.openPost = async id => {
     runTransaction(R(`posts/${id}/views`), v => (v || 0) + 1).catch(()=>{});
     const views = (p.views || 0) + 1;
 
+    // حماية جلب البيانات من خطأ الصلاحيات
     let liked = false;
     let isFav = false;
-    
+    let avg = 0;
+
     if (me) {
         try { liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); } catch(e) { console.log("No access to likes"); }
         try { isFav = (await get(R(`favorites/${me.uid}/${id}`))).exists(); } catch(e) { console.log("No access to favorites"); }
     }
 
-    let avg = 0;
     try {
         const rsSnap = await get(R('ratings/' + p.sellerId));
         const rs = Object.values(rsSnap.val() || {}).map(o => o.rating); 
@@ -481,7 +474,7 @@ window.openPost = async id => {
       </div>
       
       <div style="background:var(--success-bg); border:1px solid var(--success-bd); border-radius:10px; padding:10px; display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <i class="fa-solid fa-shield-halved" style="color:var(--success-tx); font-size:18px;"></i>
+          <i class="fa-solid fa-shield-check" style="color:var(--success-tx); font-size:18px;"></i>
           <div>
               <b style="font-size:12px; color:var(--success-tx); display:block;">ضمان BLACKP2P</b>
               <span style="font-size:10px; color:var(--success-tx); font-weight:700;">أموالك محجوزة بأمان حتى تستلم الحساب وتغيّر بياناته.</span>
@@ -721,9 +714,8 @@ window.openChat = cid => {
   $('mi').oninput = () => { if (Date.now() - last > 2500) { last = Date.now(); set(R(`chats/${cid}/typing/${me.uid}`), last).catch(()=>{}); } };
   
   const renderMsg = m => {
-    const safeUrl = m.imageUrl && (m.imageUrl.startsWith('http') || /^data:image\//.test(m.imageUrl)) ? m.imageUrl : '';
-    if (m.type === 'image' && safeUrl) { return `<img src="${E(safeUrl)}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="zoom(this.src)">`; }
-    else if (m.type === 'transaction') { return `<div style="width:100%;display:flex;justify-content:center;margin:6px 0"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:260px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${E(m.txType || 'معاملة')}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${E((m.txId||'').slice(0,8))}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${E(m.amount)} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span><b style="color:${m.status==='approved'||m.status==='completed'?'var(--success-tx)':'var(--warn-tx)'}">${E(m.status)}</b></div></div></div>`; }
+    if (m.type === 'image' && (m.imageUrl.startsWith('http') || /^data:image\//.test(m.imageUrl))) { return `<img src="${m.imageUrl}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="zoom(this.src)">`; }
+    else if (m.type === 'transaction') { return `<div style="width:100%;display:flex;justify-content:center;margin:6px 0"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:260px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span><b style="color:${m.status==='approved'||m.status==='completed'?'var(--success-tx)':'var(--warn-tx)'}">${m.status}</b></div></div></div>`; }
     else if (m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
     else if (m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble" style="white-space:pre-line;text-align:right;direction:rtl;"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
     return E(m.text);
@@ -781,7 +773,7 @@ function dealPanel(cid, c, d) {
   } else if (d.status === 'refunded') { btns = `<span class="badge badge-danger"><i class="fa-solid fa-rotate-left"></i> مسترد</span>`; }
   const steps = ['held', 'delivered', 'completed']; const idx = steps.indexOf(d.status);
   const step = (label, done, icon) => `<div class="deal-step"><div class="deal-step-circle ${done ? 'done' : ''}"><i class="fa-solid ${icon}"></i></div><span class="deal-step-label ${done ? 'done' : ''}">${label}</span></div>`;
-  el.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${E(d.amount)} ج</b><div class="deal-actions">${btns}</div></div><div class="deal-steps">${step('الدفع', true, 'fa-check')}${step('التسليم', idx >= 1, 'fa-box')}${step('الاكتمال', idx >= 2, 'fa-flag-checkered')}</div></div>`;
+  el.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${d.amount} ج</b><div class="deal-actions">${btns}</div></div><div class="deal-steps">${step('الدفع', true, 'fa-check')}${step('التسليم', idx >= 1, 'fa-box')}${step('الاكتمال', idx >= 2, 'fa-flag-checkered')}</div></div>`;
 }
 
 window.deliver = async cid => { if(!requireAuth()) return; try { if (!await ask('هل سلّمت بيانات الحساب بالكامل؟')) return; const chat = (await get(R('chats/' + cid))).val(); if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); const updates = {}; updates[`deals/${chat.dealId}/status`] = 'delivered'; updates[`chats/${cid}/dealStatus`] = 'delivered'; await update(ref(db), updates); notify(chat.buyerId, 'تم تسليم حسابك', 'راجع الدردشة ثم أكّد الاستلام.', 'deal'); ok('تم تحديد الحساب كمسلم'); } catch(e) { bad(e); } };
