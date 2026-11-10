@@ -463,6 +463,95 @@ window.openPost = async id => {
             <div style="flex:1;min-width:0">
                 <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
                     <b style="font-size:15px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b>
+window.openPost = async id => {
+  try {
+    clearU(); view = 'post'; const p = (await get(R('posts/' + id))).val(); if (!p) return go('feed');
+    
+    // زيادة المشاهدات (تجاهل الخطأ إذا لم يكن لديك صلاحية)
+    runTransaction(R(`posts/${id}/views`), v => (v || 0) + 1).catch(()=>{});
+    const views = (p.views || 0) + 1;
+
+    // جلب الإعجاب بأمان
+    let liked = false;
+    try { liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); } catch(e) { console.log("No access to likes"); }
+
+    // جلب التقييمات بأمان
+    let avg = 0;
+    try {
+        const rsSnap = await get(R('ratings/' + p.sellerId));
+        const rs = Object.values(rsSnap.val() || {}).map(o => o.rating); 
+        avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; 
+    } catch(e) { console.log("No access to ratings"); }
+    T[p.sellerId] = avg;
+
+    // جلب المفضلة بأمان
+    let isFav = false;
+    try { isFav = (await get(R(`favorites/${me.uid}/${id}`))).exists(); } catch(e) { console.log("No access to favorites"); }
+
+    const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
+    
+    // ... (باقي كود واجهة الإعلان يظل كما هو تماماً) ...
+    const sliderHtml = ph.length > 0 ? `
+        <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:10px;">
+            <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
+                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:auto;max-height:60vh;min-height:250px;background:#000;cursor:pointer;" onclick="zoom('${img}')">`).join('')}
+            </div>
+            ${ph.length > 1 ? `<button class="btn btn-ghost" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; border:none; font-size:11px; padding:5px 12px; border-radius:20px;" onclick="previewAllImages()"><i class="fa-solid fa-images"></i> معاينة الكل (${ph.length})</button>` : ''}
+        </div>
+    ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
+
+    $('app').innerHTML = `
+    <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
+    
+    <div class="card" style="padding:14px;overflow:hidden;padding-bottom:80px;"> 
+      ${sliderHtml}
+
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-top:14px;margin-bottom:10px">
+        <div style="flex:1;min-width:0">
+          <h1 style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:6px">${E(p.game)}</h1>
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+              <span class="badge badge-neutral">${E(p.server)}</span>
+              <span class="badge badge-info">${E(p.linkType)}</span>
+              <span style="font-size:10px; color:var(--text-4); font-weight:700; margin-right:auto;"><i class="fa-solid fa-eye"></i> ${views} مشاهدة</span>
+          </div>
+        </div>
+        <div style="text-align:left;flex-shrink:0">
+          <b style="font-size:26px;font-weight:900;color:var(--success-tx);display:block;letter-spacing:-0.5px;">${p.price} <span style="font-size:14px;font-weight:700">ج</span></b>
+          <div style="display:flex; gap:5px; margin-top:6px; justify-content:flex-end;">
+              <button class="icon-btn" style="width:32px; height:32px; border-radius:8px;" onclick="toggleFav('${id}')" id="favBtn"><i class="${isFav ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart'}"></i></button>
+              <button class="icon-btn" style="width:32px; height:32px; border-radius:8px;" onclick="sharePost('${E(p.game)}', ${p.price}, '${id}')"><i class="fa-solid fa-share-nodes"></i></button>
+          </div>
+        </div>
+      </div>
+      
+      <div style="background:var(--success-bg); border:1px solid var(--success-bd); border-radius:10px; padding:10px; display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <i class="fa-solid fa-shield-check" style="color:var(--success-tx); font-size:18px;"></i>
+          <div>
+              <b style="font-size:12px; color:var(--success-tx); display:block;">ضمان BLACKP2P</b>
+              <span style="font-size:10px; color:var(--success-tx); font-weight:700;">أموالك محجوزة بأمان حتى تستلم الحساب وتغيّر بياناته.</span>
+          </div>
+      </div>
+
+      <div style="padding-top:12px;border-top:1px solid var(--border);margin-bottom:14px">
+        <b style="font-size:14px;font-weight:900;color:var(--text);display:block;margin-bottom:8px"><i class="fa-solid fa-align-right"></i> وصف الحساب</b>
+        <p style="font-size:13px;color:var(--text-2);font-weight:600;line-height:1.8;white-space:pre-line; background:var(--surface-2); padding:10px; border-radius:10px;">${E(p.desc)}</p>
+      </div>
+
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <b style="font-size:13px;font-weight:900;color:var(--text)">البائع</b>
+            <div style="display:flex; gap:5px;">
+                ${avg >= 4.5 ? `<span class="badge badge-success" style="font-size:9px;"><i class="fa-solid fa-crown"></i> بائع ممتاز</span>` : ''}
+                <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;min-height:28px;border-color:var(--warn-bd);color:var(--warn-tx);background:var(--warn-bg)" onclick="rate('${p.sellerId}')">
+                    <i class="fa-solid fa-star"></i> تقييم
+                </button>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div class="avatar-initial" style="width:46px;height:46px;font-size:18px">${E(initials(p.sellerName))}</div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
+                    <b style="font-size:15px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b>
                     ${p.sellerVerified ? '<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:13px"></i>' : ''}
                 </div>
                 <span style="font-size:11px;color:var(--text-3);font-weight:700">عضو منذ ${new Date(p.sellerSince||Date.now()).toLocaleDateString('ar-EG')}</span>
