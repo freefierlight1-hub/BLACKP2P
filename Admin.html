@@ -247,7 +247,8 @@ const confirmPIN = async (actionName) => {
         
         const provider = new GoogleAuthProvider();
         // التعديل هنا: تمرير auth.currentUser بدلاً من auth
-        await reauthenticateWithPopup(auth.currentUser, provider);
+        const result = await signInWithPopup(auth, provider);
+        if (result.user.uid !== auth.currentUser.uid) throw new Error('يجب التأكيد بنفس حساب المشرف.');
         
         await log('تأكيد أمني', `تم تأكيد العملية: ${actionName}`);
         return true;
