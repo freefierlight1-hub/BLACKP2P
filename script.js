@@ -1169,47 +1169,105 @@ window.copyRef = () => {
 };
 
 // نافذة مزايا الباقة المميزة
+// نافذة مزايا الباقة المميزة (محدثة بالكامل)
 window.upgradePro = async () => {
     const price = Number(S.proPrice) || 50;
     const days = Number(S.proDays) || 30;
-    
-    if (me.balance < price) return bad(new Error('رصيدك غير كافٍ لترقية الحساب.'));
+    const isRich = me.balance >= price;
 
-    const html = `
-    <div style="text-align:right; font-family:'Cairo'; font-size:13px;">
-        <p style="margin-bottom:15px; color:var(--text-3);">احصل على مزايا حصرية ترفع مبيعاتك وتزيد من أرباحك:</p>
-        <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:10px;">
-            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-crown" style="color:#eab308;"></i> <b>شارة VIP ذهبية</b> بجانب اسمك في السوق.</li>
-            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-arrow-up-wide-short" style="color:#eab308;"></i> <b>أولوية قصوى</b> لظهور إعلاناتك في أعلى السوق.</li>
-            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-fire" style="color:#eab308;"></i> <b>إطار ذهبي متوهج</b> يجعل إعلاناتك تبرز فوراً.</li>
-            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-arrow-up" style="color:#eab308;"></i> <b>رفع الإعلان (Bump)</b> كل 6 ساعات لتتصدر السوق.</li>
-            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-chart-simple" style="color:#eab308;"></i> <b>إحصائيات متقدمة</b> (مشاهدات ومفضلة).</li>
-            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-reply" style="color:#eab308;"></i> <b>رد تلقائي</b> على رسائل المشترين.</li>
+    // تصميم المعاينة البصرية للمزايا
+    const previewHtml = `
+    <div style="text-align:right; font-family:'Cairo', sans-serif;">
+        <!-- العنوان -->
+        <div style="text-align:center; margin-bottom:15px;">
+            <div style="font-size:45px; color:#eab308; text-shadow:0 0 25px rgba(234,179,8,0.4); margin-bottom:5px;"><i class="fa-solid fa-crown"></i></div>
+            <h2 style="font-size:18px; font-weight:900; color:var(--text); margin:0;">الباقة المميزة (برو VIP)</h2>
+        </div>
+
+        <p style="font-size:11px; color:var(--text-3); text-align:center; margin-bottom:15px;">إليك كيف سيرى المشترون حسابك وإعلاناتك بعد الترقية:</p>
+        
+        <!-- المعاينة البصرية -->
+        <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:20px; position:relative; overflow:hidden;">
+            <!-- خلفية ذهبية خفيفة -->
+            <div style="position:absolute; top:0; left:0; right:0; height:40px; background:linear-gradient(90deg, rgba(234,179,8,0.15), transparent);"></div>
+            
+            <!-- بطاقة البائع -->
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; position:relative; z-index:2;">
+                <div style="width:36px; height:36px; border-radius:10px; background:#18181b; color:#fff; font-size:14px; font-weight:900; display:flex; align-items:center; justify-content:center; border:2px solid #eab308;">L</div>
+                <div>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <b style="font-size:13px; color:var(--text);">اسمك هنا</b>
+                        <span style="background:linear-gradient(135deg, #f59e0b, #ca8a04); color:#fff; padding:1px 6px; border-radius:4px; font-size:8px; font-weight:900;"><i class="fa-solid fa-crown"></i> VIP</span>
+                    </div>
+                    <span style="font-size:9px; color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> حساب موثق</span>
+                </div>
+            </div>
+
+            <!-- بطاقة الإعلان -->
+            <div style="border:2px solid #eab308; border-radius:8px; padding:10px; box-shadow:0 0 15px rgba(234,179,8,0.15); background:var(--surface); position:relative;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="font-size:12px; color:var(--text);">إعلانك المميز</b>
+                    <span style="background:#eab308; color:#fff; font-size:8px; font-weight:900; padding:2px 6px; border-radius:4px;"><i class="fa-solid fa-star"></i> مميز</span>
+                </div>
+                <div style="margin-top:8px; font-size:10px; color:var(--text-3); font-weight:700;">
+                    <i class="fa-solid fa-eye"></i> 1500 مشاهدة &nbsp;|&nbsp; <i class="fa-solid fa-heart" style="color:#dc2626;"></i> 120 إعجاب
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة المميزات -->
+        <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:10px; font-size:12px; font-weight:700; color:var(--text-2);">
+            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-arrow-up-wide-short" style="color:#eab308; width:16px;"></i> ظهور إعلاناتك في <b>أعلى السوق</b> فوراً.</li>
+            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-bolt" style="color:#eab308; width:16px;"></i> نشر الإعلانات <b>بدون مراجعة</b> (فوري).</li>
+            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-arrow-up" style="color:#eab308; width:16px;"></i> رفع الإعلان (Bump) كل 6 ساعات.</li>
+            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-reply" style="color:#eab308; width:16px;"></i> <b>رد تلقائي</b> على المشترين.</li>
+            <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-chart-simple" style="color:#eab308; width:16px;"></i> إحصائيات متقدمة (مشاهدات ومفضلة).</li>
         </ul>
-        <div style="background:var(--surface-2); padding:12px; border-radius:8px; margin-top:20px; border:1px solid var(--border); text-align:center;">
-            <p style="font-size:12px; margin-bottom:5px; color:var(--text-2);">سعر الترقية لمدة ${days} يوم:</p>
-            <b style="font-size:20px; color:var(--success-tx);">${price} ج</b>
+
+        <!-- السعر والرصيد -->
+        <div style="background:var(--surface-2); border-radius:8px; padding:12px; margin-top:20px; border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:12px; color:var(--text-3); font-weight:800;">سعر الترقية (${days} يوم):</span>
+                <b style="font-size:16px; color:var(--success-tx); font-weight:900;">${price} ج</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:700;">
+                <span style="color:var(--text-3);">رصيدك الحالي:</span>
+                <b style="color:${isRich ? 'var(--success-tx)' : 'var(--danger-tx)'};">${me.balance} ج</b>
+            </div>
+            ${!isRich ? `<p style="font-size:10px; color:var(--danger-tx); margin-top:8px; text-align:center;">رصيدك غير كافٍ، يمكنك الشحن الآن للترقية.</p>` : ''}
         </div>
     </div>`;
 
     const r = await Swal.fire({ 
-        title: 'الباقة المميزة (برو)', 
-        html: html, 
+        title: '', 
+        html: previewHtml, 
         showCancelButton: true, 
-        confirmButtonText: 'ترقية الآن', 
-        cancelButtonText: 'إلغاء' 
+        confirmButtonText: isRich ? `تأكيد الشراء (${price} ج)` : 'شحن الرصيد الآن', 
+        cancelButtonText: 'إلغاء',
+        customClass: { popup: 'user-info-modal' } // نستخدم كلاس التنسيق الجميل
     });
     
     if (!r.isConfirmed) return;
+
+    // إذا ضغط على زر الشراء ولكن ليس لديه رصيد
+    if (!isRich) {
+        go('wallet'); // يوجهه للمحفظة
+        setTimeout(() => deposit(), 300); // يفتح له نافذة الشحن مباشرة
+        return;
+    }
     
+    // تنفيذ عملية الترقية
     try {
         Swal.fire({title:'جاري الترقية...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
         const updates = {};
         updates[`users/${me.uid}/balance`] = me.balance - price;
         updates[`users/${me.uid}/isPro`] = true;
         updates[`users/${me.uid}/proUntil`] = Date.now() + (days * 86400000);
+        
         await update(ref(db), updates);
-        Swal.close(); ok('تمت ترقية حسابك بنجاح'); profile();
+        Swal.close(); 
+        ok('تمت ترقية حسابك بنجاح! أنت الآن عضو VIP 👑'); 
+        profile(); // تحديث الصفحة
     } catch(e) { Swal.close(); bad(e); }
 };
 
