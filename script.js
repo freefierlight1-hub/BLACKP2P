@@ -363,27 +363,151 @@ function renderFeed() {
 }
 
 window.toggleFav = async postId => { if (!me) return signIn(); try { const r = R(`favorites/${me.uid}/${postId}`); const snap = await get(r); if (snap.exists()) { await remove(r); ok('أزيلت من المفضلة'); } else { await set(r, true); ok('أضيفت للمفضلة'); } } catch(e) { bad(e); } };
+// ==========================================
+// نظام عرض الصور الاحترافي (Facebook Lightbox)
+// ==========================================
+let currentLbImages = [];
+let currentLbIndex = 0;
+let touchStartX = 0;
 
+window.openLightbox = (images, index = 0) => {
+    if (!images || images.length === 0) return;
+    currentLbImages = images;
+    currentLbIndex = index;
+
+    let lb = document.getElementById('fb-lightbox');
+    if (!lb) {
+        lb = document.createElement('div');
+        lb.id = 'fb-lightbox';
+        lb.className = 'fb-lightbox';
+        lb.innerHTML = `
+            <div class="fb-lb-close fb-lb-btn" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></div>
+            <div class="fb-lb-counter" id="fb-lb-counter"></div>
+            <div class="fb-lb-prev fb-lb-btn" id="fb-lb-prev" onclick="navLightbox(-1)"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="fb-lb-next fb-lb-btn" id="fb-lb-next" onclick="navLightbox(1)"><i class="fa-solid fa-chevron-left"></i></div>
+            <div class="fb-lightbox-img-wrap" id="fb-lb-img-wrap" onclick="if(event.target.tagName !== 'IMG') closeLightbox()">
+                <img id="fb-lb-img" src="" alt="">
+            </div>
+        `;
+        document.body.appendChild(lb);
+
+        // دعم السحب باللمس (Swipe)
+        const wrap = document.getElementById('fb-lb-img-wrap');
+        wrap.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
+        wrap.addEventListener('touchend', e => {
+            let touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) navLightbox(1); // سحب لليسار
+            if (touchEndX - touchStartX > 50) navLightbox(-1); // سحب لليمين
+        }, {passive: true});
+        
+        // دعم لوحة المفاتيح
+        document.addEventListener('keydown', e => {
+            if (!lb.classList.contains('active')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') navLightbox(-1);
+            if (e.key === 'ArrowRight') navLightbox(1);
+        });
+    }
+
+    updateLightboxImage();
+    lb.classList.add('active');
+};
+
+window.closeLightbox = () => {
+    const lb = document.getElementById('fb-lightbox');
+    if (lb) lb.classList.remove('active');
+};
+
+window.navLightbox = (dir) => {
+    currentLbIndex += dir;
+    if (currentLbIndex < 0) currentLbIndex = currentLbImages.length - 1;
+    if (currentLbIndex >= currentLbImages.length) currentLbIndex = 0;
+    updateLightboxImage();
+};
+
+function updateLightboxImage() {
+    const imgEl = document.getElementById('fb-lb-img');
+    const counter = document.getElementById('fb-lb-counter');
+    const prevBtn = document.getElementById('fb-lb-prev');
+    const nextBtn = document.getElementById('fb-lb-next');
+
+    imgEl.style.opacity = 0;
+    setTimeout(() => {
+        imgEl.src = currentLbImages[currentLbIndex];
+        imgEl.style.opacity = 1;
+    }, 50);
+    
+    imgEl.style.transition = 'opacity 0.2s';
+
+    counter.textContent = `${currentLbIndex + 1} / ${currentLbImages.length}`;
+    
+    if (currentLbImages.length <= 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        counter.style.display = 'none';
+    } else {
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+        counter.style.display = 'block';
+    }
+}
 window.openPost = async id => {
   try {
-    clearU(); view = 'post'; const p = (await get(R('posts/' + id))).val(); if (!p) return go('feed');
-    const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; T[p.sellerId] = avg;
-    const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const mainImg = ph.length > 0 ? ph[0] : null; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
+    clearU(); view = 'post'; 
+    const p = (await get(R('posts/' + id))).val(); 
+    if (!p) return go('feed');
     
-    const sliderHtml = ph.length > 0 ? `
-        <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:10px;">
-            <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
-                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:auto;max-height:60vh;min-height:250px;background:#000;cursor:pointer;" onclick="zoom('${img}')">`).join('')}
-            </div>
-            ${ph.length > 1 ? `<button class="btn btn-ghost" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; border:none; font-size:11px; padding:5px 12px; border-radius:20px;" onclick="previewAllImages()"><i class="fa-solid fa-images"></i> معاينة الكل (${ph.length})</button>` : ''}
-        </div>
-    ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
+    // جلب حالة الإعجاب وتقييمات البائع
+    const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); 
+    const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); 
+    const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; 
+    T[p.sellerId] = avg;
+    
+    const ph = Security.img(p.photos); 
+    const mine = p.sellerId === me.uid; 
+    const tr = trust(p); 
+    const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
+    
+    // تحويل مصفوفة الصور إلى نص JSON آمن لاستخدامه في دالة الفتح
+    const phJson = JSON.stringify(ph).replace(/"/g, '&quot;');
 
+    // ==========================================
+    // تصميم شبكة الصور الاحترافية (Facebook Style)
+    // ==========================================
+    let imageGridHtml = '';
+    if (ph.length === 0) {
+        imageGridHtml = `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px;margin-bottom:14px;"><i class="fa-regular fa-image"></i></div>`;
+    } else if (ph.length === 1) {
+        imageGridHtml = `
+        <div class="post-media-grid single" style="margin-bottom:14px;">
+            <div class="post-media-item single" onclick="openLightbox(${phJson}, 0)">
+                <img src="${ph[0]}" alt="">
+            </div>
+        </div>`;
+    } else {
+        const count = Math.min(ph.length, 4);
+        imageGridHtml = `
+        <div class="post-media-grid multi" style="margin-bottom:14px;">
+            ${ph.slice(0, count).map((img, i) => `
+                <div class="post-media-item multi" onclick="openLightbox(${phJson}, ${i})">
+                    <img src="${img}" alt="">
+                    ${i === 3 && ph.length > 4 ? `<div class="post-media-more">+${ph.length - 4}</div>` : ''}
+                </div>
+            `).join('')}
+        </div>`;
+    }
+
+    // ==========================================
+    // بناء واجهة صفحة الإعلان
+    // ==========================================
     $('app').innerHTML = `
-    <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
+    <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px">
+        <i class="fa-solid fa-arrow-right"></i> العودة للسوق
+    </button>
     
     <div class="card" style="padding:14px;overflow:hidden;padding-bottom:80px;"> 
-      ${sliderHtml}
+      
+      ${imageGridHtml}
 
       <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-top:14px;margin-bottom:10px">
         <div style="flex:1;min-width:0">
@@ -441,24 +565,12 @@ window.openPost = async id => {
         <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;border-radius:12px;box-shadow:var(--shadow-lg);font-weight:900;" onclick="buy('${id}')">
             <i class="fa-solid fa-shield-halved"></i> شراء الآن (${p.price} ج)
         </button>
-    </div>` : `<p style="text-align:center;font-size:13px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
+    </div>` : `<p style="text-align:center;font-size:13px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}
+    `;
     
-    window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
-    
-    window.previewAllImages = () => {
-        if(ph.length === 0) return;
-        const imagesHtml = ph.map(img => `<div style="width:100%; margin-bottom:10px; background:#000; display:flex; justify-content:center;"><img src="${img}" style="width:100%; max-height:80vh; object-fit:contain; cursor:pointer;" onclick="zoom('${img}')"></div>`).join('');
-        Swal.fire({ 
-            title: 'معرض الصور', 
-            html: `<div style="max-height:85vh; overflow-y:auto; width:100%; margin:0; padding:0;">${imagesHtml}</div>`, 
-            width: '100vw', 
-            padding: '0',
-            showConfirmButton: false, 
-            showCloseButton: true,
-            background: '#0a0a0a',
-            color: '#fff'
-        });
-    };
+    // تفعيل زر الإعجاب
+    window._lk = {liked, n: p.likeCount || 0}; 
+    paintLike(liked, p.likeCount || 0);
 
   } catch(e) { bad(e); }
 };
