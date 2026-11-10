@@ -16,11 +16,11 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
 <style>
-:root{ --bg:#f1f3f7; --surface:#ffffff; --surface-2:#f8f9fc; --surface-3:#eef0f5; --border:#e2e5eb; --border-2:#d4d8e0; --text:#0f172a; --text-2:#334155; --text-3:#64748b; --text-4:#94a3b8; --glass-strong:rgba(255,255,255,0.92); --success-bg:rgba(16,185,129,0.12); --success-bd:rgba(16,185,129,0.3); --success-tx:#047857; --success-solid:#059669; --danger-bg:rgba(239,68,68,0.12); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#b91c1c; --danger-solid:#dc2626; --warn-bg:rgba(245,158,11,0.12); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#b45309; --warn-solid:#d97706; --info-bg:rgba(59,130,246,0.12); --info-bd:rgba(59,130,246,0.3); --info-tx:#1d4ed8; --info-solid:#2563eb; --purple-bg:rgba(168,85,247,0.12); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#7e22ce; --purple-solid:#9333ea; --neutral-bg:rgba(148,163,184,0.1); --neutral-bd:rgba(148,163,184,0.25); --neutral-tx:#475569; --shadow:0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04); --shadow-lg:0 4px 12px rgba(15,23,42,0.08); --r:10px; --r-lg:14px; --r-xl:18px; }
-html.dark{ --bg:#0a0a0a; --surface:#17171a; --surface-2:#1f1f23; --surface-3:#27272c; --border:#2a2a30; --border-2:#3a3a42; --text:#fafafa; --text-2:#e4e4e7; --text-3:#a1a1aa; --text-4:#71717a; --glass-strong:rgba(23,23,26,0.95); --success-bg:rgba(16,185,129,0.15); --success-bd:rgba(16,185,129,0.3); --success-tx:#34d399; --success-solid:#10b981; --danger-bg:rgba(239,68,68,0.15); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#f87171; --danger-solid:#ef4444; --warn-bg:rgba(245,158,11,0.15); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#fbbf24; --warn-solid:#f59e0b; --info-bg:rgba(59,130,246,0.15); --info-bd:rgba(59,130,246,0.3); --info-tx:#60a5fa; --info-solid:#3b82f6; --purple-bg:rgba(168,85,247,0.15); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#c084fc; --purple-solid:#a855f7; --neutral-bg:rgba(255,255,255,0.06); --neutral-bd:rgba(255,255,255,0.1); --neutral-tx:#d4d4d8; --shadow:0 1px 3px rgba(0,0,0,0.4); --shadow-lg:0 4px 12px rgba(0,0,0,0.5); }
+:root{ --bg:#f1f3f7; --surface:#ffffff; --surface-2:#f8f9fc; --surface-3:#eef0f5; --border:#e2e5eb; --border-2:#d4d8e0; --text:#0f172a; --text-2:#334155; --text-3:#64748b; --text-4:#94a3b8; --glass-strong:rgba(255,255,255,0.92); --success-bg:rgba(16,185,129,0.12); --success-bd:rgba(16,185,129,0.3); --success-tx:#047857; --success-solid:#059669; --danger-bg:rgba(239,68,68,0.12); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#b91c1c; --danger-solid:#dc2626; --warn-bg:rgba(245,158,11,0.12); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#b45309; --warn-solid:#d97706; --info-bg:rgba(59,130,246,0.12); --info-bd:rgba(59,130,246,0.3); --info-tx:#1d4ed8; --info-solid:#2563eb; --purple-bg:rgba(168,85,247,0.12); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#7e22ce; --purple-solid:#9333ea; --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); --gold-tx:#854d0e; --gold-solid:#ca8a04; --neutral-bg:rgba(148,163,184,0.1); --neutral-bd:rgba(148,163,184,0.25); --neutral-tx:#475569; --shadow:0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04); --shadow-lg:0 4px 12px rgba(15,23,42,0.08); --r:10px; --r-lg:14px; --r-xl:18px; }
+html.dark{ --bg:#0a0a0a; --surface:#17171a; --surface-2:#1f1f23; --surface-3:#27272c; --border:#2a2a30; --border-2:#3a3a42; --text:#fafafa; --text-2:#e4e4e7; --text-3:#a1a1aa; --text-4:#71717a; --glass-strong:rgba(23,23,26,0.95); --success-bg:rgba(16,185,129,0.15); --success-bd:rgba(16,185,129,0.3); --success-tx:#34d399; --success-solid:#10b981; --danger-bg:rgba(239,68,68,0.15); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#f87171; --danger-solid:#ef4444; --warn-bg:rgba(245,158,11,0.15); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#fbbf24; --warn-solid:#f59e0b; --info-bg:rgba(59,130,246,0.15); --info-bd:rgba(59,130,246,0.3); --info-tx:#60a5fa; --info-solid:#3b82f6; --purple-bg:rgba(168,85,247,0.15); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#c084fc; --purple-solid:#a855f7; --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); --gold-tx:#fde047; --gold-solid:#eab308; --neutral-bg:rgba(255,255,255,0.06); --neutral-bd:rgba(255,255,255,0.1); --neutral-tx:#d4d4d8; --shadow:0 1px 3px rgba(0,0,0,0.4); --shadow-lg:0 4px 12px rgba(0,0,0,0.5); }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
-body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden}
+body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;transition:background-color 0.3s, color 0.3s}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,textarea,select{font-family:inherit;color:inherit}
 img{max-width:100%;display:block}
@@ -46,9 +46,9 @@ img{max-width:100%;display:block}
 .nav-icon.logout{color:var(--danger-tx)}.nav-icon.logout:hover{background:var(--danger-bg)}
 #v{max-width:1400px;margin:0 auto;padding:16px 14px 40px;min-height:calc(100vh - 110px)}
 @media (max-width:640px){#v{padding:12px 10px 32px}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;margin-bottom:10px;box-shadow:var(--shadow)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;margin-bottom:10px;box-shadow:var(--shadow);transition:background-color 0.3s, border-color 0.3s}
 .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:900;line-height:1.4;border:1px solid;white-space:nowrap}
-.badge i{font-size:8px}.badge-success{background:var(--success-bg);border-color:var(--success-bd);color:var(--success-tx)}.badge-danger{background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-tx)}.badge-warning{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}.badge-info{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx)}.badge-neutral{background:var(--neutral-bg);border-color:var(--neutral-bd);color:var(--neutral-tx)}.badge-purple{background:var(--purple-bg);border-color:var(--purple-bd);color:var(--purple-tx)}
+.badge i{font-size:8px}.badge-success{background:var(--success-bg);border-color:var(--success-bd);color:var(--success-tx)}.badge-danger{background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-tx)}.badge-warning{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}.badge-info{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx)}.badge-neutral{background:var(--neutral-bg);border-color:var(--neutral-bd);color:var(--neutral-tx)}.badge-purple{background:var(--purple-bg);border-color:var(--purple-bd);color:var(--purple-tx)}.badge-gold{background:var(--gold-bg);border-color:var(--gold-bd);color:var(--gold-tx)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 12px;border-radius:9px;font-size:11.5px;font-weight:800;white-space:nowrap;border:1px solid transparent;transition:background-color 0.15s, opacity 0.15s;min-height:34px;flex-shrink:0}
 .btn i{font-size:11px}.btn:active{opacity:0.75}.btn:disabled{opacity:0.4;cursor:not-allowed}
 .btn-primary{background:var(--text);color:#fff;border-color:var(--text)}html.dark .btn-primary{background:#fafafa;color:#0a0a0a;border-color:#fafafa}.btn-primary:hover{opacity:0.88}
@@ -194,17 +194,7 @@ try { fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>admin
 
 const downloadExcel=(data, headers, filename)=>{ const ws_data = [headers.map(h => h.label)]; data.forEach(row => { ws_data.push(headers.map(h => { let val = row[h.key] ?? ''; if(h.key==='createdAt') val = new Date(val).toLocaleString('ar-EG'); return val; })); }); const ws = XLSX.utils.aoa_to_sheet(ws_data); ws['!cols'] = headers.map(() => ({ wch: 20 })); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "البيانات"); XLSX.writeFile(wb, filename + '.xlsx'); };
 
-const checkSystemHealth = async () => {
-    try {
-        await get(R('settings'));
-        sysHealth.fb = true;
-    } catch(e) { sysHealth.fb = false; }
-    try {
-        const res = await fetch(WORKER_URL + '/health');
-        if(res.ok) sysHealth.cf = true;
-        else sysHealth.cf = false;
-    } catch(e) { sysHealth.cf = false; }
-};
+const checkSystemHealth = async () => { try { await get(R('settings')); sysHealth.fb = true; } catch(e) { sysHealth.fb = false; } try { const res = await fetch(WORKER_URL + '/health'); if(res.ok) sysHealth.cf = true; else sysHealth.cf = false; } catch(e) { sysHealth.cf = false; } };
 
 const getTabsByRole = (role) => {
     const allTabs = [ ['dash','الرئيسية','fa-house'], ['posts','الإعلانات','fa-rectangle-list'], ['dep','الشحن','fa-wallet'], ['wd','السحب','fa-money-bill-transfer'], ['ver','التوثيق','fa-id-card'], ['pay','الأرباح','fa-sack-dollar'], ['ref','النزاعات','fa-scale-balanced'], ['deals','الصفقات','fa-handshake'], ['cpn','الكوبونات','fa-ticket'], ['users','المستخدمون','fa-users'], ['chats','الدردشات','fa-comments'], ['note','إشعارات','fa-bell'], ['set','الإعدادات','fa-gear'], ['log','السجل','fa-clipboard-list'] ];
@@ -223,21 +213,9 @@ const log=async(action, detail, oldVal=null, newVal=null)=>{
   await push(R('audit_logs'), entry);
 };
 
-// ✅ تأمين العمليات الحساسة عبر إعادة التحقق من Google
 const confirmPIN = async (actionName) => {
     try {
-        const r = await Swal.fire({
-            title: 'تأكيد أمني مطلوب',
-            html: `<div style="text-align:right;direction:rtl;">
-                     <p style="font-size:12px;font-weight:700;color:var(--text-3);margin-bottom:8px;">العملية المطلوبة:</p>
-                     <p style="font-size:14px;font-weight:900;color:var(--success-tx);background:var(--success-bg);padding:10px;border-radius:8px;border:1px solid var(--success-bd);margin-bottom:12px;">${E(actionName)}</p>
-                     <p style="font-size:11px;color:var(--text-3);line-height:1.6;"><i class="fa-solid fa-shield-halved" style="color:var(--success-tx)"></i> سيتم فتح نافذة تأكيد هويتك عبر Google. هذه خطوة أمنية إلزامية لحماية أموال المنصة.</p>
-                   </div>`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'تأكيد الهوية',
-            cancelButtonText: 'إلغاء'
-        });
+        const r = await Swal.fire({ title: 'تأكيد أمني مطلوب', html: `<div style="text-align:right;direction:rtl;"><p style="font-size:12px;font-weight:700;color:var(--text-3);margin-bottom:8px;">العملية المطلوبة:</p><p style="font-size:14px;font-weight:900;color:var(--success-tx);background:var(--success-bg);padding:10px;border-radius:8px;border:1px solid var(--success-bd);margin-bottom:12px;">${E(actionName)}</p><p style="font-size:11px;color:var(--text-3);line-height:1.6;"><i class="fa-solid fa-shield-halved" style="color:var(--success-tx)"></i> سيتم فتح نافذة تأكيد هويتك عبر Google. هذه خطوة أمنية إلزامية لحماية أموال المنصة.</p></div>`, icon: 'warning', showCancelButton: true, confirmButtonText: 'تأكيد الهوية', cancelButtonText: 'إلغاء' });
         if (!r.isConfirmed) throw new Error('CANCEL');
         const provider = new GoogleAuthProvider();
         await reauthenticateWithPopup(auth.currentUser, provider);
@@ -284,6 +262,7 @@ const copy=t=>navigator.clipboard.writeText(t).then(()=>ok('تم النسخ'));
 const dev=ua=>{ua=ua||'';const os=(/Android[ \d.]*/.exec(ua)||/iPhone|iPad/.exec(ua)||/Windows[^;)]*/.exec(ua)||/Mac OS X[^;)]*/.exec(ua)||[])[0]||'—',m=(/;\s*([^;)]+)\sBuild/.exec(ua)||[])[1],b=(/(Edg|Firefox|Chrome|Safari)\//.exec(ua)||[])[1];return [os,m,b].filter(Boolean).join(' · ')||'—'};
 const sendNote=async uid=>{const r=await Swal.fire({title:'إشعار للمستخدم',html:'<input id="x_t" class="swal2-input" placeholder="العنوان"><textarea id="x_b" class="swal2-textarea" placeholder="النص"></textarea><label style="display:block;margin-top:8px;font-size:12px;font-weight:700"><input type="checkbox" id="x_p" style="width:auto"> نافذة منبثقة</label>',showCancelButton:true,confirmButtonText:'إرسال',cancelButtonText:'إلغاء',preConfirm:()=>{const t=$('x_t').value.trim(),b=$('x_b').value.trim();if(!t||!b){Swal.showValidationMessage('مطلوب');return false}return {t,b,p:$('x_p').checked}}});if(!r.isConfirmed)return;await set(push(R('notifications/'+uid)),{title:r.value.t.slice(0,100),body:r.value.b.slice(0,500),type:'info',popup:r.value.p,read:false,createdAt:Date.now()});await log('إشعار',uid);ok('تم')};
 
+// التعديل هنا: جلب بيانات البائع وعرض المستوى والصفقات
 window.userInfo=async uid=>{try{
   Swal.fire({title:'جارٍ التحميل...',didOpen:()=>Swal.showLoading(),showConfirmButton:false});
   const g=async p=>(await get(R(p))).val();
@@ -291,8 +270,12 @@ window.userInfo=async uid=>{try{
   if(!u)throw new Error('المستخدم غير موجود');
   const md=deals.filter(d=>d.buyerId===uid||d.sellerId===uid),mp=deps.filter(d=>d.userId===uid),mw=wds.filter(d=>d.userId===uid),rs=Object.values(rt||{}).map(o=>o.rating),sum=(a,s)=>a.filter(x=>x.status===s).reduce((n,x)=>n+x.amount,0);
   const avg = rs.length ? (rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1) : '—';
+  
+  const isPro = u.isPro && (u.proUntil||0) > Date.now();
+  const lvl = isPro ? {n:'بائع ذهبي', c:'var(--gold-tx)', b:'var(--gold-bg)', i:'fa-crown'} : (u.completedDeals>=50 ? {n:'خبير', c:'var(--warn-tx)', b:'var(--warn-bg)', i:'fa-star'} : (u.completedDeals>=10 ? {n:'محترف', c:'var(--info-tx)', b:'var(--info-bg)', i:'fa-medal'} : {n:'مبتدئ', c:'var(--text-3)', b:'var(--surface-2)', i:'fa-seedling'}));
+  
   const avatarHtml = `<div style="width:64px;height:64px;border-radius:14px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:22px;overflow:hidden;flex-shrink:0">${u.photo ? `<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">` : E(u.name?.charAt(0)||'?')}</div>`;
-  const overviewTab = `<div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">${avatarHtml}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:3px"><b style="font-size:15px;font-weight:900;color:var(--text)">${E(u.name||'غير معروف')}</b>${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:12px"></i>':''}${u.suspended?'<span class="badge badge-danger">محظور</span>':''}</div><p style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p><p style="font-size:9px;color:var(--text-4);margin-top:3px" dir="ltr">${E(uid)}</p></div></div><div class="info-grid"><div class="info-cell"><span class="info-label">الرصيد</span><span class="info-value" style="color:var(--success-tx)">${u.balance||0} ج</span></div><div class="info-cell"><span class="info-label">التقييم</span><span class="info-value" style="color:var(--warn-tx)">${avg!=='—'?'⭐ '+avg:'—'}</span></div><div class="info-cell"><span class="info-label">التسجيل</span><span class="info-value" style="font-size:11px">${ago(u.createdAt||Date.now())}</span></div><div class="info-cell"><span class="info-label">آخر ظهور</span><span class="info-value" style="font-size:11px">${ago(u.lastSeen||Date.now())}</span></div><div class="info-cell" style="grid-column:1/-1"><span class="info-label">الجهاز</span><span class="info-value" style="font-size:11px;font-weight:700">${E(dev(u.deviceInfo))}</span></div>${u.banReason?`<div class="info-cell" style="grid-column:1/-1;background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">سبب الحظر</span><span class="info-value" style="color:var(--danger-tx);font-size:11px">${E(u.banReason)}</span></div>`:''}</div>`;
+  const overviewTab = `<div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">${avatarHtml}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:3px"><b style="font-size:15px;font-weight:900;color:var(--text)">${E(u.name||'غير معروف')}</b>${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:12px"></i>':''}${u.suspended?'<span class="badge badge-danger">محظور</span>':''}</div><p style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p><p style="font-size:9px;color:var(--text-4);margin-top:3px" dir="ltr">${E(uid)}</p><span class="badge" style="background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c}; margin-top:4px;"><i class="fa-solid ${lvl.i}"></i> ${lvl.n} (${u.completedDeals||0} صفقة)</span></div></div><div class="info-grid"><div class="info-cell"><span class="info-label">الرصيد</span><span class="info-value" style="color:var(--success-tx)">${u.balance||0} ج</span></div><div class="info-cell"><span class="info-label">التقييم</span><span class="info-value" style="color:var(--warn-tx)">${avg!=='—'?'⭐ '+avg:'—'}</span></div><div class="info-cell"><span class="info-label">التسجيل</span><span class="info-value" style="font-size:11px">${ago(u.createdAt||Date.now())}</span></div><div class="info-cell"><span class="info-label">آخر ظهور</span><span class="info-value" style="font-size:11px">${ago(u.lastSeen||Date.now())}</span></div><div class="info-cell" style="grid-column:1/-1"><span class="info-label">الجهاز</span><span class="info-value" style="font-size:11px;font-weight:700">${E(dev(u.deviceInfo))}</span></div>${u.banReason?`<div class="info-cell" style="grid-column:1/-1;background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">سبب الحظر</span><span class="info-value" style="color:var(--danger-tx);font-size:11px">${E(u.banReason)}</span></div>`:''}</div>`;
   const financialTab = `<div class="info-grid"><div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd)"><span class="info-label" style="color:var(--success-tx)">إجمالي الشحن</span><span class="info-value" style="color:var(--success-tx)">${sum(mp,'approved')} ج</span></div><div class="info-cell" style="background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">إجمالي السحب</span><span class="info-value" style="color:var(--danger-tx)">${sum(mw,'approved')} ج</span></div><div class="info-cell"><span class="info-label">صفقات مكتملة</span><span class="info-value" style="color:var(--success-tx)">${md.filter(d=>d.status==='completed').length}</span></div><div class="info-cell"><span class="info-label">نزاعات</span><span class="info-value" style="color:var(--danger-tx)">${md.filter(d=>d.status==='disputed').length}</span></div></div>`;
   const postsTab = ps.length === 0 ? '<p style="font-size:12px;color:var(--text-4);text-align:center;padding:20px">لا يوجد إعلانات</p>' : ps.slice(0,10).map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;margin-bottom:5px"><div style="flex:1;min-width:0"><b style="font-size:12px;color:var(--text);display:block">${E(p.game)}</b><span style="font-size:10px;color:var(--text-3)">${timeAgo(p.createdAt)}</span></div><div style="text-align:left"><b style="font-size:12px;color:var(--text);display:block">${p.price} ج</b>${statusBadge(p.status)}</div></div>`).join('');
   const verificationTab = vf ? `<div class="info-cell" style="margin-bottom:10px"><span class="info-label">الحالة</span><span class="info-value">${statusBadge(vf.status)}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${imgs([vf.idUrl,vf.selfieUrl]).map(x=>`<img src="${x}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="zoom('${x}')">`).join('')}</div>` : '<p style="font-size:12px;color:var(--text-4);text-align:center;padding:20px">لا يوجد توثيق</p>';
@@ -310,11 +293,7 @@ window.viewPrivateInfo = async (pid) => {
   try {
     Swal.fire({title:'جاري فك التشفير بأمان...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
     const idToken = await auth.currentUser.getIdToken();
-    const response = await fetch(WORKER_URL + "/decrypt", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
-        body: JSON.stringify({ postId: pid })
-    });
+    const response = await fetch(WORKER_URL + "/decrypt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: pid }) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
     Swal.fire({ title:'بيانات الحساب', html:`<div style="background:var(--warn-bg);border:1px solid var(--warn-bd);padding:14px;border-radius:10px;text-align:left;margin-top:6px" dir="ltr"><p style="font-size:12px;margin-bottom:6px;color:var(--warn-tx)"><b>Email:</b> <span style="user-select:all">${E(result.email || 'خطأ')}</span></p><p style="font-size:12px;color:var(--warn-tx)"><b>Password:</b> <span style="user-select:all">${E(result.password || 'خطأ')}</span></p></div>`, confirmButtonText: 'إغلاق' });
@@ -353,17 +332,9 @@ window.deleteUserAccount = async (uid) => {
     Swal.fire({title:'جاري مسح بيانات المستخدم...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
     try {
         const updates = {};
-        updates[`users/${uid}`] = null;
-        updates[`notifications/${uid}`] = null;
-        updates[`user_chats/${uid}`] = null;
-        updates[`user_verifications/${uid}`] = null;
+        updates[`users/${uid}`] = null; updates[`notifications/${uid}`] = null; updates[`user_chats/${uid}`] = null; updates[`user_verifications/${uid}`] = null;
         const userPosts = await get(query(R('posts'), orderByChild('sellerId'), equalTo(uid)));
-        if(userPosts.exists()) {
-            Object.keys(userPosts.val()).forEach(pid => {
-                updates[`posts/${pid}`] = null;
-                updates[`post_private/${pid}`] = null;
-            });
-        }
+        if(userPosts.exists()) { Object.keys(userPosts.val()).forEach(pid => { updates[`posts/${pid}`] = null; updates[`post_private/${pid}`] = null; }); }
         await update(ref(db), updates);
         Swal.close(); ok('تم حذف الحساب وكل بياناته بنجاح.'); show('users');
     } catch(e) { Swal.close(); bad(e); }
@@ -399,50 +370,15 @@ window.openDatabaseManager = async () => {
     renderUI(); document.body.appendChild(overlay);
 };
 
-// ✅ ميزة إنشاء كوبونات جديدة
 window.createPromoCode = async () => {
-    const { value: formValues } = await Swal.fire({
-        title: 'إنشاء كوبون جديد',
-        html: `
-            <p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">اترك حقل UID فارغاً لإنشاء كوبون عام يمكن لأي شخص استخدامه.</p>
-            <input id="swal-uid" class="swal2-input" placeholder="UID المستخدم (اختياري)" dir="ltr" style="text-align:left">
-            <input id="swal-amount" class="swal2-input" placeholder="قيمة الكوبون (ج)" type="number">
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'إنشاء الكوبون',
-        cancelButtonText: 'إلغاء',
-        preConfirm: () => {
-            const uid = document.getElementById('swal-uid').value.trim();
-            const amount = document.getElementById('swal-amount').value.trim();
-            if (!amount || amount < 1) {
-                Swal.showValidationMessage('أدخل مبلغاً صالحاً');
-                return false;
-            }
-            return { uid, amount: Number(amount) };
-        }
-    });
+    const { value: formValues } = await Swal.fire({ title: 'إنشاء كوبون جديد', html: `<p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">اترك حقل UID فارغاً لإنشاء كوبون عام يمكن لأي شخص استخدامه.</p><input id="swal-uid" class="swal2-input" placeholder="UID المستخدم (اختياري)" dir="ltr" style="text-align:left"><input id="swal-amount" class="swal2-input" placeholder="قيمة الكوبون (ج)" type="number">`, showCancelButton: true, confirmButtonText: 'إنشاء الكوبون', cancelButtonText: 'إلغاء', preConfirm: () => { const uid = document.getElementById('swal-uid').value.trim(); const amount = document.getElementById('swal-amount').value.trim(); if (!amount || amount < 1) { Swal.showValidationMessage('أدخل مبلغاً صالحاً'); return false; } return { uid, amount: Number(amount) }; } });
     if (!formValues) return;
-
     const code = 'BLCK-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-
     try {
         Swal.fire({title: 'جاري الإنشاء...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        await set(R('promo_codes/' + code), { 
-            amount: formValues.amount, 
-            status: 'active', 
-            createdAt: Date.now(), 
-            targetUser: formValues.uid || null 
-        });
+        await set(R('promo_codes/' + code), { amount: formValues.amount, status: 'active', createdAt: Date.now(), targetUser: formValues.uid || null });
         Swal.close();
-        
-        Swal.fire({ 
-            title: 'تم إنشاء الكوبون بنجاح!', 
-            html: `<p style="font-size:13px;margin-bottom:10px;">أعط هذا الكود للمستخدم ليقوم بإدخاله في المحفظة:</p>
-                   <b style="font-size:24px; color:var(--success-tx); letter-spacing:2px; background:var(--surface-2); padding:5px 15px; border-radius:8px; display:inline-block;">${code}</b>
-                   <p style="font-size:12px;margin-top:10px;">القيمة: ${formValues.amount} ج</p>`, 
-            confirmButtonText: 'نسخ الكود' 
-        }).then(r => { if(r.isConfirmed) navigator.clipboard.writeText(code); });
-        
+        Swal.fire({ title: 'تم إنشاء الكوبون بنجاح!', html: `<p style="font-size:13px;margin-bottom:10px;">أعط هذا الكود للمستخدم ليقوم بإدخاله في المحفظة:</p><b style="font-size:24px; color:var(--success-tx); letter-spacing:2px; background:var(--surface-2); padding:5px 15px; border-radius:8px; display:inline-block;">${code}</b><p style="font-size:12px;margin-top:10px;">القيمة: ${formValues.amount} ج</p>`, confirmButtonText: 'نسخ الكود' }).then(r => { if(r.isConfirmed) navigator.clipboard.writeText(code); });
         show('cpn');
     } catch(e) { Swal.close(); bad(e); }
 };
@@ -452,14 +388,7 @@ async dash(){
   const roleTitle = me?.role === 'owner' ? 'المالك 👑' : me?.role === 'accountant' ? 'المحاسب 💼' : me?.role === 'support' ? 'الدعم الفني 🎧' : 'المدير 🛡️';
   
   await checkSystemHealth();
-  const healthHtml = `
-  <div class="card" style="margin-bottom:14px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-      <div style="display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-server" style="color:var(--text-3)"></i> <span style="font-size:11px; font-weight:800; color:var(--text-2)">حالة النظام:</span></div>
-      <div style="display:flex; gap:10px; font-size:10px; font-weight:900;">
-          <span style="color:${sysHealth.fb ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.fb ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> قاعدة البيانات</span>
-          <span style="color:${sysHealth.cf ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.cf ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> السيرفر (Worker)</span>
-      </div>
-  </div>`;
+  const healthHtml = `<div class="card" style="margin-bottom:14px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div style="display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-server" style="color:var(--text-3)"></i> <span style="font-size:11px; font-weight:800; color:var(--text-2)">حالة النظام:</span></div><div style="display:flex; gap:10px; font-size:10px; font-weight:900;"><span style="color:${sysHealth.fb ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.fb ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> قاعدة البيانات</span><span style="color:${sysHealth.cf ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.cf ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> السيرفر (Worker)</span></div></div>`;
 
   if (me?.role === 'accountant') { const [d,w,y,f,dl] = await Promise.all(['deposits','withdrawals','pending_payouts','refund_queue','deals'].map(async p => Object.values((await get(R(p))).val() || {}))); const pending = a => a.filter(x => x.status === 'pending').length; const tiles = [ ['طلبات الشحن المعلقة', pending(d), 'dep'], ['طلبات السحب المعلقة', pending(w), 'wd'], ['الأرباح المعلقة', pending(y), 'pay'], ['النزاعات المفتوحة', pending(f), 'ref'], ['إجمالي الصفقات', dl.length, 'deals'] ]; return healthHtml + `<div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:900;color:var(--text)">مرحباً ${roleTitle}</h1><p style="color:var(--text-3);font-size:11px;font-weight:700">مؤشرات الأقسام المالية المسموح بها لدورك.</p></div><div class="stats-grid">${tiles.map(([l,n,k])=>`<div onclick="go('${k}')" class="stat-card"><span class="stat-label">${l}</span><span class="stat-value">${n}</span></div>`).join('')}</div>`; }
   if (me?.role === 'support') { const [u,c] = await Promise.all([ get(R('users')).then(s => Object.keys(s.val() || {}).length), get(R('chats')).then(s => Object.values(s.val() || {}).filter(x => x.status !== 'closed').length) ]); return healthHtml + `<div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:900;color:var(--text)">مرحباً ${roleTitle}</h1><p style="color:var(--text-3);font-size:11px;font-weight:700">مؤشرات المستخدمين والدردشات فقط.</p></div><div class="stats-grid"><div onclick="go('users')" class="stat-card"><span class="stat-label">المستخدمون</span><span class="stat-value">${u}</span></div><div onclick="go('chats')" class="stat-card"><span class="stat-label">الدردشات المفتوحة</span><span class="stat-value">${c}</span></div></div>`; }
@@ -510,12 +439,8 @@ async ref(){ const all = await fetchList('refund_queue'); const pending = all.fi
 async deals(){ const s=st('all'); let all=(await fetchList('deals')).filter(d=>s==='all'||d.status===s); await Promise.all(all.flatMap(d=>[uname(d.buyerId),uname(d.sellerId)])); all=all.filter(d=>hit({...d,b:NM[d.buyerId],s:NM[d.sellerId]},['id','b','s'])); all = filterByDate(all); const limit = pageState[view] ? pageState[view]*30 : 30; const a = all.slice(0, limit); return bar([['all','الكل'],['held','محجوزة'],['delivered','مسلمة'],['completed','مكتملة'],['disputed','نزاع']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:14px;color:var(--success-tx)">${d.amount} ج</b>${statusBadge(d.status)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;margin-bottom:6px"><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">المشتري</span>${ulink(d.buyerId,NM[d.buyerId])}</div><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">البائع</span>${ulink(d.sellerId,NM[d.sellerId])}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('دردشة',()=>adminChat(d.chatId))}${op('الإعلان',()=>postInfo(d.postId))}${(d.status === 'held' || d.status === 'delivered') ? op('إلغاء وإرجاع', async () => { if (!await ask('هل تريد إلغاء هذه الصفقة وإرجاع المبلغ كاملاً للمشتري؟')) return; await confirmPIN('إلغاء الصفقة'); await credit(d.buyerId, d.amount); await update(R('deals/' + d.id), { status: 'cancelled' }); if(d.chatId) { await update(R('chats/' + d.chatId), { dealStatus: 'cancelled', frozen: false }); await set(push(R(`chats/${d.chatId}/messages`)), {senderId: me.uid, type: 'admin', text: 'تم إلغاء الصفقة وإرجاع المبلغ للمشتري.', createdAt: Date.now()}); } await notify(d.buyerId, 'إلغاء الصفقة', 'تم إلغاء الصفقة وإرجاع المبلغ لرصيدك.'); await log('إلغاء صفقة', `تم إلغاء الصفقة #${d.id}`); ok('تم الإلغاء بنجاح'); }, 'btn-danger') : ''}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); },
 async cpn(){ 
     const createBtn = `<button class="btn btn-primary" style="margin-bottom:14px; width:100%" onclick="window.createPromoCode()"><i class="fa-solid fa-plus"></i> إنشاء كوبون / شحن يدوي</button>`;
-    
-    const o=(await get(R('credit_queue'))).val()||{},a=[];
-    Object.entries(o).forEach(([u,c])=>Object.entries(c).forEach(([k,x])=>x.status==='pending'&&a.push({u,k,...x}))); 
-    
+    const o=(await get(R('credit_queue'))).val()||{},a=[]; Object.entries(o).forEach(([u,c])=>Object.entries(c).forEach(([k,x])=>x.status==='pending'&&a.push({u,k,...x}))); 
     const listHtml = (await Promise.all(a.map(async c=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:12.5px;color:var(--text)">${await uname(c.u)}</b><code dir="ltr" style="background:var(--neutral-bg);padding:3px 8px;border-radius:6px;color:var(--text);font-weight:900;font-size:11px">${E(c.k)}</code></div><div style="display:flex;gap:5px">${op('المستخدم',()=>userInfo(c.u))}${btn('قبول وتحديد القيمة',async()=>{const {value:v}=await Swal.fire({title:'القيمة',input:'number',showCancelButton:true});const n=Math.round(+v);if(!n||n<1)throw new Error('قيمة غير صالحة');await confirmPIN('قبول كوبون '+n);const p=`credit_queue/${c.u}/${c.k}`;await claim(p,'pending','approved');await update(R(p),{amount:n});await credit(c.u,n);await notify(c.u,'كوبون',`+${n} ج`)},'btn-success')}${btn('رفض',()=>claim(`credit_queue/${c.u}/${c.k}`,'pending','rejected'),'btn-danger')}</div>`)))).join('');
-    
     return createBtn + (listHtml || empty); 
 },
 async users(){ 
@@ -530,27 +455,13 @@ async users(){
     const a = all.slice(0, limit); 
     const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:10px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'name',label:'الاسم'},{key:'email',label:'الإيميل'},{key:'balance',label:'الرصيد'},{key:'createdAt',label:'تاريخ التسجيل'}], 'users')"><i class="fa-solid fa-file-excel"></i> تصدير قائمة المستخدمين</button>`; 
     
-    const summaryHtml = `
-    <div class="grid-2" style="margin-bottom:10px;">
-        <div class="card" style="padding:10px; margin:0; display:flex; flex-direction:column; gap:4px; border-color:var(--info-bd);">
-            <span style="font-size:10px; font-weight:800; color:var(--info-tx);"><i class="fa-solid fa-users"></i> إجمالي المستخدمين</span>
-            <b style="font-size:18px; font-weight:900; color:var(--text);">${all.length}</b>
-        </div>
-        <div class="card" style="padding:10px; margin:0; display:flex; flex-direction:column; gap:4px; border-color:var(--success-bd);">
-            <span style="font-size:10px; font-weight:800; color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> الموثقون</span>
-            <b style="font-size:18px; font-weight:900; color:var(--text);">${totalVerified}</b>
-        </div>
-        <div class="card" style="padding:10px; margin:0; display:flex; flex-direction:column; gap:4px; border-color:var(--danger-bd);">
-            <span style="font-size:10px; font-weight:800; color:var(--danger-tx);"><i class="fa-solid fa-ban"></i> المحظورون</span>
-            <b style="font-size:18px; font-weight:900; color:var(--text);">${totalBanned}</b>
-        </div>
-        <div class="card" style="padding:10px; margin:0; display:flex; flex-direction:column; gap:4px; border-color:var(--warn-bd);">
-            <span style="font-size:10px; font-weight:800; color:var(--warn-tx);"><i class="fa-solid fa-wallet"></i> إجمالي الأرصدة</span>
-            <b style="font-size:18px; font-weight:900; color:var(--text);">${totalBal} ج</b>
-        </div>
-    </div>`;
+    const summaryHtml = `<div class="grid-2" style="margin-bottom:10px;"><div class="card" style="padding:10px; margin:0; display:flex; flex-direction:column; gap:4px; border-color:var(--info-bd);"><span style="font-size:10px; font-weight:800; color:var(--info-tx);"><i class="fa-solid fa-users"></i> إجمالي المستخدمين</span><b style="font-size:18px; font-weight:900; color:var(--text);">${all.length}</b></div><div class="card" style="padding:10px; margin:0; display:flex; flex-direction:column; gap:4px; border-color:var(--success-bd);"><span style="font-size:10px; font-weight:800; color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> الموثقون</span><b style="font-size:18px; font-weight:900; color:var(--text);">${totalVerified}</b></div><div class="card" style="padding:10px; margin:0; display:flex; flex-direction:column; gap:4px; border-color:var(--danger-bd);"><span style="font-size:10px; font-weight:800; color:var(--danger-tx);"><i class="fa-solid fa-ban"></i> المحظورون</span><b style="font-size:18px; font-weight:900; color:var(--text);">${totalBanned}</b></div><div class="card" style="padding:10px; margin:0; display:flex; flex-direction:column; gap:4px; border-color:var(--warn-bd);"><span style="font-size:10px; font-weight:800; color:var(--warn-tx);"><i class="fa-solid fa-wallet"></i> إجمالي الأرصدة</span><b style="font-size:18px; font-weight:900; color:var(--text);">${totalBal} ج</b></div></div>`;
 
-    const items=a.map(u=>card(`<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0"><div style="width:38px;height:38px;border-radius:10px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px;flex-shrink:0;overflow:hidden">${u.photo?`<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">`:E(u.name?.charAt(0)||'?')}</div><div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap"><b style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(u.name || 'مستخدم محذوف')}</b>${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:10px"></i>':''}${u.suspended?'<span class="badge badge-danger" style="padding:1px 5px;font-size:8px">محظور</span>':''}${u.strikes ? `<span class="badge badge-warning" style="padding:1px 5px;font-size:8px">${u.strikes} تحذيرات</span>` : ''}</div><p style="font-size:10px;color:var(--text-3);margin:1px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p></div></div><b style="color:var(--success-tx);font-size:11.5px;white-space:nowrap">${u.balance||0} ج</b></div><div style="display:flex;gap:4px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:6px">${op('تفاصيل',()=>userInfo(u.id))}${op('إشعار',()=>sendNote(u.id))}${u.suspended ? op('رفع الحظر',async()=>{await update(R('users/'+u.id),{suspended:false,banReason:null,banUntil:null});ok('تم');show(view)},'btn-success') : op('حظر',async()=>{await window.adminToggleBan(u.id); show(view);},'btn-danger')}${op('رصيد',()=>window.adminAdjustBalance(u.id))}<button class="btn btn-danger" onclick="window.deleteUserAccount('${u.id}')"><i class="fa-solid fa-user-minus"></i> حذف</button></div>`)).join(''); 
+    const items=a.map(u=>{
+        const isPro = u.isPro && (u.proUntil||0) > Date.now();
+        const lvl = isPro ? {n:'ذهبي', c:'var(--gold-tx)', b:'var(--gold-bg)', i:'fa-crown'} : (u.completedDeals>=50 ? {n:'خبير', c:'var(--warn-tx)', b:'var(--warn-bg)', i:'fa-star'} : (u.completedDeals>=10 ? {n:'محترف', c:'var(--info-tx)', b:'var(--info-bg)', i:'fa-medal'} : {n:'مبتدئ', c:'var(--text-3)', b:'var(--surface-2)', i:'fa-seedling'}));
+        return card(`<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0"><div style="width:38px;height:38px;border-radius:10px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px;flex-shrink:0;overflow:hidden">${u.photo?`<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">`:E(u.name?.charAt(0)||'?')}</div><div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap"><b style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(u.name || 'مستخدم محذوف')}</b>${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:10px"></i>':''}${u.suspended?'<span class="badge badge-danger" style="padding:1px 5px;font-size:8px">محظور</span>':''}</div><div style="display:flex;align-items:center;gap:4px;margin-top:2px;"><span class="badge" style="padding:0px 4px;font-size:8px;background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c};"><i class="fa-solid ${lvl.i}"></i> ${lvl.n}</span> <span style="font-size:9px; color:var(--text-4);">${u.completedDeals||0} صفقة</span></div><p style="font-size:10px;color:var(--text-3);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p></div></div><b style="color:var(--success-tx);font-size:11.5px;white-space:nowrap">${u.balance||0} ج</b></div><div style="display:flex;gap:4px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:6px">${op('تفاصيل',()=>userInfo(u.id))}${op('إشعار',()=>sendNote(u.id))}${u.suspended ? op('رفع الحظر',async()=>{await update(R('users/'+u.id),{suspended:false,banReason:null,banUntil:null});ok('تم');show(view)},'btn-success') : op('حظر',async()=>{await window.adminToggleBan(u.id); show(view);},'btn-danger')}${op('رصيد',()=>window.adminAdjustBalance(u.id))}${isPro ? op('إلغاء برو',async()=>{await update(R('users/'+u.id),{isPro:false, proUntil:0}); ok('تم إلغاء الاشتراك'); show(view);},'btn-warning') : op('ترقية برو',async()=>{await update(R('users/'+u.id),{isPro:true, proUntil:Date.now()+30*86400000}); ok('تمت الترقية'); show(view);},'btn-gold')}<button class="btn btn-danger" onclick="window.deleteUserAccount('${u.id}')"><i class="fa-solid fa-user-minus"></i></button></div>`);
+    }).join(''); 
     
     return summaryHtml + bar([['all','الكل'],['ver','موثقون'],['unv','غير موثقين'],['ban','محظورون']], false) + exportBtn + (items||empty) + moreBtn(view, all.length, limit); 
 },
@@ -558,20 +469,7 @@ async chats(){ const all=(await fetchList('chats')).sort((a,b)=>b.updatedAt-a.up
 async note(){ 
     const recentLogs = (await fetchLogs()).filter(l => l.action === 'إشعار').slice(0, 5);
     const recentHtml = recentLogs.length ? recentLogs.map(l => `<div style="display:flex;justify-content:space-between;font-size:10px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-2);font-weight:700">تم إرسال إشعار لـ: ${E(l.detail)}</span><span style="color:var(--text-4)">${timeAgo(l.at)}</span></div>`).join('') : '<p style="font-size:11px;color:var(--text-4);text-align:center">لا توجد إشعارات مرسلة مؤخراً.</p>';
-
-    return `
-    <div class="card">
-        <div class="sec-title"><i class="fa-solid fa-bell"></i> إرسال إشعار</div>
-        <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">UID (اختياري - اتركه فارغاً للإرسال للجميع)</label><input id="n_u" placeholder="UID...">
-        <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">العنوان</label><input id="n_t">
-        <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">النص</label><textarea id="n_b" rows="4"></textarea>
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin:8px 0 12px;color:var(--text-2)"><input type="checkbox" id="n_p" style="width:auto;margin:0"> نافذة منبثقة</label>
-        ${btn('إرسال الإشعار',async()=>{const t=$('n_t').value.trim(),b=$('n_b').value.trim();if(!t||!b)throw new Error('مطلوب');const m={title:t.slice(0,100),body:b.slice(0,500),type:'info',popup:$('n_p').checked,read:false,createdAt:Date.now()};const u=$('n_u').value.trim();if(u){await set(push(R('notifications/'+u)),m);await log('إشعار', u);}else{const ids=Object.keys((await get(R('users'))).val()||{});for(const i of ids){await set(push(R('notifications/'+i)),m)}await log('إشعار', 'الجميع');}ok('تم')},'btn-primary','')}
-    </div>
-    <div class="card">
-        <div class="sec-title" style="color:var(--info-tx);border-bottom-color:var(--info-bd);"><i class="fa-solid fa-clock-rotate-left"></i> آخر الإشعارات المرسلة</div>
-        ${recentHtml}
-    </div>`;
+    return `<div class="card"><div class="sec-title"><i class="fa-solid fa-bell"></i> إرسال إشعار</div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">UID (اختياري - اتركه فارغاً للإرسال للجميع)</label><input id="n_u" placeholder="UID..."><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">العنوان</label><input id="n_t"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">النص</label><textarea id="n_b" rows="4"></textarea><label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin:8px 0 12px;color:var(--text-2)"><input type="checkbox" id="n_p" style="width:auto;margin:0"> نافذة منبثقة</label>${btn('إرسال الإشعار',async()=>{const t=$('n_t').value.trim(),b=$('n_b').value.trim();if(!t||!b)throw new Error('مطلوب');const m={title:t.slice(0,100),body:b.slice(0,500),type:'info',popup:$('n_p').checked,read:false,createdAt:Date.now()};const u=$('n_u').value.trim();if(u){await set(push(R('notifications/'+u)),m);await log('إشعار', u);}else{const ids=Object.keys((await get(R('users'))).val()||{});for(const i of ids){await set(push(R('notifications/'+i)),m)}await log('إشعار', 'الجميع');}ok('تم')},'btn-primary','')}</div><div class="card"><div class="sec-title" style="color:var(--info-tx);border-bottom-color:var(--info-bd);"><i class="fa-solid fa-clock-rotate-left"></i> آخر الإشعارات المرسلة</div>${recentHtml}</div>`;
 },
 async set(){ const s=(await get(R('settings'))).val()||{};S=s; let admins = []; try { if (me.isOwner) { const snap = await get(R('admins')); if (snap.exists()) admins = Object.entries(snap.val()).map(([id, o]) => ({id, ...o})); } } catch (e) {} const defaultGames = "فري فاير, ببجي موبايل, كلاش أوف كلانس, فورتنايت, روبلوكس"; const defaultServers = "MENA, Europe, Asia, Global, North America"; const currentGames = s.games ? s.games.join(', ') : defaultGames; const currentServers = s.servers ? s.servers.join(', ') : defaultServers; const f=[['siteName','اسم الموقع'],['supportEmail','بريد الدعم'],['bankName','اسم البنك'],['accountName','اسم الحساب'],['walletNumber','رقم المحفظة'],['commission','العمولة %'],['tickerText','الشريط'],['depositWarning','تنبيه الشحن'],['maintenanceMessage','رسالة الصيانة'],['autoReplyText','الرد التلقائي للدعم (اتركه فارغاً للإلغاء)']]; const adminsHtml = me.isOwner ? (admins.map(a => { const k='h'+(hc++);H[k]=()=>Swal.fire({title:'تعديل',input:'select',inputOptions:{'super_admin':'مدير','accountant':'محاسب','support':'دعم'},inputValue:a.role||'super_admin',showCancelButton:true}).then(async r=>{if(r.isConfirmed){await update(R('admins/'+a.id),{role:r.value});ok('تم');show(view)}}); const delK='h'+(hc++);H[delK]=async()=>{if(!await ask('حذف '+a.email+'؟'))return;await remove(R('admins/'+a.id));await log('حذف مشرف',a.email);ok('تم');show(view)}; return `<div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);padding:8px;border-radius:8px;margin-bottom:5px;border:1px solid var(--border);gap:6px"><div style="min-width:0;flex:1"><b style="font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${E(a.email||a.id)}</b><span style="font-size:10px;color:var(--info-tx);font-weight:800">${a.role==='accountant'?'محاسب':a.role==='support'?'دعم':'مدير'}</span></div><div style="display:flex;gap:3px;flex-shrink:0"><button class="btn btn-ghost" style="padding:3px 7px;font-size:10px;min-height:26px" onclick="A('${k}')">تعديل</button><button class="btn btn-danger" style="padding:3px 7px;font-size:10px;min-height:26px" onclick="A('${delK}')">حذف</button></div></div>`; }).join('') || '<p style="font-size:11px;color:var(--text-4)">لا يوجد مشرفين</p>') : '<p style="font-size:11px;color:var(--text-4)">ليس لديك صلاحية</p>'; const addAdminK = 'h'+(hc++); H[addAdminK] = async () => { const r = await Swal.fire({ title: 'إضافة مشرف', html: '<input id="a_email" class="swal2-input" placeholder="البريد"><input id="a_uid" class="swal2-input" placeholder="UID (اختياري)"><select id="a_role" class="swal2-select"><option value="super_admin">مدير</option><option value="accountant">محاسب</option><option value="support">دعم</option></select>', showCancelButton: true, confirmButtonText: 'إضافة', cancelButtonText: 'إلغاء', preConfirm: () => { const email = $('a_email').value.trim(); const uid = $('a_uid').value.trim(); const role = $('a_role').value; if (!uid && !email) { Swal.showValidationMessage('مطلوب'); return false; } return { email, uid, role }; }}); if (!r.isConfirmed) return; if (r.value.uid) { await set(R('admins/'+r.value.uid), {email: r.value.email, role: r.value.role, addedAt: Date.now()}); await log('إضافة مشرف', r.value.email); ok('تم'); show(view); } else { try { Swal.fire({title: 'جاري البحث...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); const usersSnap = await get(R('users')); let targetUid = null; usersSnap.forEach(child => { if (child.val().email && child.val().email.toLowerCase() === r.value.email.toLowerCase()) targetUid = child.key; }); if (!targetUid) throw new Error('لم يتم إيجاد المستخدم'); await set(R('admins/'+targetUid), {email: r.value.email, role: r.value.role, addedAt: Date.now()}); await log('إضافة مشرف', r.value.email); Swal.close(); ok('تم'); show(view); } catch (err) { Swal.close(); bad(err); } } }; return `<div class="card"><div class="sec-title"><i class="fa-solid fa-gear"></i> إعدادات الموقع</div><div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم الموقع</label><input id="s_siteName" value="${E(s.siteName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">بريد الدعم</label><input id="s_supportEmail" value="${E(s.supportEmail||'')}"></div></div><div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-wallet"></i> بيانات الدفع والعمولة</div><div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم البنك</label><input id="s_bankName" value="${E(s.bankName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم الحساب</label><input id="s_accountName" value="${E(s.accountName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رقم المحفظة</label><input id="s_walletNumber" value="${E(s.walletNumber||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">العمولة (%)</label><input id="s_commission" type="number" value="${E(s.commission||0)}"></div></div><div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الشريط المتحرك</label><input id="s_tickerText" value="${E(s.tickerText||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تنبيه الشحن</label><input id="s_depositWarning" value="${E(s.depositWarning||'')}"></div></div><div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-gamepad"></i> قوائم الألعاب والسيرفرات</div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الألعاب (مفصولة بفاصلة)</label><textarea id="s_games" rows="2">${E(currentGames)}</textarea><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">السيرفرات (مفصولة بفاصلة)</label><textarea id="s_servers" rows="2">${E(currentServers)}</textarea><div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-shield-halved"></i> الأمان والصيانة</div><div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تأمين العمليات الحساسة</label><div style="padding:10px 12px;background:var(--success-bg);border:1px solid var(--success-bd);border-radius:9px;font-size:11px;font-weight:800;color:var(--success-tx);margin-bottom:9px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-shield-halved"></i> محمي عبر إعادة التحقق من Google</div></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رسالة الصيانة</label><input id="s_maintenanceMessage" value="${E(s.maintenanceMessage||'')}"></div></div><label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin:10px 0 6px;color:var(--text-2)"><input type="checkbox" id="s_maintenanceMode" style="width:auto;margin:0" ${s.maintenanceMode?'checked':''}> تفعيل وضع الصيانة (إغلاق الموقع للمستخدمين)</label>${btn('حفظ جميع الإعدادات',async()=>{const o={}; f.forEach(([k])=>o[k]=$('s_'+k).value.trim()); o.commission=Math.min(50,Math.max(0,Number(o.commission)||0)); o.maintenanceMode=$('s_maintenanceMode').checked; o.games = $('s_games').value.split(',').map(x=>x.trim()).filter(Boolean); o.servers = $('s_servers').value.split(',').map(x=>x.trim()).filter(Boolean); await update(R('settings'),o); $('maintenance-banner').classList.toggle('hidden', !o.maintenanceMode); },'btn-primary','تعديل الإعدادات')}</div><div class="card"><div class="sec-title" style="justify-content:space-between"><span><i class="fa-solid fa-users-gear"></i> إدارة المشرفين</span>${me.isOwner ? `<button class="btn btn-primary" style="padding:3px 9px;font-size:10px;min-height:26px" onclick="A('${addAdminK}')"><i class="fa-solid fa-plus"></i> إضافة</button>` : ''}</div>${adminsHtml}</div>${me.isOwner ? `<div class="card" style="border-color:var(--danger-bd);"><div class="sec-title" style="color:var(--danger-tx);border-bottom-color:var(--danger-bd);"><i class="fa-solid fa-skull-crossbones"></i> منطقة الخطر (للمالك فقط)</div><p style="font-size:11px;color:var(--text-3);margin-bottom:10px;">أدوات متقدمة للتحكم الكامل بقاعدة البيانات (مسح أو تعديل يدوي).</p><button class="btn btn-danger" style="width:100%;" onclick="window.openDatabaseManager()"><i class="fa-solid fa-database"></i> فتح شجرة قاعدة البيانات (JSON)</button></div>` : ''}`; },
 async log(){ 
@@ -580,7 +478,6 @@ async log(){
     const filtered = all.filter(l => !q || (l.action||'').toLowerCase().includes(q) || (l.detail||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q));
     const limit = pageState[view] ? pageState[view]*30 : 30;
     const a = filtered.slice(0, limit);
-
     return bar([['all','الكل']], false) + (a.map(l=>card(`<div style="display:flex;align-items:start;gap:6px"><div style="width:26px;height:26px;border-radius:7px;background:var(--neutral-bg);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0;margin-top:2px"><i class="fa-solid fa-clipboard-list" style="font-size:9px"></i></div><div style="flex:1;min-width:0"><b style="font-size:11.5px;color:var(--text)">${E(l.action)}</b><p style="font-size:9px;color:var(--text-3);margin:1px 0 0">${E(l.email)} · ${timeAgo(l.at)} · IP: ${E(l.ip||'—')}</p><p style="font-size:10.5px;color:var(--text-2);margin-top:4px;background:var(--neutral-bg);padding:5px 7px;border-radius:6px;font-weight:600">${E(l.detail)}</p></div></div>`)).join('')||empty) + moreBtn(view, filtered.length, limit); 
 }
 };
@@ -611,15 +508,7 @@ function adminChat(cid){
   clearLive();H={};hc=0;let c={}, currentUserData = null;
   window._chatCtx = { cid: cid, uid: null, postId: null };
   const compressImageToBlob = (file) => new Promise((resolve) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (event) => { const img = new Image(); img.src = event.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let { width, height } = img; const MAX = 800; if (width > height && width > MAX) { height *= MAX / width; width = MAX; } else if (height > MAX) { width *= MAX / height; height = MAX; } canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height); canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.6); }; }; });
-  const uploadAdminImage = async (file) => { 
-      const blob = await compressImageToBlob(file); 
-      const formData = new FormData(); 
-      formData.append('image', blob, 'image.jpg'); 
-      const res = await fetch(`${WORKER_URL}/upload`, { method: 'POST', body: formData }); 
-      const data = await res.json(); 
-      if (data.success) return data.url; 
-      throw new Error(data.error || 'فشل الرفع'); 
-  };
+  const uploadAdminImage = async (file) => { const blob = await compressImageToBlob(file); const formData = new FormData(); formData.append('image', blob, 'image.jpg'); const res = await fetch(`${WORKER_URL}/upload`, { method: 'POST', body: formData }); const data = await res.json(); if (data.success) return data.url; throw new Error(data.error || 'فشل الرفع'); };
   const quickReplies = ["أهلاً، جاري المراجعة.","تم الاستلام، انتظر قليلاً.","تم الرفض لعدم تطابق البيانات.","أرفق صورة واضحة للإيصال.","تمت الموافقة، شكراً لثقتك."];
   $('v').innerHTML = `<div id="panel-overlay" class="panel-overlay" onclick="togglePanel()"></div><div id="side-panel" class="side-panel"><div class="panel-header"><div id="panel-avatar" style="width:64px;height:64px;border-radius:16px;background:#18181b;color:#fff;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">?</div><b id="panel-name" style="font-size:15px;font-weight:900;display:block;color:var(--text);">—</b><span id="panel-email" style="font-size:10px;color:var(--text-3);font-weight:700;direction:ltr;display:block;margin-top:2px;cursor:pointer;" onclick="window.copyText(this.innerText)">—</span><div id="panel-status" style="margin-top:5px;font-size:10px;font-weight:800;"></div><div id="panel-balance" style="margin-top:10px;background:var(--success-bg);color:var(--success-tx);padding:5px 10px;border-radius:8px;font-size:12px;font-weight:900;display:inline-block;">الرصيد: 0 ج</div></div><div class="panel-body"><div class="action-grid"><button class="action-btn info" onclick="window.sendUserInfoCard()"><i class="fa-solid fa-address-card"></i> بطاقة المستخدم</button><button class="action-btn" onclick="window.openUserTransactions(window._chatCtx.uid, window._chatCtx.cid)"><i class="fa-solid fa-receipt" style="color:var(--info-solid)"></i> المعاملات</button><button class="action-btn warning" onclick="window.adminAdjustBalance(window._chatCtx.uid)"><i class="fa-solid fa-wallet"></i> تعديل الرصيد</button><button class="action-btn danger" onclick="window.adminToggleBan(window._chatCtx.uid)"><i class="fa-solid fa-ban"></i> حظر / إلغاء</button><button class="action-btn" onclick="userInfo(window._chatCtx.uid)"><i class="fa-solid fa-user-gear" style="color:var(--purple-solid)"></i> الملف الشخصي</button><button class="action-btn success" onclick="window.sendQuickNote(window._chatCtx.uid)"><i class="fa-solid fa-bell"></i> إشعار سريع</button><button class="action-btn danger" style="background:#7f1d1d;color:#fca5a5;border-color:#991b1b;" onclick="window.banDevice(window._chatCtx.uid)"><i class="fa-solid fa-laptop-circle-xmark"></i> حظر الجهاز</button><button class="action-btn warning" onclick="window.adminAddStrike(window._chatCtx.uid)"><i class="fa-solid fa-triangle-exclamation"></i> إعطاء تحذير</button><button class="action-btn" style="grid-column: 1/-1; display:none;" id="btn-view-post" onclick="viewPrivateInfo(window._chatCtx.postId)"><i class="fa-solid fa-file-shield" style="color:var(--warn-solid)"></i> بيانات إعلان الصفقة</button></div><div class="internal-notes" id="notes-container" style="display:none;"><b style="font-size:11px; color:var(--warn-tx); display:block; margin-bottom:5px;"><i class="fa-solid fa-pen-nib"></i> ملاحظات داخلية (لن يراها المستخدم)</b><textarea id="admin-note-input" style="font-size:11px; height:60px; margin-bottom:5px; padding:6px;" placeholder="اكتب ملاحظة عن هذا المستخدم..."></textarea><button class="btn btn-warning" style="width:100%; font-size:10px; min-height:28px;" onclick="window.saveAdminNote(window._chatCtx.uid)">حفظ الملاحظة</button></div></div></div><div class="chat-shell"><div class="chat-header" style="cursor:pointer;" onclick="togglePanel()"><button class="icon-btn" onclick="event.stopPropagation(); go('chats')" style="width:30px;height:30px;flex-shrink:0"><i class="fa-solid fa-arrow-right" style="font-size:11px"></i></button><div id="chat-avatar-wrap" class="chat-avatar">?</div><div class="chat-info"><div id="chat-title" class="chat-name" style="display:flex;align-items:center;gap:5px;">— <i class="fa-solid fa-circle-info" style="font-size:10px;color:var(--text-4)"></i></div><div id="chat-status" class="chat-status"><span class="status-dot"></span><span>—</span></div></div><div style="display:flex;gap:4px;flex-shrink:0"><span id="fz"></span><span id="cl"></span></div></div><div id="dp"></div><div id="ms" class="chat-messages"></div><div class="chat-input-bar"><input type="file" id="fi" accept="image/*" style="display:none"><button class="icon-btn" id="btn-img" title="صورة"><i class="fa-solid fa-image"></i></button><button class="icon-btn" id="btn-tx" title="معاملة"><i class="fa-solid fa-receipt"></i></button><button class="icon-btn" id="btn-qr" title="ردود سريعة" style="color:var(--warn-tx);background:var(--warn-bg);border-color:var(--warn-bd)"><i class="fa-solid fa-bolt"></i></button><input id="mi" placeholder="اكتب ردك..."><button class="btn btn-primary" id="mb" style="padding:8px 12px;min-height:38px"><i class="fa-solid fa-paper-plane"></i></button></div></div>`;
   window.togglePanel = () => { $('side-panel').classList.toggle('open'); $('panel-overlay').classList.toggle('open'); };
@@ -699,36 +588,14 @@ window.adminAdjustBalance = async (uid) => {
     try { 
         const userSnap = await get(R('users/'+uid));
         const currentBalance = Number(userSnap.val().balance) || 0;
-
-        const {value: opType} = await Swal.fire({
-            title: 'نوع العملية',
-            html: `<p style="margin-bottom:10px; font-size:14px; font-weight:bold;">الرصيد الحالي للمستخدم: <span style="color:green;">${currentBalance} ج</span></p>`,
-            input: 'select',
-            inputOptions: { 'add': 'إضافة رصيد (+)', 'deduct': 'خصم رصيد (-)' },
-            showCancelButton: true, confirmButtonText: 'متابعة', cancelButtonText: 'إلغاء'
-        });
+        const {value: opType} = await Swal.fire({ title: 'نوع العملية', html: `<p style="margin-bottom:10px; font-size:14px; font-weight:bold;">الرصيد الحالي للمستخدم: <span style="color:green;">${currentBalance} ج</span></p>`, input: 'select', inputOptions: { 'add': 'إضافة رصيد (+)', 'deduct': 'خصم رصيد (-)' }, showCancelButton: true, confirmButtonText: 'متابعة', cancelButtonText: 'إلغاء' });
         if (!opType) return;
-
-        const r = await Swal.fire({
-            title: opType === 'add' ? 'المبلغ المراد إضافته' : 'المبلغ المراد خصمه', 
-            input:'number',
-            inputAttributes: { min: 1, max: opType === 'deduct' ? currentBalance : 10000000 },
-            showCancelButton:true,
-            confirmButtonText:'متابعة',
-            cancelButtonText:'إلغاء'
-        });
-        
+        const r = await Swal.fire({ title: opType === 'add' ? 'المبلغ المراد إضافته' : 'المبلغ المراد خصمه', input:'number', inputAttributes: { min: 1, max: opType === 'deduct' ? currentBalance : 10000000 }, showCancelButton:true, confirmButtonText:'متابعة', cancelButtonText:'إلغاء' });
         if(!r.isConfirmed || !r.value) return;
-        
         let n = Math.abs(Math.round(+r.value));
         if(!n || n <= 0) throw new Error('مبلغ غير صالح');
-        
         if (opType === 'deduct') n = -n;
-
-        if ((currentBalance + n) < 0) {
-            throw new Error(`لا يمكن الخصم. الرصيد الحالي ${currentBalance} ج فقط.`);
-        }
-
+        if ((currentBalance + n) < 0) { throw new Error(`لا يمكن الخصم. الرصيد الحالي ${currentBalance} ج فقط.`); }
         const why = await reason('سبب التعديل');
         await confirmPIN('تعديل رصيد '+n);
         await credit(uid, n);
