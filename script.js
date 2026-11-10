@@ -915,7 +915,94 @@ window.buyPro = async () => {
 
 window.showTerms = () => { Swal.fire({ title: 'الشروط والأحكام', html: `<div style="text-align:right; font-size:12px; line-height:1.8; max-height:60vh; overflow-y:auto; padding:10px;" dir="rtl"><b>1. طبيعة المنصة:</b> BLACKP2P هي منصة وسيطة (وسيط) لتسهيل عمليات بيع وشراء الحسابات بين المستخدمين. المنصة لا تمتلك الحسابات ولا تتحمل مسؤولية أي إجراء تتخذه شركات الألعاب (مثل الحظر).<br><br><b>2. الضمان:</b> يتم حجز المبلغ لدى المنصة حتى يقوم المشتري بتأكيد استلام الحساب وتغيير بياناته. بمجرد ضغط المشتري على "تأكيد الاستلام"، يتم تحويل المبلغ للبائع ولا يمكن التراجع.<br><br><b>3. النزاعات:</b> في حال وجود مشكلة، يجب فتح نزاع خلال 24 ساعة من استلام الحساب. الإدارة لها الحق في اتخاذ القرار النهائي بناءً على الأدلة المقدمة.<br><br><b>4. الحسابات المسروقة:</b> يُمنع منعاً باتاً بيع حسابات مسروقة. أي مستخدم يثبت تورطه في ذلك سيتم حظر حسابه نهائياً وتجميد أمواله.<br><br><b>5. المسؤولية:</b> أنت مسؤول عن الحفاظ على سرية بيانات حسابك على المنصة.</div>`, confirmButtonText: 'موافق', width: '90%' }); };
 window.verify = () => { if(!requireAuth()) return; if (VS === 'pending') return bad(new Error('طلبك قيد المراجعة بالفعل، يرجى الانتظار.')); if (me.verified) return bad(new Error('حسابك موثق بالفعل.')); form('توثيق الحساب', '<label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:4px">صورة الهوية</label><input id="f_i" type="file" accept="image/*" style="margin-bottom:10px;font-size:11px;padding:8px"><label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:4px">سيلفي مع الهوية</label><input id="f_s" type="file" accept="image/*" style="font-size:11px;padding:8px">', async () => { const a = await img($('f_i').files[0]); const b = await img($('f_s').files[0]); await set(R('user_verifications/' + me.uid), {idUrl: a, selfieUrl: b, status: 'pending', createdAt: Date.now()}); VS = 'pending'; if (view === 'me') profile(); ok('تم إرسال طلب التوثيق'); }); };
+window.showTermsPage = (type) => {
+  clearU(); view = 'terms';
+  const isTerms = type === 'terms';
+  const title = isTerms ? 'الشروط والأحكام' : 'سياسة الخصوصية';
+  
+  const content = isTerms ? `
+    <h2>1. طبيعة المنصة (الوساطة)</h2>
+    <p>منصة BLACKP2P هي منصة وسيطة تهدف إلى تسهيل عمليات بيع وشراء الحسابات بين المستخدمين. المنصة لا تمتلك الحسابات ولا تتحمل مسؤولية أي إجراء تتخذه شركات الألعاب (مثل الحظر أو تغيير شروط الخدمة).</p>
+    
+    <h2>2. نظام الضمان (Escrow)</h2>
+    <p>عند قيام المشتري بشراء إعلان، يتم خصم المبلغ من محفظته وحجزه لدى المنصة (وليس للبائع). لا يتم تحويل المبلغ للبائع إلا بعد أن يقوم المشتري باستلام الحساب، تغيير بياناته، وتأكيد الاستلام.</p>
+    
+    <h2>3. مسؤوليات البائع</h2>
+    <ul>
+      <li>يجب أن يكون الحساب المعروض ملكاً للبائع بشكل قانوني.</li>
+      <li>يُمنع منعاً باتاً بيع الحسابات المسروقة أو المخترقة. أي مستخدم يثبت تورطه في ذلك سيتم حظر حسابه نهائياً وتجميد أمواله.</li>
+      <li>يجب أن تكون بيانات الحساب (الإيميل وكلمة المرور) صحيحة ومطابقة للواقع.</li>
+    </ul>
 
+    <h2>4. مسؤوليات المشتري</h2>
+    <p>بمجرد تسليم الحساب، يتحمل المشتري مسؤولية تغيير كلمة المرور وربطه بحسابه الشخصي. المنصة لا تتحمل مسؤولية عودة الحساب للبائع في حال لم يقم المشتري بتأمين الحساب.</p>
+
+    <h2>5. النزاعات والاسترداد</h2>
+    <p>في حال وجود مشكلة، يحق للطرفين فتح "نزاع" خلال 24 ساعة من استلام الحساب. فريق الإدارة سيقوم بمراجعة الأدلة (الصور، المحادثات) واتخاذ القرار النهائي. قرار الإدارة ملزم للطرفين.</p>
+
+    <h2>6. العمولات المالية</h2>
+    <p>تفرض المنصة عمولة بسيطة على كل صفقة مكتملة، تُخصم من مبلغ البائع. هذه العمولة تُستخدم لتغطية تكاليف تشغيل المنصة وضمان أمان المعاملات.</p>
+
+    <h2>7. تعليق الحسابات</h2>
+    <p>تحتفظ الإدارة بالحق في تعليق أو حظر أي حساب يخالف القوانين، أو يحاول التلاعب بالنظام، أو يسيء استخدام المنصة، دون إشعار مسبق.</p>
+  ` : `
+    <h2>1. جمع المعلومات</h2>
+    <p>نحن نجمع بعض المعلومات الأساسية مثل (الاسم، البريد الإلكتروني، وصورة الحساب) من خلال تسجيل الدخول بجوجل لتسهيل عملية الدخول. كما نقوم بتسجيل بيانات المتصفح (Device Info) لأغراض أمنية وحماية الحسابات من الاختراق والتلاعب.</p>
+    
+    <h2>2. سرية البيانات المشفرة</h2>
+    <p>بيانات الحسابات المعروضة للبيع (الإيميل وكلمة المرور) يتم تشفيرها فوراً باستخدام خوارزميات مصرفية (AES-256). لا يمكن لأي شخص، بما في ذلك إدارة المنصة، الاطلاع عليها إلا في حالات النزاع وبعد موافقة أحد الطرفين.</p>
+    
+    <h2>3. استخدام المعلومات</h2>
+    <p>نستخدم معلوماتك فقط لتحسين تجربتك على المنصة، وإتمام الصفقات، والتحقق من الهوية (في حالة طلب التوثيق) لمنع عمليات النصب والاحتيال.</p>
+
+    <h2>4. مشاركة البيانات</h2>
+    <p>نحن لا نبيع أو نشارك بياناتك مع أي طرف ثالث. بياناتك محفوظة على خوادم آمنة (Firebase & Cloudflare).</p>
+
+    <h2>5. ملفات تعريف الارتباط (Cookies)</h2>
+    <p>نستخدم التخزين المحلي في متصفحك للحفاظ على تسجيل الدخول وتفضيلاتك (مثل الوضع الليلي أو الفاتح) لكي لا تحتاج لتسجيل الدخول في كل مرة.</p>
+
+    <h2>6. التعديلات على السياسة</h2>
+    <p>نحتفظ بالحق في تحديث سياسة الخصوصية من وقت لآخر. استمرارك في استخدام المنصة يعني موافقتك على السياسة المحدثة.</p>
+  `;
+
+  $('app').innerHTML = `
+  <style>
+    .legal-page { background: #ffffff; color: #1a1a1a; min-height: 100vh; padding: 20px; border-radius: 14px; margin-top: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); font-family: 'Cairo', sans-serif; }
+    .legal-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 20px; }
+    .legal-title { font-size: 22px; font-weight: 900; color: #111827; margin: 0; }
+    .legal-date { font-size: 11px; color: #6b7280; font-weight: 700; margin-top: 4px; }
+    .legal-content h2 { font-size: 15px; font-weight: 900; color: #1f2937; margin-top: 24px; margin-bottom: 8px; background: #f3f4f6; padding: 8px 12px; border-radius: 8px; border-right: 4px solid #18181b; }
+    .legal-content p { font-size: 13px; color: #4b5563; line-height: 1.8; margin-bottom: 12px; text-align: justify; }
+    .legal-content ul { padding-right: 20px; margin-bottom: 12px; }
+    .legal-content li { font-size: 13px; color: #4b5563; line-height: 1.8; margin-bottom: 6px; text-align: justify; }
+    .legal-footer { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+  </style>
+
+  <div class="legal-page">
+      <div class="legal-header">
+          <div>
+              <h1 class="legal-title">${title}</h1>
+              <div class="legal-date">آخر تحديث: نوفمبر 2026</div>
+          </div>
+          <button class="btn btn-ghost" style="border-color:#d1d5db; color:#374151; background:#f9fafb;" onclick="go('feed')"><i class="fa-solid fa-arrow-right"></i> عودة</button>
+      </div>
+
+      <div class="legal-content">
+          <div style="background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:8px; margin-bottom:20px;">
+              <p style="color:#991b1b; font-weight:800; margin:0; font-size:12px;">
+                  <i class="fa-solid fa-circle-info"></i> يرجى قراءة هذه الشروط بعناية. بمجرد استخدامك للمنصة، فإنك توافق على الالتزام بجميع ما ورد فيها.
+              </p>
+          </div>
+          
+          ${content}
+          
+          <div class="legal-footer">
+              جميع الحقوق محفوظة &copy; 2026 BLACKP2P<br>
+              منصة الوساطة الآمنة لبيع وشراء الحسابات.
+          </div>
+      </div>
+  </div>`;
+};
 const ST = {held:'بانتظار التسليم', delivered:'تم التسليم', completed:'مكتملة', cancelled:'ملغية', refunded:'مستردة', disputed:'نزاع'};
 const PS = {pending:'قيد المراجعة', active:'منشور', sold:'مباع', deleted:'محذوف'};
 const GR = {run:['held','delivered','disputed'], done:['completed'], bad:['cancelled','refunded']};
