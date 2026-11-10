@@ -6,7 +6,6 @@ const app=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",authDo
 const auth=getAuth(app),db=getDatabase(app),R=p=>ref(db,p);
 
 const WORKER_URL = "https://late-haze-3fe4.freefierlight1.workers.dev";
-// تم إزالة IMGBB_API_KEY — الصور تُرفع عبر الـ Worker
 
 const $=id=>document.getElementById(id);
 window.$ = $; 
@@ -77,7 +76,6 @@ const compressToBlob = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
     i.src = URL.createObjectURL(f);
 });
 
-// تم تعديل دالة الرفع لتستخدم الـ Worker بدلاً من ImgBB المباشر
 const img = async f => {
     const file = Security.file(f);
     const blob = await compressToBlob(file);
@@ -96,6 +94,93 @@ const initials=n=>{n=String(n||'?').trim();const a=n.split(' ');return (a[0]?.[0
 
 let me=null,isAdmin=false,S={},P={},N={},T={},view='feed',VS='',OT='run',OD=[],MP=[],U=[],GU=[],shown=new Set(),F={q:'',game:'',sort:'new'};
 let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized=false;
+
+// ==========================================
+// نظام عرض الصور (Facebook Lightbox)
+// ==========================================
+let currentLbImages = [];
+let currentLbIndex = 0;
+let touchStartX = 0;
+
+window.openLightbox = (images, index = 0) => {
+    if (!images || images.length === 0) return;
+    currentLbImages = images;
+    currentLbIndex = index;
+
+    let lb = document.getElementById('fb-lightbox');
+    if (!lb) {
+        lb = document.createElement('div');
+        lb.id = 'fb-lightbox';
+        lb.className = 'fb-lightbox';
+        lb.innerHTML = `
+            <div class="fb-lb-close fb-lb-btn" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></div>
+            <div class="fb-lb-counter" id="fb-lb-counter"></div>
+            <div class="fb-lb-prev fb-lb-btn" id="fb-lb-prev" onclick="navLightbox(-1)"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="fb-lb-next fb-lb-btn" id="fb-lb-next" onclick="navLightbox(1)"><i class="fa-solid fa-chevron-left"></i></div>
+            <div class="fb-lightbox-img-wrap" id="fb-lb-img-wrap" onclick="if(event.target.tagName !== 'IMG') closeLightbox()">
+                <img id="fb-lb-img" src="" alt="">
+            </div>
+        `;
+        document.body.appendChild(lb);
+
+        const wrap = document.getElementById('fb-lb-img-wrap');
+        wrap.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
+        wrap.addEventListener('touchend', e => {
+            let touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) navLightbox(1);
+            if (touchEndX - touchStartX > 50) navLightbox(-1);
+        }, {passive: true});
+        
+        document.addEventListener('keydown', e => {
+            if (!lb.classList.contains('active')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') navLightbox(-1);
+            if (e.key === 'ArrowRight') navLightbox(1);
+        });
+    }
+
+    updateLightboxImage();
+    lb.classList.add('active');
+};
+
+window.closeLightbox = () => {
+    const lb = document.getElementById('fb-lightbox');
+    if (lb) lb.classList.remove('active');
+};
+
+window.navLightbox = (dir) => {
+    currentLbIndex += dir;
+    if (currentLbIndex < 0) currentLbIndex = currentLbImages.length - 1;
+    if (currentLbIndex >= currentLbImages.length) currentLbIndex = 0;
+    updateLightboxImage();
+};
+
+function updateLightboxImage() {
+    const imgEl = document.getElementById('fb-lb-img');
+    const counter = document.getElementById('fb-lb-counter');
+    const prevBtn = document.getElementById('fb-lb-prev');
+    const nextBtn = document.getElementById('fb-lb-next');
+
+    imgEl.style.opacity = 0;
+    setTimeout(() => {
+        imgEl.src = currentLbImages[currentLbIndex];
+        imgEl.style.opacity = 1;
+    }, 50);
+    
+    imgEl.style.transition = 'opacity 0.2s';
+    counter.textContent = `${currentLbIndex + 1} / ${currentLbImages.length}`;
+    
+    if (currentLbImages.length <= 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        counter.style.display = 'none';
+    } else {
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+        counter.style.display = 'block';
+    }
+}
+// ==========================================
 
 const clearU = () => { U.forEach(f => f()); U = []; };
 const clearGU = () => { GU.forEach(f => f()); GU = []; };
@@ -315,19 +400,21 @@ function renderFeed() {
     const photos = Security.img(p.photos); 
     const tr = trust(p); 
     const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
-    
+    const phJson = JSON.stringify(photos).replace(/"/g, '&quot;');
+
+    // شبكة الصور في السوق
     let gridHtml = '';
     if (photos.length === 0) {
         gridHtml = `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`;
     } else if (photos.length === 1) {
-        gridHtml = `<img src="${photos[0]}" class="post-card-image" loading="lazy" alt="">`;
+        gridHtml = `<div class="post-media-grid single"><div class="post-media-item single" onclick="event.stopPropagation(); openLightbox(${phJson}, 0)"><img src="${photos[0]}" loading="lazy"></div></div>`;
     } else {
         const count = Math.min(photos.length, 4);
-        gridHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2px; width:100%; height:100%;">
+        gridHtml = `<div class="post-media-grid multi">
             ${photos.slice(0, count).map((img, i) => `
-                <div style="position:relative; width:100%; height:100%; overflow:hidden;">
-                    <img src="${img}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
-                    ${i === 3 && photos.length > 4 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:900;">+${photos.length - 4}</div>` : ''}
+                <div class="post-media-item multi" onclick="event.stopPropagation(); openLightbox(${phJson}, ${i})">
+                    <img src="${img}" loading="lazy">
+                    ${i === 3 && photos.length > 4 ? `<div class="post-media-more">+${photos.length - 4}</div>` : ''}
                 </div>
             `).join('')}
         </div>`;
@@ -363,183 +450,7 @@ function renderFeed() {
 }
 
 window.toggleFav = async postId => { if (!me) return signIn(); try { const r = R(`favorites/${me.uid}/${postId}`); const snap = await get(r); if (snap.exists()) { await remove(r); ok('أزيلت من المفضلة'); } else { await set(r, true); ok('أضيفت للمفضلة'); } } catch(e) { bad(e); } };
-// ==========================================
-// نظام عرض الصور الاحترافي (Facebook Lightbox)
-// ==========================================
-let currentLbImages = [];
-let currentLbIndex = 0;
-let touchStartX = 0;
 
-window.openLightbox = (images, index = 0) => {
-    if (!images || images.length === 0) return;
-    currentLbImages = images;
-    currentLbIndex = index;
-
-    let lb = document.getElementById('fb-lightbox');
-    if (!lb) {
-        lb = document.createElement('div');
-        lb.id = 'fb-lightbox';
-        lb.className = 'fb-lightbox';
-        lb.innerHTML = `
-            <div class="fb-lb-close fb-lb-btn" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></div>
-            <div class="fb-lb-counter" id="fb-lb-counter"></div>
-            <div class="fb-lb-prev fb-lb-btn" id="fb-lb-prev" onclick="navLightbox(-1)"><i class="fa-solid fa-chevron-right"></i></div>
-            <div class="fb-lb-next fb-lb-btn" id="fb-lb-next" onclick="navLightbox(1)"><i class="fa-solid fa-chevron-left"></i></div>
-            <div class="fb-lightbox-img-wrap" id="fb-lb-img-wrap" onclick="if(event.target.tagName !== 'IMG') closeLightbox()">
-                <img id="fb-lb-img" src="" alt="">
-            </div>
-        `;
-        document.body.appendChild(lb);
-
-        // دعم السحب باللمس (Swipe)
-        const wrap = document.getElementById('fb-lb-img-wrap');
-        wrap.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
-        wrap.addEventListener('touchend', e => {
-            let touchEndX = e.changedTouches[0].screenX;
-            if (touchStartX - touchEndX > 50) navLightbox(1); // سحب لليسار
-            if (touchEndX - touchStartX > 50) navLightbox(-1); // سحب لليمين
-        }, {passive: true});
-        
-        // دعم لوحة المفاتيح
-        document.addEventListener('keydown', e => {
-            if (!lb.classList.contains('active')) return;
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowLeft') navLightbox(-1);
-            if (e.key === 'ArrowRight') navLightbox(1);
-        });
-    }
-
-    updateLightboxImage();
-    lb.classList.add('active');
-};
-
-window.closeLightbox = () => {
-    const lb = document.getElementById('fb-lightbox');
-    if (lb) lb.classList.remove('active');
-};
-
-window.navLightbox = (dir) => {
-    currentLbIndex += dir;
-    if (currentLbIndex < 0) currentLbIndex = currentLbImages.length - 1;
-    if (currentLbIndex >= currentLbImages.length) currentLbIndex = 0;
-    updateLightboxImage();
-};
-
-function updateLightboxImage() {
-    const imgEl = document.getElementById('fb-lb-img');
-    const counter = document.getElementById('fb-lb-counter');
-    const prevBtn = document.getElementById('fb-lb-prev');
-    const nextBtn = document.getElementById('fb-lb-next');
-
-    imgEl.style.opacity = 0;
-    setTimeout(() => {
-        imgEl.src = currentLbImages[currentLbIndex];
-        imgEl.style.opacity = 1;
-    }, 50);
-    
-    imgEl.style.transition = 'opacity 0.2s';
-
-    counter.textContent = `${currentLbIndex + 1} / ${currentLbImages.length}`;
-    
-    if (currentLbImages.length <= 1) {
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-        counter.style.display = 'none';
-    } else {
-        prevBtn.style.display = 'flex';
-        nextBtn.style.display = 'flex';
-        counter.style.display = 'block';
-    }
-}
-window.openPost = async id => {
-  try {
-    clearU(); view = 'post'; 
-    const p = (await get(R('posts/' + id))).val(); 
-    if (!p) return go('feed');
-    
-    // جلب حالة الإعجاب وتقييمات البائع
-    const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); 
-    const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); 
-    const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; 
-    T[p.sellerId] = avg;
-    
-    const ph = Security.img(p.photos); 
-    const mine = p.sellerId === me.uid; 
-    const tr = trust(p); 
-    const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
-    
-    // تحويل مصفوفة الصور إلى نص JSON آمن لاستخدامه في دالة الفتح
-    const phJson = JSON.stringify(ph).replace(/"/g, '&quot;');
-
-    // ==========================================
-    // تصميم شبكة الصور الاحترافية (Facebook Style)
-    // ==========================================
-    let imageGridHtml = '';
-    if (ph.length === 0) {
-        imageGridHtml = `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px;margin-bottom:14px;"><i class="fa-regular fa-image"></i></div>`;
-    } else if (ph.length === 1) {
-        imageGridHtml = `
-        <div class="post-media-grid single" style="margin-bottom:14px;">
-            <div class="post-media-item single" onclick="openLightbox(${phJson}, 0)">
-                <img src="${ph[0]}" alt="">
-            </div>
-        </div>`;
-    } else {
-        const count = Math.min(ph.length, 4);
-        imageGridHtml = `
-        <div class="post-media-grid multi" style="margin-bottom:14px;">
-            ${ph.slice(0, count).map((img, i) => `
-                <div class="post-media-item multi" onclick="openLightbox(${phJson}, ${i})">
-                    <img src="${img}" alt="">
-                    ${i === 3 && ph.length > 4 ? `<div class="post-media-more">+${ph.length - 4}</div>` : ''}
-                </div>
-            `).join('')}
-        </div>`;
-    }
-
-    // ==========================================
-    // بناء واجهة صفحة الإعلان
-    // ==========================================
-    $('app').innerHTML = `
-    <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px">
-        <i class="fa-solid fa-arrow-right"></i> العودة للسوق
-    </button>
-    
-    <div class="card" style="padding:14px;overflow:hidden;padding-bottom:80px;"> 
-      
-      ${imageGridHtml}
-
-      <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-top:14px;margin-bottom:10px">
-        <div style="flex:1;min-width:0">
-          <h1 style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:6px">${E(p.game)}</h1>
-          <div style="display:flex; gap:6px;">
-              <span class="badge badge-neutral">${E(p.server)}</span>
-              <span class="badge badge-info">${E(p.linkType)}</span>
-          </div>
-        </div>
-        <div style="text-align:left;flex-shrink:0">
-          <b style="font-size:26px;font-weight:900;color:var(--success-tx);display:block;letter-spacing:-0.5px;">${p.price} <span style="font-size:14px;font-weight:700">ج</span></b>
-          <button id="lk" style="margin-top:6px;padding:4px 12px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text-3); width:100%;" onclick="like('${id}')"></button>
-        </div>
-      </div>
-      
-      <div style="background:var(--success-bg); border:1px solid var(--success-bd); border-radius:10px; padding:10px; display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <i class="fa-solid fa-shield-check" style="color:var(--success-tx); font-size:18px;"></i>
-          <div>
-              <b style="font-size:12px; color:var(--success-tx); display:block;">ضمان BLACKP2P</b>
-              <span style="font-size:10px; color:var(--success-tx); font-weight:700;">أموالك محجوزة بأمان حتى تستلم الحساب وتغيّر بياناته.</span>
-          </div>
-      </div>
-
-      <div style="padding-top:12px;border-top:1px solid var(--border);margin-bottom:14px">
-        <b style="font-size:14px;font-weight:900;color:var(--text);display:block;margin-bottom:8px"><i class="fa-solid fa-align-right"></i> وصف الحساب</b>
-        <p style="font-size:13px;color:var(--text-2);font-weight:600;line-height:1.8;white-space:pre-line; background:var(--surface-2); padding:10px; border-radius:10px;">${E(p.desc)}</p>
-      </div>
-
-      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <b style="font-size:13px;font-weight:900;color:var(--text)">البائع</b>
-            <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;min-height:28px;border-color:var(--warn-bd);color:var(--warn-tx);background:var(--warn-bg)" onclick="rate('${p.sellerId}')">
 window.openPost = async id => {
   try {
     clearU(); view = 'post'; 
@@ -555,11 +466,8 @@ window.openPost = async id => {
     const mine = p.sellerId === me.uid; 
     const tr = trust(p); 
     const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
-    
-    // تحويل الصور إلى صيغة آمنة لتمريرها في الأزرار
     const phJson = JSON.stringify(ph).replace(/"/g, '&quot;');
 
-    // 1. إعادة السلايدر الأفقي
     const sliderHtml = ph.length > 0 ? `
         <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:14px;">
             <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
@@ -639,11 +547,8 @@ window.openPost = async id => {
     window._lk = {liked, n: p.likeCount || 0}; 
     paintLike(liked, p.likeCount || 0);
 
-    // 2. دالة المعاينة الطولية (مثل فيسبوك)
     window.previewAllImages = () => {
         if(ph.length === 0) return;
-        
-        // بناء قائمة صور طولية نظيفة
         const imagesHtml = ph.map((img, i) => `
             <div style="width:100%; margin-bottom:12px; background:var(--surface-2); display:flex; justify-content:center; border-radius:10px; overflow:hidden; border:1px solid var(--border);">
                 <img src="${img}" style="width:100%; max-height:75vh; object-fit:contain; cursor:zoom-in; display:block;" onclick="closeSwalAndOpenLightbox(${phJson}, ${i})">
@@ -662,27 +567,17 @@ window.openPost = async id => {
         });
     };
 
-    // دالة وسيطة لإغلاق النافذة الطولية وفتح الصورة المكبرة
     window.closeSwalAndOpenLightbox = (imgs, index) => {
         Swal.close();
-        // تأخير بسيط لضمان إغلاق النافذة قبل فتح الصورة المكبرة
         setTimeout(() => { openLightbox(imgs, index); }, 150);
     };
 
   } catch(e) { bad(e); }
 };
+
 const paintLike = (l, n) => { $('lk').innerHTML = `<i class="fa-${l ? 'solid text-red' : 'regular'} fa-heart" style="${l ? 'color:#dc2626' : ''}"></i> ${n}`; };
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
-window.zoom = u => Swal.fire({ 
-    imageUrl: u, 
-    imageWidth: '100%', 
-    imageHeight: 'auto', 
-    width: '100vw',
-    padding: '0', 
-    showConfirmButton: false, 
-    showCloseButton: true, 
-    background: '#0a0a0a' 
-});
+
 window.buy = async function(id) {
   if(!requireAuth()) return;
   try {
@@ -750,7 +645,6 @@ window.add = function() {
           photos.push(await img(f));
       }
       
-      // إرسال بيانات الحساب للسيرفر لتشفيرها (لا يوجد مفتاح في الواجهة)
       Swal.fire({title:'جاري تأمين بيانات الحساب...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
       const idToken = await auth.currentUser.getIdToken();
       const encryptRes = await fetch(WORKER_URL + "/encrypt", {
@@ -865,7 +759,7 @@ window.openChat = cid => {
   $('mi').oninput = () => { if (Date.now() - last > 2500) { last = Date.now(); set(R(`chats/${cid}/typing/${me.uid}`), last).catch(()=>{}); } };
   
   const renderMsg = m => {
-    if (m.type === 'image' && (m.imageUrl.startsWith('http') || /^data:image\//.test(m.imageUrl))) { return `<img src="${m.imageUrl}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="zoom(this.src)">`; }
+    if (m.type === 'image' && (m.imageUrl.startsWith('http') || /^data:image\//.test(m.imageUrl))) { return `<img src="${m.imageUrl}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="openLightbox(['${m.imageUrl}'], 0)">`; }
     else if (m.type === 'transaction') { return `<div style="width:100%;display:flex;justify-content:center;margin:6px 0"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:260px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span><b style="color:${m.status==='approved'||m.status==='completed'?'var(--success-tx)':'var(--warn-tx)'}">${m.status}</b></div></div></div>`; }
     else if (m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
     else if (m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble" style="white-space:pre-line;text-align:right;direction:rtl;"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
