@@ -1,4 +1,4 @@
-import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut, reauthenticateWithPopup} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getDatabase,ref,get,set,update,push,onValue,runTransaction,remove,query,orderByChild,equalTo,limitToLast} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
@@ -118,11 +118,44 @@ function showMaintenanceScreen(){
 function showSignInScreen(){
     $('nav').classList.add('hidden');
     $('app').innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:20px;text-align:center">
-      <div style="width:80px;height:80px;border-radius:22px;background:#18181b;color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;margin-bottom:20px"><i class="fa-solid fa-shield-halved"></i></div>
-      <h1 style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:6px">سوق الحسابات الآمن</h1>
-      <p style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:24px;max-width:300px;line-height:1.6">الدفع محجوز لدى المنصة حتى تستلم حسابك وتتأكد منه 100%</p>
-      <button class="btn btn-primary" onclick="signIn()" style="width:100%;max-width:320px;padding:14px;font-size:14px"><i class="fa-brands fa-google"></i> الدخول بحساب Google</button>
+    <style>
+        .auth-container { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:85vh; padding:20px; background: radial-gradient(circle at 50% 0%, #1a0b2e 0%, #0a0a0a 70%); position: relative; overflow: hidden; border-radius: 14px; margin-top: 10px; }
+        .auth-glow { position:absolute; width:300px; height:300px; background:rgba(139, 92, 246, 0.2); filter:blur(80px); top:-50px; z-index:0; }
+        .auth-logo { width:90px; height:90px; background:#18181b; border:2px solid #8b5cf6; border-radius:24px; display:flex; align-items:center; justify-content:center; font-size:40px; color:#fff; margin-bottom:20px; box-shadow: 0 0 30px rgba(139, 92, 246, 0.4); z-index:1; }
+        .auth-title { font-size:26px; font-weight:900; color:#fff; margin-bottom:8px; z-index:1; text-shadow: 0 2px 10px rgba(139,92,246,0.5); }
+        .auth-sub { font-size:13px; color:#a1a1aa; font-weight:700; margin-bottom:30px; z-index:1; text-align:center; max-width:280px; line-height:1.6; }
+        .auth-card { width:100%; max-width:340px; background:rgba(23,23,26,0.6); backdrop-filter:blur(15px); border:1px solid rgba(139,92,246,0.3); border-radius:20px; padding:24px; z-index:1; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+        .btn-social { width:100%; padding:14px; border-radius:12px; font-size:14px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px; border:none; cursor:pointer; transition:all 0.3s; margin-bottom:12px; position:relative; overflow:hidden; }
+        .btn-google { background:#ffffff; color:#0f172a; }
+        .btn-google:hover { background:#f1f5f9; transform:translateY(-2px); box-shadow:0 4px 15px rgba(255,255,255,0.2); }
+        .btn-facebook { background:#1877F2; color:#ffffff; }
+        .btn-facebook:hover { background:#166fe5; transform:translateY(-2px); box-shadow:0 4px 15px rgba(24,119,242,0.4); }
+        .auth-features { display:flex; justify-content:space-around; width:100%; max-width:340px; margin-top:25px; z-index:1; }
+        .auth-feat { display:flex; flex-direction:column; align-items:center; gap:6px; color:#a1a1aa; font-size:10px; font-weight:800; }
+        .auth-feat i { font-size:16px; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:8px; border-radius:50%; }
+    </style>
+    
+    <div class="auth-container">
+        <div class="auth-glow"></div>
+        
+        <div class="auth-logo">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        
+        <h1 class="auth-title">BLACKP2P</h1>
+        <p class="auth-sub">منصة الوساطة الآمنة لبيع وشراء الحسابات. أموالك محمية 100%.</p>
+        
+        <div class="auth-card">
+            <button class="btn-social btn-google" onclick="signIn()">
+                <i class="fa-brands fa-google" style="font-size:18px;"></i> الدخول بحساب Google
+            </button>
+        </div>
+        
+        <div class="auth-features">
+            <div class="auth-feat"><i class="fa-solid fa-lock"></i> تشفير مصرفي</div>
+            <div class="auth-feat"><i class="fa-solid fa-bolt"></i> سرعة معالجة</div>
+            <div class="auth-feat"><i class="fa-solid fa-star"></i> بائعون موثقون</div>
+        </div>
     </div>`;
 }
 
@@ -133,7 +166,6 @@ window.go = v => {
     ({feed, add, chats, notes, wallet, me: profile, orders, chat: null}[v]||feed)();
 };
 
-// استخدام Popup بدلاً من Redirect لضمان العمل
 window.signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => {
     if(e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
         bad(new Error('المتصفح يمنع النوافذ المنبثقة. يرجى فتح الرابط في متصفح كروم (وليس من داخل فيسبوك).'));
@@ -197,7 +229,7 @@ onAuthStateChanged(auth, async u => {
 
     const snap = await get(r);
     if (!snap.exists()) {
-      set(r, {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, verified: false, role: 'user', suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now()})
+      set(r, {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now()})
         .catch(err => console.log("Error saving new user:", err));
     } else {
       update(r, {lastSeen: Date.now(), deviceInfo: navigator.userAgent.slice(0,120)}).catch(()=>{});
@@ -281,28 +313,51 @@ function renderFeed() {
   if (a.length === 0) { $('list').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-4);"><i class="fa-regular fa-face-frown" style="font-size: 32px; margin-bottom: 8px;"></i><p>لا توجد إعلانات مطابقة</p></div>`; return; }
   
   $('list').innerHTML = a.map(p => {
-    const photos = Security.img(p.photos); const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
-    return `<div class="post-card" onclick="openPost('${p.id}')">
-      <div class="post-img-wrap">
-        ${photos[0] ? `<img src="${photos[0]}" class="post-card-image" loading="lazy" alt="">` : `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`}
-        <div class="post-price-badge">${p.price} ج</div>
+    const photos = Security.img(p.photos); 
+    const tr = trust(p); 
+    const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
+    
+    // تصميم شبكة الصور في السوق
+    let gridHtml = '';
+    if (photos.length === 0) {
+        gridHtml = `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`;
+    } else if (photos.length === 1) {
+        gridHtml = `<img src="${photos[0]}" class="post-card-image" loading="lazy" alt="">`;
+    } else {
+        // عرض حتى 4 صور في شبكة
+        const count = Math.min(photos.length, 4);
+        gridHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2px; width:100%; height:100%;">
+            ${photos.slice(0, count).map((img, i) => `
+                <div style="position:relative; width:100%; height:100%; overflow:hidden;">
+                    <img src="${img}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+                    ${i === 3 && photos.length > 4 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:900;">+${photos.length - 4}</div>` : ''}
+                </div>
+            `).join('')}
+        </div>`;
+    }
+
+    return `<div class="post-card" onclick="openPost('${p.id}')" style="display:flex; flex-direction:column; position:relative;">
+      <div class="post-img-wrap" style="aspect-ratio:16/12; background:var(--surface-2);">
+        ${gridHtml}
+        <div class="post-price-badge" style="font-size:14px; padding:4px 10px;">${p.price} ج</div>
         ${p.featured ? '<div class="post-featured-badge"><i class="fa-solid fa-star"></i> مميز</div>' : ''}
       </div>
-      <div class="post-body">
+      <div class="post-body" style="padding:12px;">
         <div>
-          <div style="font-size:13px;font-weight:900;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.game)}</div>
-          <div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--text-3);margin-bottom:8px">
-            <span class="badge badge-neutral" style="padding:1px 5px">${E(p.server)}</span>
-            <span>•</span>
-            <span>${ago(p.createdAt)}</span>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px;">
+              <div style="font-size:14px;font-weight:900;color:var(--text);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.game)}</div>
+              <span class="badge badge-neutral" style="padding:1px 6px; font-size:9px;">${E(p.server)}</span>
+          </div>
+          <div style="font-size:11px; color:var(--text-3); font-weight:600; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.5; margin-bottom:10px;">
+              ${E(p.desc)}
           </div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border)">
-          <div style="display:flex;align-items:center;gap:5px;min-width:0">
-            <div class="avatar-initial">${E(initials(p.sellerName))}</div>
-            <span style="font-size:10.5px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:6px;min-width:0">
+            <div class="avatar-initial" style="width:24px; height:24px; font-size:10px;">${E(initials(p.sellerName))}</div>
+            <span style="font-size:11px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span>
           </div>
-          <span class="trust-meter ${trc}"><span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>${tr}%</span>
+          <span class="trust-meter ${trc}" style="font-size:9px; padding:2px 6px;"><i class="fa-solid fa-shield-halved"></i> ${tr}%</span>
         </div>
       </div>
     </div>`;
@@ -318,57 +373,70 @@ window.openPost = async id => {
     const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; T[p.sellerId] = avg;
     const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const mainImg = ph.length > 0 ? ph[0] : null; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
+    // سلايدر الصور المحسن
     const sliderHtml = ph.length > 0 ? `
-        <div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:8px;padding-bottom:8px;margin:0 -12px;padding-left:12px;padding-right:12px;">
-            ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;max-height:400px;border-radius:12px;background:var(--surface-2);cursor:pointer;" onclick="zoom('${img}')">`).join('')}
+        <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000;">
+            <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
+                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:320px;background:var(--surface-2);" onclick="zoom('${img}')">`).join('')}
+            </div>
         </div>
+        ${ph.length > 1 ? `
+        <div style="display:flex; gap:6px; overflow-x:auto; padding:10px 0; scrollbar-width:none;" class="hide-scroll">
+            ${ph.map(img => `<img src="${img}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; border:1px solid var(--border); cursor:pointer; flex-shrink:0;" onclick="document.getElementById('post-slider').scrollTo({left: document.getElementById('post-slider').scrollWidth * ${ph.indexOf(img)} / ${ph.length}, behavior: 'smooth'})">`).join('')}
+        </div>` : ''}
     ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
 
     $('app').innerHTML = `
-    <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة</button>
+    <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
     
     <div class="card" style="padding:14px;overflow:hidden;padding-bottom:80px;"> 
       ${sliderHtml}
 
       <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-top:14px;margin-bottom:10px">
         <div style="flex:1;min-width:0">
-          <b style="font-size:20px;font-weight:900;color:var(--text);display:block;margin-bottom:6px">${E(p.game)}</b>
-          <span class="badge badge-neutral">${E(p.server)}</span>
+          <h1 style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:6px">${E(p.game)}</h1>
+          <div style="display:flex; gap:6px;">
+              <span class="badge badge-neutral">${E(p.server)}</span>
+              <span class="badge badge-info">${E(p.linkType)}</span>
+          </div>
         </div>
         <div style="text-align:left;flex-shrink:0">
-          <b style="font-size:24px;font-weight:900;color:var(--success-tx);display:block">${p.price} <span style="font-size:12px;font-weight:700">ج</span></b>
-          <button id="lk" style="margin-top:6px;padding:4px 12px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text-3)" onclick="like('${id}')"></button>
+          <b style="font-size:26px;font-weight:900;color:var(--success-tx);display:block;letter-spacing:-0.5px;">${p.price} <span style="font-size:14px;font-weight:700">ج</span></b>
+          <button id="lk" style="margin-top:6px;padding:4px 12px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text-3); width:100%;" onclick="like('${id}')"></button>
         </div>
       </div>
       
-      <div style="padding-top:12px;border-top:1px solid var(--border);margin-bottom:14px">
-        <b style="font-size:13px;font-weight:900;color:var(--text);display:block;margin-bottom:6px">الوصف</b>
-        <p style="font-size:13px;color:var(--text-2);font-weight:600;line-height:1.7;white-space:pre-line">${E(p.desc)}</p>
+      <div style="background:var(--success-bg); border:1px solid var(--success-bd); border-radius:10px; padding:10px; display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <i class="fa-solid fa-shield-check" style="color:var(--success-tx); font-size:18px;"></i>
+          <div>
+              <b style="font-size:12px; color:var(--success-tx); display:block;">ضمان BLACKP2P</b>
+              <span style="font-size:10px; color:var(--success-tx); font-weight:700;">أموالك محجوزة بأمان حتى تستلم الحساب وتغيّر بياناته.</span>
+          </div>
       </div>
-      
-      <div class="info-grid" style="margin-bottom:14px">
-        <div class="info-cell"><span class="info-label">نوع الربط</span><span class="info-value" style="font-size:12px">${E(p.linkType)}</span></div>
-        <div class="info-cell"><span class="info-label">السيرفر</span><span class="info-value" style="font-size:12px">${E(p.server)}</span></div>
+
+      <div style="padding-top:12px;border-top:1px solid var(--border);margin-bottom:14px">
+        <b style="font-size:14px;font-weight:900;color:var(--text);display:block;margin-bottom:8px"><i class="fa-solid fa-align-right"></i> وصف الحساب</b>
+        <p style="font-size:13px;color:var(--text-2);font-weight:600;line-height:1.8;white-space:pre-line; background:var(--surface-2); padding:10px; border-radius:10px;">${E(p.desc)}</p>
       </div>
 
       <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <b style="font-size:12px;font-weight:900;color:var(--text)">معلومات البائع</b>
+            <b style="font-size:13px;font-weight:900;color:var(--text)">البائع</b>
             <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;min-height:28px;border-color:var(--warn-bd);color:var(--warn-tx);background:var(--warn-bg)" onclick="rate('${p.sellerId}')">
-                <i class="fa-solid fa-star"></i> تقييم البائع
+                <i class="fa-solid fa-star"></i> تقييم
             </button>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-            <div class="avatar-initial" style="width:44px;height:44px;font-size:16px">${E(initials(p.sellerName))}</div>
+            <div class="avatar-initial" style="width:46px;height:46px;font-size:18px">${E(initials(p.sellerName))}</div>
             <div style="flex:1;min-width:0">
                 <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
-                    <b style="font-size:14px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b>
-                    ${p.sellerVerified ? '<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:12px"></i>' : ''}
+                    <b style="font-size:15px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b>
+                    ${p.sellerVerified ? '<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:13px"></i>' : ''}
                 </div>
-                <span style="font-size:10px;color:var(--text-3);font-weight:700">عضو منذ ${new Date(p.sellerSince||Date.now()).toLocaleDateString('ar-EG')}</span>
+                <span style="font-size:11px;color:var(--text-3);font-weight:700">عضو منذ ${new Date(p.sellerSince||Date.now()).toLocaleDateString('ar-EG')}</span>
             </div>
             <div style="text-align:center">
-                <span class="trust-meter ${trc}" style="margin-bottom:4px"><span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>${tr}% ثقة</span>
+                <span class="trust-meter ${trc}" style="margin-bottom:4px; font-size:10px;"><i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة</span>
                 <span class="info-value" style="color:var(--warn-tx);font-size:12px;display:block">${avg ? '⭐ ' + avg.toFixed(1) : 'لا يوجد تقييم'}</span>
             </div>
         </div>
@@ -377,10 +445,10 @@ window.openPost = async id => {
 
     ${p.status === 'active' && !mine ? `
     <div style="position:fixed;bottom:60px;left:0;right:0;padding:10px 15px;background:var(--glass-strong);backdrop-filter:blur(10px);border-top:1px solid var(--border);z-index:40;max-width:640px;margin:0 auto;">
-        <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;box-shadow:var(--shadow-lg);" onclick="buy('${id}')">
-            <i class="fa-solid fa-shield-halved"></i> شراء بضمان المنصة (${p.price} ج)
+        <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;border-radius:12px;box-shadow:var(--shadow-lg);font-weight:900;" onclick="buy('${id}')">
+            <i class="fa-solid fa-shield-halved"></i> شراء الآن (${p.price} ج)
         </button>
-    </div>` : `<p style="text-align:center;font-size:12px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
+    </div>` : `<p style="text-align:center;font-size:13px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
     
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
   } catch(e) { bad(e); }
