@@ -85,39 +85,34 @@ input:focus,textarea:focus,select:focus{border-color:var(--text-3);background:va
 .chip{display:inline-flex;align-items:center;padding:7px 14px;border-radius:20px;font-size:11.5px;font-weight:800;background:var(--surface);border:1px solid var(--border);color:var(--text-3);white-space:nowrap;flex-shrink:0;min-height:34px}
 .chip.active{background:var(--text);color:#fff;border-color:var(--text)}
 html.dark .chip.active{background:#fafafa;color:#0a0a0a;border-color:#fafafa}
-
 /* =========================================
-   5. تصميم شبكة الصور في السوق (Feed Post Grid)
+   تصميم شبكة الصور في السوق (Feed Post Grid)
    ========================================= */
-.posts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-@media (max-width: 480px) { .posts-grid { grid-template-columns: 1fr; } }
-.post-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; box-shadow: var(--shadow); }
-.post-card:hover { transform: translateY(-2px); border-color: var(--border-2); box-shadow: var(--shadow-lg); }
-.post-img-wrap { position: relative; width: 100%; aspect-ratio: 16/11; background: var(--surface-2); overflow: hidden; }
-.post-card-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-.post-card:hover .post-card-image { transform: scale(1.03); }
-.post-card-image-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-4); font-size: 24px; }
-.post-price-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); color: #fff; padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 900; }
-.post-featured-badge { position: absolute; top: 8px; right: 8px; background: var(--warn-solid); color: #fff; padding: 2px 7px; border-radius: 6px; font-size: 9.5px; font-weight: 900; display: flex; align-items: center; gap: 3px; }
-.post-body { padding: 10px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
-.avatar-initial { width: 22px; height: 22px; border-radius: 6px; background: #18181b; color: #fff; font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-html.dark .avatar-initial { background: #fafafa; color: #0a0a0a; }
-.trust-meter { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 5px; }
-.trust-high { background: var(--success-bg); color: var(--success-tx); border: 1px solid var(--success-bd); }
-.trust-mid { background: var(--warn-bg); color: var(--warn-tx); border: 1px solid var(--warn-bd); }
-.trust-low { background: var(--danger-bg); color: var(--danger-tx); border: 1px solid var(--danger-bd); }
+.post-img-wrap { position: relative; width: 100%; height: 220px; background: var(--surface-2); overflow: hidden; border-radius: 12px 12px 0 0; }
+@media (min-width: 640px) { .post-img-wrap { height: 260px; } }
 
-/* شبكة الصور المصغرة (للسوق) */
-.post-media-grid { display: grid; gap: 2px; width: 100%; border-radius: 12px; overflow: hidden; background: var(--surface-2); }
+.post-media-grid { display: grid; gap: 2px; width: 100%; height: 100%; background: var(--surface-3); }
 .post-media-grid.single { grid-template-columns: 1fr; }
-.post-media-grid.multi { grid-template-columns: 1fr 1fr; }
+.post-media-grid.multi { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
 .post-media-item { position: relative; width: 100%; height: 100%; cursor: pointer; overflow: hidden; display: flex; }
 .post-media-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
 .post-media-item:hover img { transform: scale(1.03); }
-.post-media-item.single { aspect-ratio: 16/10; }
-.post-media-item.multi { aspect-ratio: 1/1; }
-.post-media-more { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26px; font-weight: 900; pointer-events: none; }
 
+.post-media-more { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; font-weight: 900; pointer-events: none; }
+
+/* =========================================
+   شاشة عرض الصور المكبرة (Lightbox)
+   ========================================= */
+.fb-lightbox { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; backdrop-filter: blur(5px); }
+.fb-lightbox.active { opacity: 1; pointer-events: auto; }
+.fb-lightbox-img-wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.fb-lightbox-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; transition: transform 0.1s ease-out; touch-action: none; }
+.fb-lb-btn { position: absolute; width: 44px; height: 44px; background: rgba(255,255,255,0.1); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: 0.2s; z-index: 100000; border: 1px solid rgba(255,255,255,0.2); }
+.fb-lb-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.1); }
+.fb-lb-close { top: 20px; right: 20px; }
+.fb-lb-counter { position: absolute; top: 25px; left: 25px; color: #fff; font-size: 13px; font-weight: 800; background: rgba(0,0,0,0.6); padding: 5px 14px; border-radius: 20px; letter-spacing: 1px; z-index: 100000; }
+@media (max-width: 640px) { .fb-lb-btn { width: 38px; height: 38px; font-size: 15px; } }
 /* =========================================
    6. الدردشة (Chat)
    ========================================= */
