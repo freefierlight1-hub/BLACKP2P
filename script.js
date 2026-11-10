@@ -6,7 +6,7 @@ const app=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",authDo
 const auth=getAuth(app),db=getDatabase(app),R=p=>ref(db,p);
 
 const WORKER_URL = "https://late-haze-3fe4.freefierlight1.workers.dev";
-const IMGBB_API_KEY = "53bcd76af848af724a74013f151c9743";
+// تم إزالة IMGBB_API_KEY — الصور تُرفع عبر الـ Worker
 
 const $=id=>document.getElementById(id);
 window.$ = $; 
@@ -77,15 +77,16 @@ const compressToBlob = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
     i.src = URL.createObjectURL(f);
 });
 
+// تم تعديل دالة الرفع لتستخدم الـ Worker بدلاً من ImgBB المباشر
 const img = async f => {
     const file = Security.file(f);
     const blob = await compressToBlob(file);
     const formData = new FormData();
     formData.append('image', blob, 'image.jpg');
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
+    const res = await fetch(`${WORKER_URL}/upload`, { method: 'POST', body: formData });
     const data = await res.json();
-    if (data.success) return data.data.url;
-    throw new Error('فشل رفع الصورة، حاول مرة أخرى.');
+    if (data.success) return data.url;
+    throw new Error(data.error || 'فشل رفع الصورة، حاول مرة أخرى.');
 };
 
 const ago=t=>{const m=(Date.now()-t)/6e4;return m<1?'الآن':m<60?`${m|0}د`:m<1440?`${m/60|0}س`:`${m/1440|0}ي`};
@@ -128,8 +129,6 @@ function showSignInScreen(){
         .btn-social { width:100%; padding:14px; border-radius:12px; font-size:14px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px; border:none; cursor:pointer; transition:all 0.3s; margin-bottom:12px; position:relative; overflow:hidden; }
         .btn-google { background:#ffffff; color:#0f172a; }
         .btn-google:hover { background:#f1f5f9; transform:translateY(-2px); box-shadow:0 4px 15px rgba(255,255,255,0.2); }
-        .btn-facebook { background:#1877F2; color:#ffffff; }
-        .btn-facebook:hover { background:#166fe5; transform:translateY(-2px); box-shadow:0 4px 15px rgba(24,119,242,0.4); }
         .auth-features { display:flex; justify-content:space-around; width:100%; max-width:340px; margin-top:25px; z-index:1; }
         .auth-feat { display:flex; flex-direction:column; align-items:center; gap:6px; color:#a1a1aa; font-size:10px; font-weight:800; }
         .auth-feat i { font-size:16px; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:8px; border-radius:50%; }
@@ -317,14 +316,12 @@ function renderFeed() {
     const tr = trust(p); 
     const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
-    // تصميم شبكة الصور في السوق
     let gridHtml = '';
     if (photos.length === 0) {
         gridHtml = `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`;
     } else if (photos.length === 1) {
         gridHtml = `<img src="${photos[0]}" class="post-card-image" loading="lazy" alt="">`;
     } else {
-        // عرض حتى 4 صور في شبكة
         const count = Math.min(photos.length, 4);
         gridHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2px; width:100%; height:100%;">
             ${photos.slice(0, count).map((img, i) => `
@@ -373,7 +370,6 @@ window.openPost = async id => {
     const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; T[p.sellerId] = avg;
     const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const mainImg = ph.length > 0 ? ph[0] : null; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
-    // السلايدر فقط بدون صور مصغرة
     const sliderHtml = ph.length > 0 ? `
         <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:10px;">
             <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
@@ -449,7 +445,6 @@ window.openPost = async id => {
     
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
     
-    // دالة معاينة جميع الصور بحجم الشاشة الكامل
     window.previewAllImages = () => {
         if(ph.length === 0) return;
         const imagesHtml = ph.map(img => `<div style="width:100%; margin-bottom:10px; background:#000; display:flex; justify-content:center;"><img src="${img}" style="width:100%; max-height:80vh; object-fit:contain; cursor:pointer;" onclick="zoom('${img}')"></div>`).join('');
@@ -517,7 +512,7 @@ window.add = function() {
     
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">صور الحساب (حتى 10 صور)</label>
     <div style="position:relative;border:2px dashed var(--border-2);background:var(--surface-2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px"><input id="a_f" type="file" accept="image/*" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer"><i class="fa-solid fa-cloud-arrow-up" style="font-size:26px;color:var(--text-3);margin-bottom:6px;display:block"></i><span style="font-size:12px;font-weight:800;color:var(--text-2);display:block">اضغط لاختيار الصور</span><span id="file-count" style="font-size:10.5px;color:var(--text-3);font-weight:700;margin-top:4px;display:block"></span></div>
-    <div style="background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:11px;margin-bottom:14px"><p style="font-size:11px;color:var(--warn-tx);font-weight:900;margin-bottom:8px"><i class="fa-solid fa-lock"></i> بيانات الدخول (مشفرة)</p><input id="a_e" type="text" placeholder="إيميل / اسم الحساب" style="background:var(--surface);border-color:var(--warn-bd);margin-bottom:6px;font-size:12px"><input id="a_w" type="password" placeholder="كلمة المرور" style="background:var(--surface);border-color:var(--warn-bd);margin:0;font-size:12px"></div>
+    <div style="background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:11px;margin-bottom:14px"><p style="font-size:11px;color:var(--warn-tx);font-weight:900;margin-bottom:8px"><i class="fa-solid fa-lock"></i> بيانات الدخول (مشفرة على السيرفر)</p><input id="a_e" type="text" placeholder="إيميل / اسم الحساب" style="background:var(--surface);border-color:var(--warn-bd);margin-bottom:6px;font-size:12px"><input id="a_w" type="password" placeholder="كلمة المرور" style="background:var(--surface);border-color:var(--warn-bd);margin:0;font-size:12px"></div>
     <button class="btn btn-primary" style="width:100%;padding:14px;font-size:13px" id="a_b">نشر للمراجعة</button>
   </div>`;
   window.updateLinkInput = () => { const type = $('a_l').value; const input = $('a_e'); if (type === 'Facebook') { input.type = 'tel'; input.placeholder = 'رقم الهاتف'; } else if (type === 'Google' || type === 'Apple' || type === 'Email') { input.type = 'email'; input.placeholder = 'البريد الإلكتروني'; } else { input.type = 'text'; input.placeholder = 'اسم الحساب'; } };
@@ -546,25 +541,21 @@ window.add = function() {
           photos.push(await img(f));
       }
       
-      const TEMP_KEY = "A7x!9pQ2$mW5vB8@kL1zR4tY6nC3hJ0sX9fG2dE5w";
-      const encryptAES = async (text, secret) => {
-          const enc = new TextEncoder();
-          const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "PBKDF2" }, false, ["deriveBits", "deriveKey"]);
-          const salt = crypto.getRandomValues(new Uint8Array(16));
-          const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
-          const iv = crypto.getRandomValues(new Uint8Array(12));
-          const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(text));
-          const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
-          combined.set(salt, 0);
-          combined.set(iv, salt.length);
-          combined.set(new Uint8Array(encrypted), salt.length + iv.length);
-          return btoa(String.fromCharCode.apply(null, combined));
-      };
-      const encryptedEmail = await encryptAES(em, TEMP_KEY);
-      const encryptedPass = await encryptAES(pw, TEMP_KEY);
+      // إرسال بيانات الحساب للسيرفر لتشفيرها (لا يوجد مفتاح في الواجهة)
+      Swal.fire({title:'جاري تأمين بيانات الحساب...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+      const idToken = await auth.currentUser.getIdToken();
+      const encryptRes = await fetch(WORKER_URL + "/encrypt", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+          body: JSON.stringify({ email: em, password: pw })
+      });
+      const encryptData = await encryptRes.json();
+      if (!encryptRes.ok) throw new Error(encryptData.error || 'فشل تشفير البيانات عبر السيرفر');
 
-      const id = push(R('posts')).key; await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: 'pending', createdAt: Date.now(), featured: false });
-      await set(R('post_private/' + id), {email: encryptedEmail, password: encryptedPass});
+      const id = push(R('posts')).key; 
+      await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: 'pending', createdAt: Date.now(), featured: false });
+      await set(R('post_private/' + id), {email: encryptData.encryptedEmail, password: encryptData.encryptedPass});
+      
       Swal.close(); ok('تم الإرسال للمراجعة'); go('feed');
     } catch(e) { Swal.close(); bad(e); $('a_b').disabled = false; $('a_b').innerHTML = 'نشر للمراجعة'; }
   };
