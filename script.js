@@ -462,56 +462,73 @@ window.sellerProfile = async (uid) => {
         let followBtnHtml = '';
         if (me && me.uid !== uid) {
             followBtnHtml = isFollowingSeller 
-                ? `<button class="btn btn-ghost" style="width:100%; border-color:var(--success-bd); color:var(--success-tx); background:var(--success-bg); margin-top:12px;" onclick="toggleFollow('${uid}')"><i class="fa-solid fa-check"></i> متابَع</button>`
-                : `<button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="toggleFollow('${uid}')"><i class="fa-solid fa-plus"></i> متابعة</button>`;
+                ? `<button class="btn btn-ghost" style="width:100%; border-color:var(--success-bd); color:var(--success-tx); background:var(--success-bg); font-size:11px; min-height:36px;" onclick="toggleFollow('${uid}')"><i class="fa-solid fa-check"></i> متابَع</button>`
+                : `<button class="btn btn-primary" style="width:100%; font-size:11px; min-height:36px;" onclick="toggleFollow('${uid}')"><i class="fa-solid fa-plus"></i> متابعة</button>`;
         }
 
         const postsHtml = posts.length === 0 
-            ? '<div class="empty-state"><i class="fa-regular fa-folder-open"></i><p>لا توجد إعلانات نشطة لهذا البائع.</p></div>'
+            ? '<div class="empty-state" style="text-align:center; padding:30px; color:var(--text-4); font-size:12px; font-weight:700;"><i class="fa-regular fa-folder-open" style="font-size:24px; margin-bottom:10px; opacity:0.5; display:block;"></i>لا توجد إعلانات نشطة لهذا البائع.</div>'
             : `<div class="posts-grid">${posts.map(p => {
                 const ph = Security.img(p.photos);
                 const imgHtml = ph.length > 0 ? `<img src="${ph[0]}" loading="lazy" alt="">` : `<div class="post-card-image-placeholder"><i class="fa-regular fa-image"></i></div>`;
                 return `<div class="post-card" onclick="openPost('${p.id}')">
                   <div class="post-img-wrap">${imgHtml}<div class="post-price-badge">${p.price} ج</div></div>
-                  <div class="post-body"><b style="font-size:14px;font-weight:900;color:var(--text);">${E(p.game)}</b><p style="font-size:11px;color:var(--text-3);margin-top:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${E(p.desc)}</p></div>
+                  <div class="post-body"><b style="font-size:13px;font-weight:900;color:var(--text);">${E(p.game)}</b><p style="font-size:10px;color:var(--text-3);margin-top:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${E(p.desc)}</p></div>
                 </div>`;
             }).join('')}</div>`;
 
+        // تصميم صفحة البائع الجديد والمنسق
         $('app').innerHTML = `
         <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px; padding:7px 12px; font-size:11px;"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
         
-        <div class="seller-profile-header" style="position:relative; overflow:hidden; ${isProSeller ? 'border:2px solid #eab308; box-shadow:0 0 15px rgba(234,179,8,0.2);' : ''}">
-            ${isProSeller ? '<div style="position:absolute; top:0; left:0; right:0; height:40px; background:linear-gradient(90deg, rgba(234,179,8,0.2), transparent);"></div>' : ''}
-            <div style="position:relative; display:inline-block; margin-bottom:10px; z-index:2;">
-                <img src="${E(u.photo || '')}" style="width:80px; height:80px; border-radius:20px; object-fit:cover; border:3px solid var(--surface); box-shadow:var(--shadow-lg); background:var(--surface-2);" alt="">
-                ${u.verified ? '<div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)"><i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:13px"></i></div>' : ''}
-            </div>
-            <h2 style="font-size:18px; font-weight:900; color:var(--text); margin-bottom:4px; position:relative; z-index:2;">${E(u.name)} ${getBadges(u)}</h2>
-            <p style="font-size:11px; color:var(--text-3); font-weight:700; position:relative; z-index:2;">عضو منذ ${new Date(u.createdAt || Date.now()).toLocaleDateString('ar-EG')}</p>
+        <div class="card" style="padding:0; overflow:hidden; position:relative; background:var(--surface); border-radius:16px; ${isProSeller ? 'border:2px solid #eab308; box-shadow:0 0 15px rgba(234,179,8,0.15);' : 'border:1px solid var(--border);'}">
+            <!-- خلفية الغلاف -->
+            <div style="height: 70px; background: ${isProSeller ? 'linear-gradient(135deg, rgba(234,179,8,0.3), transparent)' : 'linear-gradient(135deg, var(--surface-2), transparent)'}; border-bottom: 1px solid var(--border);"></div>
             
-            <div class="seller-stats-grid" style="position:relative; z-index:2;">
-                <div class="seller-stat-box" style="background:var(--success-bg); border-color:var(--success-bd);">
-                    <span class="seller-stat-value" style="color:var(--success-tx);">${u.completedDeals || 0}</span>
-                    <span class="seller-stat-label" style="color:var(--success-tx);">صفقات مكتملة</span>
+            <div style="padding: 0 16px 16px; margin-top: -35px; display:flex; flex-direction:column; align-items:center; text-align:center;">
+                <!-- الصورة الشخصية -->
+                <div style="position:relative; margin-bottom:8px;">
+                    <img src="${E(u.photo || '')}" style="width:70px; height:70px; border-radius:18px; object-fit:cover; border:3px solid var(--surface); box-shadow:var(--shadow-md); background:var(--surface-2);" alt="">
+                    ${u.verified ? '<div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)"><i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:12px"></i></div>' : ''}
                 </div>
-                <div class="seller-stat-box" style="background:var(--warn-bg); border-color:var(--warn-bd);">
-                    <span class="seller-stat-value" style="color:var(--warn-tx);">${avg !== 'جديد' ? '⭐ ' + avg : 'جديد'}</span>
-                    <span class="seller-stat-label" style="color:var(--warn-tx);">التقييم</span>
+
+                <!-- الاسم والشارات -->
+                <div style="display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap; margin-bottom:2px;">
+                    <h2 style="font-size:16px; font-weight:900; color:var(--text); margin:0;">${E(u.name)}</h2>
+                    ${getBadges(u)}
                 </div>
-                <div class="seller-stat-box" style="background:var(--purple-bg); border-color:var(--purple-bd);">
-                    <span class="seller-stat-value" style="color:var(--purple-tx);">${u.followersCount || 0}</span>
-                    <span class="seller-stat-label" style="color:var(--purple-tx);">متابع</span>
+                
+                <p style="font-size:10px; color:var(--text-3); font-weight:700; margin-bottom:12px;">
+                    <i class="fa-regular fa-calendar"></i> عضو منذ ${new Date(u.createdAt || Date.now()).toLocaleDateString('ar-EG')}
+                </p>
+
+                <!-- الإحصائيات (3 أعمدة) -->
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; margin-bottom: 12px;">
+                    <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:6px 2px;">
+                        <span style="font-size:9px; color:var(--text-3); font-weight:800; display:block; margin-bottom:2px;">الصفقات</span>
+                        <b style="font-size:13px; color:var(--info-tx); font-weight:900;">${u.completedDeals || 0}</b>
+                    </div>
+                    <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:6px 2px;">
+                        <span style="font-size:9px; color:var(--text-3); font-weight:800; display:block; margin-bottom:2px;">التقييم</span>
+                        <b style="font-size:13px; color:var(--warn-tx); font-weight:900;">${avg !== 'جديد' ? '⭐ ' + avg : 'جديد'}</b>
+                    </div>
+                    <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:6px 2px;">
+                        <span style="font-size:9px; color:var(--text-3); font-weight:800; display:block; margin-bottom:2px;">المتابعون</span>
+                        <b style="font-size:13px; color:var(--purple-tx); font-weight:900;">${u.followersCount || 0}</b>
+                    </div>
+                </div>
+
+                <!-- أزرار المتابعة والثقة -->
+                <div style="display:flex; width:100%; gap:6px; align-items:center;">
+                    <span class="trust-meter ${trc}" style="cursor:pointer; font-size:10px; padding:8px 10px; flex:1; justify-content:center; border-radius:8px;" onclick="showTrust(${tr}, ${u.verified}, ${u.completedDeals}, ${avg !== 'جديد' ? avg : 0})">
+                        <i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة
+                    </span>
+                    <div style="flex:1;">${followBtnHtml}</div>
                 </div>
             </div>
-            
-            <div style="margin-top:12px; display:flex; justify-content:center; gap:10px; position:relative; z-index:2;">
-                <span class="trust-meter ${trc}" style="cursor:pointer; font-size:10px; padding:4px 10px;" onclick="showTrust(${tr}, ${u.verified}, ${u.completedDeals}, ${avg !== 'جديد' ? avg : 0})"><i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة</span>
-            </div>
-            
-            ${followBtnHtml}
         </div>
         
-        <h3 style="font-size:15px; font-weight:900; color:var(--text); margin-bottom:10px;"><i class="fa-solid fa-store" style="color:var(--text-3);"></i> إعلانات البائع (${posts.length})</h3>
+        <h3 style="font-size:14px; font-weight:900; color:var(--text); margin: 16px 0 10px;"><i class="fa-solid fa-store" style="color:var(--text-3);"></i> إعلانات البائع (${posts.length})</h3>
         ${postsHtml}`;
         
         loadT([uid]);
@@ -829,7 +846,9 @@ window.add = function() {
     return;
   }
 
+  // التحقق مما إذا كان المستخدم VIP
   const isPro = me.isPro && (me.proUntil || 0) > Date.now();
+  
   const maxAdsAllowed = isPro ? (Number(S.maxAdsPro) || 50) : (Number(S.maxAdsFree) || 5);
   const myActivePosts = Object.values(P).filter(p => p.sellerId === me.uid && p.status === 'active').length;
   
@@ -851,6 +870,7 @@ window.add = function() {
   const gamesList = S.games && S.games.length > 0 ? S.games : ['فري فاير','ببجي موبايل','كلاش أوف كلانس','فورتنايت','روبلوكس'];
   const serversList = S.servers && S.servers.length > 0 ? S.servers : ['MENA','Europe','Asia','Global','North America'];
   const linkTypes = ['Google','Facebook','Apple','Email'];
+  
   $('app').innerHTML = `
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><div style="width:38px;height:38px;border-radius:10px;background:#18181b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px"><i class="fa-solid fa-plus"></i></div><h2 style="font-size:18px;font-weight:900;color:var(--text)">إعلان جديد</h2></div>
   <div class="card">
@@ -860,15 +880,19 @@ window.add = function() {
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">السعر (ج)</label><input id="a_p" type="number" placeholder="مثال: 500" style="margin-bottom:12px">
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">نوع الربط</label><select id="a_l" style="margin-bottom:12px" onchange="updateLinkInput()">${linkTypes.map(l => `<option value="${l}">${l}</option>`).join('')}</select>
     
+    <!-- إخفاء خيار الشراء الفوري إذا لم يكن المستخدم VIP -->
+    ${isPro ? `
     <label style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; margin-bottom:12px; background:var(--gold-bg); padding:10px; border-radius:8px; border:1px solid var(--gold-bd); color:var(--gold-tx);">
         <input type="checkbox" id="a_auto" style="width:auto; margin:0;"> تفعيل "الشراء الفوري" (يتحول المبلغ فوراً لبائعك بمجرد الضغط)
     </label>
+    ` : ''}
 
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">صور الحساب (حتى 10 صور)</label>
     <div style="position:relative;border:2px dashed var(--border-2);background:var(--surface-2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px"><input id="a_f" type="file" accept="image/*" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer"><i class="fa-solid fa-cloud-arrow-up" style="font-size:26px;color:var(--text-3);margin-bottom:6px;display:block"></i><span style="font-size:12px;font-weight:800;color:var(--text-2);display:block">اضغط لاختيار الصور</span><span id="file-count" style="font-size:10.5px;color:var(--text-3);font-weight:700;margin-top:4px;display:block"></span></div>
     <div style="background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:11px;margin-bottom:14px"><p style="font-size:11px;color:var(--warn-tx);font-weight:900;margin-bottom:8px"><i class="fa-solid fa-lock"></i> بيانات الدخول (مشفرة)</p><input id="a_e" type="text" placeholder="إيميل / اسم الحساب" style="background:var(--surface);border-color:var(--warn-bd);margin-bottom:6px;font-size:12px"><input id="a_w" type="password" placeholder="كلمة المرور" style="background:var(--surface);border-color:var(--warn-bd);margin:0;font-size:12px"></div>
     <button class="btn btn-primary" style="width:100%;padding:14px;font-size:13px" id="a_b">نشر للمراجعة</button>
   </div>`;
+  
   window.updateLinkInput = () => { const type = $('a_l').value; const input = $('a_e'); if (type === 'Facebook') { input.type = 'tel'; input.placeholder = 'رقم الهاتف'; } else if (type === 'Google' || type === 'Apple' || type === 'Email') { input.type = 'email'; input.placeholder = 'البريد الإلكتروني'; } else { input.type = 'text'; input.placeholder = 'اسم الحساب'; } };
   updateLinkInput();
   
@@ -900,8 +924,10 @@ window.add = function() {
 
       const id = push(R('posts')).key; 
       
-      // هنا تم إصلاح ميزة VIP بحيث ينشر الإعلان مباشرة إذا كان المستخدم VIP
-      await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: isPro ? 'active' : 'pending', createdAt: Date.now(), featured: isPro ? true : false, isAutoBuy: $('a_auto').checked });
+      // التحقق الآمن من وجود المربع (لتجنب الأخطاء إذا كان المستخدم ليس VIP)
+      const isAutoBuyChecked = isPro && $('a_auto') ? $('a_auto').checked : false;
+
+      await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: isPro ? 'active' : 'pending', createdAt: Date.now(), featured: isPro ? true : false, isAutoBuy: isAutoBuyChecked });
       
       await set(R('post_private/' + id), {email: encryptedEmail, password: encryptedPass});
       Swal.close(); 
