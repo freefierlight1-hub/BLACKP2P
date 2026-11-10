@@ -502,16 +502,31 @@ async dash(){
   const roleTitle = me?.role === 'owner' ? 'المالك 👑' : me?.role === 'accountant' ? 'المحاسب 💼' : me?.role === 'support' ? 'الدعم الفني 🎧' : 'المدير 🛡️';
   await checkSystemHealth();
   
-  // جلب البيانات للسجل المالي والإجراءات السريعة
-  const [deals, deps, wds, users, y] = await Promise.all(['deals','deposits','withdrawals','users','pending_payouts'].map(async p => Object.values((await get(R(p))).val() || {})));
+  const g=async p=>Object.values((await get(R(p))).val()||{});
+  const [u,p,d,w,v,y,f,dl]=await Promise.all(['users','posts','deposits','withdrawals','user_verifications','pending_payouts','refund_queue','deals'].map(g));
   
-  const heldFunds = deals.filter(d => d.status === 'held' || d.status === 'delivered').reduce((a,b) => a + b.amount, 0);
-  const pendingWds = wds.filter(w => w.status === 'pending').reduce((a,b) => a + b.amount, 0);
-  const totalBalances = users.reduce((a,b) => a + (Number(b.balance) || 0), 0);
-  const platformEarnings = y.filter(x => x.status === 'processed').reduce((a,x) => a + (x.commission || 0), 0);
+  const activeUsersCount = u.filter(x => x.lastSeen && (Date.now() - x.lastSeen < 300000)).length;
 
-  const pendingDepsList = deps.filter(d => d.status === 'pending').slice(0, 3);
-  const pendingWdsList = wds.filter(w => w.status === 'pending').slice(0, 3);
+  const pc=a=>a.filter(x=>x.status==='pending').length,earn=y.filter(x=>x.status==='processed').reduce((a,x)=>a+(x.commission||0),0),bal=u.reduce((a,x)=>a+(x.balance||0),0);
+  const pendingTotal = pc(p) + pc(d) + pc(w) + pc(v) + pc(f);
+  const successRate = dl.length ? Math.round((dl.filter(x=>x.status==='completed').length / dl.length) * 100) : 0;
+  
+  const stats=[ 
+    {l:'المستخدمون', n:u.length, k:'users', icon:'fa-users', bg:'var(--info-bg)', clr:'var(--info-tx)', bd:'var(--info-bd)'}, 
+    {l:'نشطون الآن', n:activeUsersCount, k:'users', icon:'fa-wifi', bg:'var(--success-bg)', clr:'var(--success-tx)', bd:'var(--success-bd)'},
+    {l:'إعلانات معلقة', n:pc(p), k:'posts', icon:'fa-rectangle-list', bg:'var(--warn-bg)', clr:'var(--warn-tx)', bd:'var(--warn-bd)'}, 
+    {l:'شحن معلق', n:pc(d), k:'dep', icon:'fa-wallet', bg:'var(--warn-bg)', clr:'var(--warn-tx)', bd:'var(--warn-bd)'}, 
+    {l:'سحب معلق', n:pc(w), k:'wd', icon:'fa-money-bill-transfer', bg:'var(--warn-bg)', clr:'var(--warn-tx)', bd:'var(--warn-bd)'}, 
+    {l:'توثيق معلق', n:pc(v), k:'ver', icon:'fa-id-card', bg:'var(--purple-bg)', clr:'var(--purple-tx)', bd:'var(--purple-bd)'}, 
+    {l:'أرباح معلقة', n:pc(y), k:'pay', icon:'fa-sack-dollar', bg:'var(--success-bg)', clr:'var(--success-tx)', bd:'var(--success-bd)'}, 
+    {l:'نزاعات', n:pc(f), k:'ref', icon:'fa-scale-balanced', bg:'var(--danger-bg)', clr:'var(--danger-tx)', bd:'var(--danger-bd)'}, 
+    {l:'صفقات جارية', n:dl.filter(x=>x.status==='held'||x.status==='delivered').length, k:'deals', icon:'fa-handshake', bg:'var(--info-bg)', clr:'var(--info-tx)', bd:'var(--info-bd)'} 
+  ];
+
+  const heldFunds = dl.filter(d => d.status === 'held' || d.status === 'delivered').reduce((a,b) => a + b.amount, 0);
+  const pendingWds = w.filter(w => w.status === 'pending').reduce((a,b) => a + b.amount, 0);
+  const pendingDepsList = d.filter(d => d.status === 'pending').slice(0, 3);
+  const pendingWdsList = w.filter(w => w.status === 'pending').slice(0, 3);
 
   const healthHtml = `<div class="card" style="margin-bottom:14px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div style="display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-server" style="color:var(--text-3)"></i> <span style="font-size:11px; font-weight:800; color:var(--text-2)">حالة النظام:</span></div><div style="display:flex; gap:10px; font-size:10px; font-weight:900;"><span style="color:${sysHealth.fb ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.fb ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> قاعدة البيانات</span><span style="color:${sysHealth.cf ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.cf ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> السيرفر (Worker)</span></div></div>`;
 
@@ -519,10 +534,10 @@ async dash(){
   <div class="card" style="background:linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%); border-color:var(--border);">
       <div class="sec-title" style="color:var(--info-tx);border-bottom-color:var(--info-bd);"><i class="fa-solid fa-scale-balanced"></i> السجل المالي للمنصة</div>
       <div class="grid-2" style="gap:8px;">
-          <div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd);"><span class="info-label" style="color:var(--success-tx)">أرباح المنصة (العمولات)</span><b class="info-value" style="color:var(--success-tx);font-size:16px;">${platformEarnings} ج</b></div>
+          <div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd);"><span class="info-label" style="color:var(--success-tx)">أرباح المنصة (العمولات)</span><b class="info-value" style="color:var(--success-tx);font-size:16px;">${earn} ج</b></div>
           <div class="info-cell" style="background:var(--warn-bg);border-color:var(--warn-bd);"><span class="info-label" style="color:var(--warn-tx)">أموال محجوزة (صفقات)</span><b class="info-value" style="color:var(--warn-tx);font-size:16px;">${heldFunds} ج</b></div>
           <div class="info-cell" style="background:var(--danger-bg);border-color:var(--danger-bd);"><span class="info-label" style="color:var(--danger-tx)">سحب معلق (مطلوب دفعه)</span><b class="info-value" style="color:var(--danger-tx);font-size:16px;">${pendingWds} ج</b></div>
-          <div class="info-cell" style="background:var(--info-bg);border-color:var(--info-bd);"><span class="info-label" style="color:var(--info-tx)">إجمالي أرصدة المستخدمين</span><b class="info-value" style="color:var(--info-tx);font-size:16px;">${totalBalances} ج</b></div>
+          <div class="info-cell" style="background:var(--info-bg);border-color:var(--info-bd);"><span class="info-label" style="color:var(--info-tx)">إجمالي أرصدة المستخدمين</span><b class="info-value" style="color:var(--info-tx);font-size:16px;">${bal} ج</b></div>
       </div>
   </div>`;
 
@@ -548,17 +563,33 @@ async dash(){
       </div>
   </div>`;
 
-  const pc=a=>a.filter(x=>x.status==='pending').length;
-  const pendingTotal = pc(deals) + pc(deps) + pc(wds);
-  
+  // الرسم البياني
+  const now = Date.now(), dayMs = 86400000;
+  const last7 = [...Array(7)].map((_, i) => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - (6 - i)); return { label: d.toLocaleDateString('ar-EG',{weekday:'short'}), from: d.getTime(), to: d.getTime() + dayMs }; });
+  const earningsByDay = last7.map(day => y.filter(x => x.status === 'processed' && x.createdAt >= day.from && x.createdAt < day.to).reduce((a, x) => a + (x.commission || 0), 0));
+  setTimeout(() => {
+    const ctx = document.getElementById('earningsChart');
+    if (!ctx) return;
+    if (window.myChart) { window.myChart.destroy(); window.myChart = null; }
+    const isDark = document.documentElement.classList.contains('dark');
+    window.myChart = new Chart(ctx, { type: 'line', data: { labels: last7.map(d=>d.label), datasets: [{ label: 'الإيرادات', data: earningsByDay, borderColor: isDark ? '#fafafa' : '#18181b', backgroundColor: isDark ? 'rgba(250,250,250,0.08)' : 'rgba(24,24,27,0.08)', fill: true, tension: 0.35, borderWidth: 2, pointRadius: 3, pointBackgroundColor: isDark ? '#fafafa' : '#18181b' }] }, options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: isDark ? 'rgba(148,163,184,0.1)' : 'rgba(148,163,184,0.15)' }, ticks: { font: { family: 'Cairo', size: 10 } } }, x: { grid: { display: false }, ticks: { font: { family: 'Cairo', size: 10 } } } } } });
+  }, 120);
+
+  const lg = (await fetchLogs(5));
+
   return `${healthHtml}
-  ${pendingTotal > 0 ? `<div class="card" style="background:var(--warn-bg);border-color:var(--warn-bd);padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warn-tx);font-size:14px"></i><span style="color:var(--warn-tx);font-weight:900;font-size:11px">لديك ${pendingTotal} طلبات معلقة تحتاج لمراجعة.</span></div>` : ''}
+  ${pendingTotal > 0 ? `<div class="card" style="background:var(--warn-bg);border-color:var(--warn-bd);padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warn-tx);font-size:14px"></i><span style="color:var(--warn-tx);font-weight:900;font-size:11px">${pendingTotal} طلبات معلقة</span></div>` : ''}
+  <div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:900;color:var(--text);letter-spacing:-0.02em">مرحباً ${roleTitle}</h1><p style="color:var(--text-3);font-size:11px;font-weight:700;margin-top:2px">${new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
   
-  <div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:900;color:var(--text);">مرحباً ${roleTitle}</h1><p style="color:var(--text-3);font-size:11px;font-weight:700;">ملخص شامل لأداء المنصة اليوم.</p></div>
+  <div class="stats-grid">${stats.map((s)=>`<div onclick="go('${s.k}')" class="stat-card"><div class="stat-icon" style="background:${s.bg};border-color:${s.bd};color:${s.clr}"><i class="fa-solid ${s.icon}"></i></div><span class="stat-label">${s.l}</span><span class="stat-value">${s.n}</span></div>`).join('')}</div>
   
   ${ledgerHtml}
   ${quickActionsHtml}
-  `;
+
+  <div class="grid-2" style="margin-bottom:8px">
+    <div class="card"><h3 style="font-size:12px;font-weight:900;color:var(--text);margin-bottom:10px">إيرادات 7 أيام</h3><div class="chart-container"><canvas id="earningsChart"></canvas></div></div>
+    <div class="card"><h3 style="font-size:12px;font-weight:900;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-clock-rotate-left" style="color:var(--text-3);font-size:10px"></i> آخر الإجراءات</h3><div style="max-height:160px;overflow-y:auto">${lg.map(l=>`<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border)"><div style="width:22px;height:22px;border-radius:6px;background:var(--neutral-bg);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0"><i class="fa-solid fa-circle-dot" style="font-size:7px"></i></div><div style="flex:1;min-width:0"><p style="font-size:10.5px;font-weight:800;color:var(--text);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(l.action)}</p><p style="font-size:9px;color:var(--text-3);margin:1px 0 0">${E((l.email||'').split('@')[0])} · ${timeAgo(l.at)}</p></div></div>`).join('') || '<p style="font-size:10px;color:var(--text-4);text-align:center;padding:8px">لا يوجد</p>'}</div></div>
+  </div>`;
 },
 async posts(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
@@ -614,8 +645,6 @@ async users(){
     let all=(await fetchList('users', limit)).sort((x,y)=>(y.lastSeen||0)-(x.lastSeen||0)); 
     all.forEach(u => { if(u.suspended && u.banUntil && Date.now() > u.banUntil) { update(R('users/'+u.id), {suspended: false, banReason: null, banUntil: null}); u.suspended = false; } }); 
     
-    // البحث المباشر في قاعدة البيانات يتم تجاوزه هنا للسماح بالبحث في الدفعة المحملة، 
-    // لكن لتحسين الأداء قمنا بجلب 50 مستخدم فقط.
     all=all.filter(u=>(st('all')==='all'||(st('ver')==='ver'&&u.verified)||(st('unv')==='unv'&&!u.verified)||(st('ban')==='ban'&&u.suspended))&&hit(u,['name','email','id'])); 
     const a = all.slice(0, limit); 
     
@@ -661,6 +690,7 @@ async set(){
     const currentGames = s.games ? s.games.join(', ') : defaultGames; 
     const currentServers = s.servers ? s.servers.join(', ') : defaultServers; 
     
+    // الحقول تمت إضافة autoReplyText هنا لضمان عدم حدوث خطأ عند الحفظ
     const f=[
         ['siteName','اسم الموقع'],['supportEmail','بريد الدعم'],['bankName','اسم البنك'],
         ['accountName','اسم الحساب'],['walletNumber','رقم المحفظة'],['commission','العمولة %'],
@@ -701,6 +731,7 @@ async set(){
         <div class="grid-2">
             <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الشريط المتحرك</label><input id="s_tickerText" value="${E(s.tickerText||'')}"></div>
             <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تنبيه الشحن</label><input id="s_depositWarning" value="${E(s.depositWarning||'')}"></div>
+            <div style="grid-column:1/-1"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الرد التلقائي للدعم</label><input id="s_autoReplyText" value="${E(s.autoReplyText||'')}"></div>
         </div>
         
         <div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-gamepad"></i> قوائم الألعاب والسيرفرات</div>
