@@ -33,9 +33,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 input,textarea,select{font-family:inherit;color:inherit}
 img{max-width:100%;display:block}
 
-/* =========================================
-   Header & Nav
-   ========================================= */
+/* Header & Nav */
 #header{position:sticky;top:0;z-index:50;background:var(--glass-strong);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
 .header-inner{max-width:640px;margin:0 auto;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:52px}
 .brand{display:flex;align-items:center;gap:8px;min-width:0}
@@ -57,9 +55,7 @@ html.dark #tick{background:#fafafa;color:#0a0a0a}#tick.hidden{display:none}
 .nav-item i{font-size:16px}.nav-item.active{color:var(--text);background:var(--neutral-bg)}
 html.dark .nav-item.active{color:#fafafa;background:rgba(255,255,255,0.08)}
 
-/* =========================================
-   UI Elements
-   ========================================= */
+/* UI Elements */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;margin-bottom:10px;box-shadow:var(--shadow);transition:border-color 0.15s, box-shadow 0.15s, background-color 0.3s}
 .card-hover:hover{border-color:var(--border-2);box-shadow:var(--shadow-lg)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border-radius:10px;font-size:12.5px;font-weight:900;white-space:nowrap;border:1px solid transparent;transition:opacity 0.15s, background-color 0.15s;min-height:40px}
@@ -84,159 +80,31 @@ input:focus,textarea:focus,select:focus{border-color:var(--text-3);background:va
 .chip.active{background:var(--text);color:#fff;border-color:var(--text)}
 html.dark .chip.active{background:#fafafa;color:#0a0a0a;border-color:#fafafa}
 
-/* =========================================
-   Post Grid & Media (تم إصلاح مشكلة التمدد)
-   ========================================= */
-.posts-grid { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 10px; 
-    width: 100%;
-}
-@media (max-width: 480px) { 
-    .posts-grid { grid-template-columns: 1fr; } 
-}
-.post-card { 
-    background: var(--surface); 
-    border: 1px solid var(--border); 
-    border-radius: var(--r-lg); 
-    overflow: hidden; 
-    cursor: pointer; 
-    display: flex; 
-    flex-direction: column; 
-    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; 
-    box-shadow: var(--shadow); 
-    width: 100%;
-}
-.post-card:hover { 
-    transform: translateY(-2px); 
-    border-color: var(--border-2); 
-    box-shadow: var(--shadow-lg); 
-}
-.post-img-wrap { 
-    position: relative; 
-    width: 100%; 
-    aspect-ratio: 16 / 12; /* إجبار الصورة على أخذ نسبة عرض لارتفاع ثابتة */
-    background: var(--surface-2); 
-    overflow: hidden; 
-}
-.post-media-grid { 
-    display: grid; 
-    gap: 2px; 
-    width: 100%; 
-    height: 100%; 
-    background: var(--surface-3); 
-}
-.post-media-grid.single { 
-    grid-template-columns: 1fr; 
-}
-.post-media-grid.multi { 
-    grid-template-columns: 1fr 1fr; 
-    grid-template-rows: 1fr 1fr; 
-}
-.post-media-item { 
-    position: relative; 
-    width: 100%; 
-    height: 100%; 
-    overflow: hidden; 
-    display: flex; 
-}
-.post-media-item img { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; /* منع الصورة من التشوه أو التمدد */
-    transition: transform 0.3s ease; 
-}
-.post-media-item:hover img { 
-    transform: scale(1.03); 
-}
-.post-media-more { 
-    position: absolute; 
-    inset: 0; 
-    background: rgba(0,0,0,0.6); 
-    backdrop-filter: blur(2px); 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    color: #fff; 
-    font-size: 26px; 
-    font-weight: 900; 
-    pointer-events: none; 
-}
-.post-card-image-placeholder { 
-    width: 100%; 
-    height: 100%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    color: var(--text-4); 
-    font-size: 24px; 
-}
-.post-price-badge { 
-    position: absolute; 
-    bottom: 8px; 
-    right: 8px; 
-    background: rgba(0, 0, 0, 0.75); 
-    backdrop-filter: blur(4px); 
-    color: #fff; 
-    padding: 3px 8px; 
-    border-radius: 8px; 
-    font-size: 12px; 
-    font-weight: 900; 
-    z-index: 2;
-}
-.post-featured-badge { 
-    position: absolute; 
-    top: 8px; 
-    right: 8px; 
-    background: var(--gold-solid); 
-    color: #fff; 
-    padding: 2px 7px; 
-    border-radius: 6px; 
-    font-size: 9.5px; 
-    font-weight: 900; 
-    display: flex; 
-    align-items: center; 
-    gap: 3px; 
-    z-index: 2;
-}
-.post-body { 
-    padding: 10px; 
-    display: flex; 
-    flex-direction: column; 
-    flex: 1; 
-    justify-content: space-between; 
-}
-.avatar-initial { 
-    width: 22px; 
-    height: 22px; 
-    border-radius: 6px; 
-    background: #18181b; 
-    color: #fff; 
-    font-size: 9px; 
-    font-weight: 900; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    flex-shrink: 0; 
-}
+/* Post Grid & Media */
+.posts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (max-width: 480px) { .posts-grid { grid-template-columns: 1fr; } }
+.post-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; box-shadow: var(--shadow); }
+.post-card:hover { transform: translateY(-2px); border-color: var(--border-2); box-shadow: var(--shadow-lg); }
+.post-img-wrap { position: relative; width: 100%; aspect-ratio: 16 / 12; background: var(--surface-2); overflow: hidden; }
+.post-media-grid { display: grid; gap: 2px; width: 100%; height: 100%; background: var(--surface-3); }
+.post-media-grid.single { grid-template-columns: 1fr; }
+.post-media-grid.multi { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.post-media-item { position: relative; width: 100%; height: 100%; cursor: pointer; overflow: hidden; display: flex; }
+.post-media-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+.post-media-item:hover img { transform: scale(1.03); }
+.post-media-more { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26px; font-weight: 900; pointer-events: none; }
+.post-card-image-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-4); font-size: 24px; }
+.post-price-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); color: #fff; padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 900; z-index: 2; }
+.post-featured-badge { position: absolute; top: 8px; right: 8px; background: var(--gold-solid); color: #fff; padding: 2px 7px; border-radius: 6px; font-size: 9.5px; font-weight: 900; display: flex; align-items: center; gap: 3px; z-index: 2; }
+.post-body { padding: 10px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+.avatar-initial { width: 22px; height: 22px; border-radius: 6px; background: #18181b; color: #fff; font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 html.dark .avatar-initial { background: #fafafa; color: #0a0a0a; }
-.trust-meter { 
-    display: inline-flex; 
-    align-items: center; 
-    gap: 3px; 
-    font-size: 9px; 
-    font-weight: 900; 
-    padding: 1px 5px; 
-    border-radius: 5px; 
-}
+.trust-meter { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 5px; }
 .trust-high { background: var(--success-bg); color: var(--success-tx); border: 1px solid var(--success-bd); }
 .trust-mid { background: var(--warn-bg); color: var(--warn-tx); border: 1px solid var(--warn-bd); }
 .trust-low { background: var(--danger-bg); color: var(--danger-tx); border: 1px solid var(--danger-bd); }
 
-/* =========================================
-   Chat
-   ========================================= */
+/* Chat */
 .chat-shell{display:flex;flex-direction:column;height:calc(100dvh - 120px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
 .chat-header{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);flex-shrink:0}
 .chat-avatar{width:36px;height:36px;border-radius:10px;background:#18181b;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -264,9 +132,7 @@ html.dark .msg-bubble.me{background:#fafafa;color:#0a0a0a}
 .chat-input-bar input{margin:0;flex:1;background:var(--surface-2);min-height:38px}
 .chat-input-bar .icon-btn{width:36px;height:36px}
 
-/* =========================================
-   Modals & Swal
-   ========================================= */
+/* Modals & Swal */
 .swal2-popup{border-radius:14px!important;font-family:'Cairo',sans-serif!important;padding:18px!important;background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important;max-width:420px!important}
 .swal2-title{font-weight:900!important;font-size:16px!important;color:var(--text)!important}
 .swal2-confirm{background:var(--text)!important;color:#fff!important;border-radius:9px!important;font-weight:800!important;padding:8px 18px!important;box-shadow:none!important}
@@ -275,8 +141,88 @@ html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 .swal2-input,.swal2-textarea,.swal2-select{background:var(--surface-2)!important;border:1px solid var(--border)!important;border-radius:9px!important;font-family:'Cairo',sans-serif!important;color:var(--text)!important}
 
 /* =========================================
-   Filters Modal Overrides
+   المعرض العمودي (مثل فيسبوك) وصفحة البائع
    ========================================= */
-.filter-modal .swal2-html-container { margin: 0 !important; padding: 0 !important; }
-.filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: right; }
-.filter-grid label { font-size: 11px; font-weight: 800; color: var(--text-3); margin-bottom: 4px; display: block; }
+.fullscreen-gallery-popup {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    background: #000 !important;
+}
+.fullscreen-gallery-close {
+    color: #fff !important;
+    font-size: 30px !important;
+    top: 15px !important;
+    right: 15px !important;
+    z-index: 9999 !important;
+    background: rgba(0,0,0,0.5) !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+}
+.vertical-gallery-container {
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* المسافة المطلوبة */
+    padding-bottom: 20px;
+    scrollbar-width: none; /* Firefox */
+}
+.vertical-gallery-container::-webkit-scrollbar { display: none; } /* Chrome */
+.vertical-gallery-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    background: #000;
+    cursor: zoom-in;
+}
+
+.seller-profile-header {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 20px 15px;
+    text-align: center;
+    border: 1px solid var(--border);
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+}
+.seller-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 15px;
+}
+.seller-stat-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.seller-stat-value {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.2;
+}
+.seller-stat-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--text-3);
+    margin-top: 2px;
+}
