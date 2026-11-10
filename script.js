@@ -111,8 +111,6 @@ document.getElementById('theme-toggle')?.addEventListener('click', () => {
 // =========================================
 // المعرض العمودي ونظام التكبير (جديد)
 // =========================================
-let zoomScale = 1, initialDist = 0;
-
 window.openCustomGallery = (ph) => {
     if(ph.length === 0) return;
     const overlay = document.createElement('div');
@@ -127,7 +125,12 @@ window.openCustomGallery = (ph) => {
 };
 
 window.openCustomZoom = (url) => {
-    zoomScale = 1;
+    let scale = 1;
+    let isDragging = false;
+    let startX, startY;
+    let translateX = 0, translateY = 0;
+    let initialDist = 0;
+
     const overlay = document.createElement('div');
     overlay.className = 'custom-zoom-overlay';
     overlay.innerHTML = `
@@ -137,45 +140,78 @@ window.openCustomZoom = (url) => {
     document.body.appendChild(overlay);
     const imgEl = overlay.querySelector('img');
     
-    // Double Tap support
-    let lastTap = 0;
-    imgEl.addEventListener('touchend', (e) => {
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        if (tapLength < 300 && tapLength > 0) {
-            e.preventDefault();
-            if (zoomScale === 1) { zoomScale = 2.5; } else { zoomScale = 1; }
-            imgEl.style.transform = `scale(${zoomScale})`;
-        }
-        lastTap = currentTime;
+    const updateTransform = () => {
+        imgEl.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    };
+
+    // Mouse events for desktop
+    imgEl.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+        imgEl.style.cursor = 'grabbing';
+        imgEl.style.transition = 'none'; // Disable transition while dragging
     });
 
-    // Pinch to zoom support
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        translateX = e.clientX - startX;
+        translateY = e.clientY - startY;
+        updateTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        imgEl.style.cursor = 'grab';
+        imgEl.style.transition = 'transform 0.1s ease-out';
+    });
+
+    // Touch events for mobile
+    let lastTap = 0;
     imgEl.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
+        if (e.touches.length === 1) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+                // Double tap to zoom
+                e.preventDefault();
+                if (scale === 1) { scale = 2.5; } else { scale = 1; translateX = 0; translateY = 0; }
+                updateTransform();
+                lastTap = 0;
+                return;
+            }
+            lastTap = currentTime;
+            isDragging = true;
+            startX = e.touches[0].clientX - translateX;
+            startY = e.touches[0].clientY - translateY;
+            imgEl.style.transition = 'none';
+        } else if (e.touches.length === 2) {
+            isDragging = false;
             initialDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
         }
     });
 
     imgEl.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2) {
+        if (e.touches.length === 1 && isDragging) {
+            e.preventDefault();
+            translateX = e.touches[0].clientX - startX;
+            translateY = e.touches[0].clientY - startY;
+            updateTransform();
+        } else if (e.touches.length === 2) {
             e.preventDefault();
             const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
             const scaleChange = dist / initialDist;
-            zoomScale = Math.max(1, Math.min(zoomScale * scaleChange, 5));
-            imgEl.style.transform = `scale(${zoomScale})`;
+            scale = Math.max(1, Math.min(scale * scaleChange, 5));
+            updateTransform();
             initialDist = dist;
         }
     });
 
-    // Mouse double click support
-    imgEl.addEventListener('dblclick', (e) => {
-        e.preventDefault();
-        if (zoomScale === 1) { zoomScale = 2.5; } else { zoomScale = 1; }
-        imgEl.style.transform = `scale(${zoomScale})`;
+    imgEl.addEventListener('touchend', () => {
+        isDragging = false;
+        imgEl.style.transition = 'transform 0.1s ease-out';
     });
 
-    // Close on clicking the background
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) overlay.remove();
     });
