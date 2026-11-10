@@ -94,7 +94,7 @@ const timeOnly=t=>new Date(t).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:
 const notify=(uid,title,body,type='info',extra={})=>{if(uid)set(push(R('notifications/'+uid)),{title,body,type,popup:false,read:false,createdAt:Date.now(),...extra})};
 const initials=n=>{n=String(n||'?').trim();const a=n.split(' ');return (a[0]?.[0]||'?')+(a[1]?.[0]||'')};
 
-let me=null,isAdmin=false,S={},P={},N={},T={},view='feed',VS='',OT='run',OD=[],MP=[],U=[],GU=[],shown=new Set(),F={q:'',game:'',sort:'new'};
+let me=null,isAdmin=false,S={},P={},N={},T={},S_PRO={},view='feed',VS='',OT='run',OD=[],MP=[],U=[],GU=[],shown=new Set(),F={q:'',game:'',sort:'new'};
 let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized=false;
 let pendingPostId = new URLSearchParams(window.location.search).get('post');
 let refCode = new URLSearchParams(window.location.search).get('ref');
@@ -109,7 +109,7 @@ document.getElementById('theme-toggle')?.addEventListener('click', () => {
 });
 
 // =========================================
-// المعرض العمودي ونظام التكبير (جديد)
+// المعرض العمودي ونظام التكبير
 // =========================================
 window.openCustomGallery = (ph) => {
     if(ph.length === 0) return;
@@ -150,7 +150,7 @@ window.openCustomZoom = (url) => {
         startX = e.clientX - translateX;
         startY = e.clientY - translateY;
         imgEl.style.cursor = 'grabbing';
-        imgEl.style.transition = 'none'; // Disable transition while dragging
+        imgEl.style.transition = 'none';
     });
 
     window.addEventListener('mousemove', (e) => {
@@ -173,7 +173,6 @@ window.openCustomZoom = (url) => {
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
             if (tapLength < 300 && tapLength > 0) {
-                // Double tap to zoom
                 e.preventDefault();
                 if (scale === 1) { scale = 2.5; } else { scale = 1; translateX = 0; translateY = 0; }
                 updateTransform();
@@ -218,15 +217,30 @@ window.openCustomZoom = (url) => {
 };
 // =========================================
 
-const getBadges = (user) => {
+// =========================================
+// دالة الشارات (تمت إضافة شارة VIP المميزة)
+// =========================================
+const getBadges = (user, isProOverride = false) => {
     if (!user) return '';
     let badges = [];
-    const isPro = user.isPro && (user.proUntil || 0) > Date.now();
-    if (isPro) badges.push('<span title="عضو برو" style="color:#eab308; margin-right:4px;"><i class="fa-solid fa-crown"></i></span>');
-    if (user.verified) badges.push('<span title="حساب موثق" style="color:#059669; margin-right:4px;"><i class="fa-solid fa-circle-check"></i></span>');
-    if ((user.completedDeals || 0) >= 50) badges.push('<span title="خبير (50+ صفقة)" style="color:#ea580c; margin-right:4px;"><i class="fa-solid fa-star"></i></span>');
+    const isPro = isProOverride || (user.isPro && (user.proUntil || 0) > Date.now());
+    
+    // شارة VIP الجديدة
+    if (isPro) {
+        badges.push('<span style="background:linear-gradient(135deg, #f59e0b, #ca8a04); color:#fff; padding:2px 6px; border-radius:6px; font-size:9px; font-weight:900; display:inline-flex; align-items:center; gap:3px; margin-right:4px; box-shadow:0 1px 3px rgba(202,138,4,0.4);" title="عضو VIP مميز"><i class="fa-solid fa-crown"></i> VIP</span>');
+    }
+    
+    if (user.sellerVerified || user.verified) {
+        badges.push('<span title="حساب موثق" style="color:#059669; margin-right:4px;"><i class="fa-solid fa-circle-check"></i></span>');
+    }
+    
+    if ((user.completedDeals || 0) >= 50) {
+        badges.push('<span title="خبير (50+ صفقة)" style="color:#ea580c; margin-right:4px;"><i class="fa-solid fa-star"></i></span>');
+    }
+    
     return badges.join('');
 };
+// =========================================
 
 window.showTrust = (score, verified, deals, rating) => {
     Swal.fire({
@@ -429,7 +443,15 @@ onAuthStateChanged(auth, async u => {
 const trust = p => { const age = Math.min(30, (Date.now() - (p.sellerSince || Date.now())) / 864e5 / 10); return Math.round((p.sellerVerified ? 40 : 0) + age + (T[p.sellerId] || 0) / 5 * 30); };
 async function loadT(ids) {
   let n = 0;
-  for (const s of ids) if (!(s in T)) { T[s] = 0; n++; const x = await get(R('ratings/' + s)); const v = Object.values(x.val() || {}).map(o => o.rating); T[s] = v.length ? v.reduce((a,b) => a+b) / v.length : 0; }
+  for (const s of ids) if (!(s in T)) { 
+      T[s] = 0; n++; 
+      const x = await get(R('ratings/' + s)); const v = Object.values(x.val() || {}).map(o => o.rating); 
+      T[s] = v.length ? v.reduce((a,b) => a+b) / v.length : 0; 
+      
+      // جلب حالة البرو (VIP) للبائع
+      const uSnap = await get(R('users/' + s));
+      if(uSnap.exists()) { const u = uSnap.val(); S_PRO[s] = u.isPro && (u.proUntil || 0) > Date.now(); }
+  }
   if (n && view === 'feed') renderFeed();
   if (n && view === 'seller') sellerProfile(currentSellerId);
 }
@@ -458,7 +480,6 @@ window.sellerProfile = async (uid) => {
             isFollowingSeller = followSnap.exists();
         }
 
-        const isPro = u.isPro && (u.proUntil || 0) > Date.now();
         const tr = trust({sellerId: uid, sellerSince: u.createdAt, sellerVerified: u.verified});
         const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
 
@@ -488,7 +509,7 @@ window.sellerProfile = async (uid) => {
                 <img src="${E(u.photo || '')}" style="width:80px; height:80px; border-radius:20px; object-fit:cover; border:3px solid var(--surface); box-shadow:var(--shadow-lg); background:var(--surface-2);" alt="">
                 ${u.verified ? '<div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)"><i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:13px"></i></div>' : ''}
             </div>
-            <h2 style="font-size:18px; font-weight:900; color:var(--text); margin-bottom:4px;">${E(u.name)} ${isPro ? '<i class="fa-solid fa-crown" style="color:var(--gold-solid);font-size:14px;" title="عضو برو"></i>' : ''}</h2>
+            <h2 style="font-size:18px; font-weight:900; color:var(--text); margin-bottom:4px;">${E(u.name)} ${getBadges(u)}</h2>
             <p style="font-size:11px; color:var(--text-3); font-weight:700;">عضو منذ ${new Date(u.createdAt || Date.now()).toLocaleDateString('ar-EG')}</p>
             
             <div class="seller-stats-grid">
@@ -618,7 +639,7 @@ function renderFeed() {
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border)">
           <div style="display:flex;align-items:center;gap:6px;min-width:0" onclick="event.stopPropagation(); goToSeller('${p.sellerId}')">
             <div class="avatar-initial" style="width:24px; height:24px; font-size:10px;">${E(initials(p.sellerName))}</div>
-            <span style="font-size:11px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span> ${getBadges(p)}
+            <span style="font-size:11px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span> ${getBadges(p, S_PRO[p.sellerId])}
           </div>
           <span class="trust-meter ${trc}" style="font-size:9px; padding:2px 6px; cursor:pointer;" onclick="event.stopPropagation(); showTrust(${tr}, ${p.sellerVerified}, 0, ${T[p.sellerId]||0})"><i class="fa-solid fa-shield-halved"></i> ${tr}%</span>
         </div>
@@ -669,6 +690,11 @@ window.openPost = async id => {
     const p = (await get(R('posts/' + id))).val(); 
     if (!p) { bad(new Error('هذا الإعلان غير موجود أو تم حذفه.')); return go('feed'); }
     
+    // جلب حالة البرو للبائع لعرضها في تفاصيل الإعلان
+    let sellerData = {};
+    try { sellerData = (await get(R('users/' + p.sellerId))).val() || {}; } catch(e) {}
+    const isProSeller = sellerData.isPro && (sellerData.proUntil || 0) > Date.now();
+
     runTransaction(R(`posts/${id}/views`), v => (v || 0) + 1).catch(()=>{});
     const views = (p.views || 0) + 1;
 
@@ -686,7 +712,6 @@ window.openPost = async id => {
 
     const ph = Security.img(p.photos); const mine = me && p.sellerId === me.uid; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
-    // استخدام دالة المعرض الجديدة
     const sliderHtml = ph.length > 0 ? `
         <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:10px;">
             <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
@@ -742,7 +767,7 @@ window.openPost = async id => {
             <div class="avatar-initial" style="width:46px;height:46px;font-size:18px">${E(initials(p.sellerName))}</div>
             <div style="flex:1;min-width:0">
                 <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
-                    <b style="font-size:15px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b> ${getBadges(p)}
+                    <b style="font-size:15px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b> ${getBadges(p, isProSeller)}
                 </div>
                 <span style="font-size:11px;color:var(--text-3);font-weight:700">عضو منذ ${new Date(p.sellerSince||Date.now()).toLocaleDateString('ar-EG')}</span>
             </div>
@@ -1114,7 +1139,7 @@ function profile() {
           <img src="${E(me.photo)}" style="width:88px;height:88px;border-radius:22px;object-fit:cover;border:3px solid var(--surface);box-shadow:var(--shadow-lg)" alt="">
           ${me.verified ? '<div style="position:absolute;bottom:0;right:0;width:26px;height:26px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)"><i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:14px"></i></div>' : ''}
       </div>
-      <b style="font-size:18px;font-weight:900;color:var(--text);display:block;margin-bottom:4px">${E(me.name)} ${isPro ? '<i class="fa-solid fa-crown" style="color:var(--gold-solid);font-size:14px;" title="عضو برو"></i>' : ''}</b>
+      <b style="font-size:18px;font-weight:900;color:var(--text);display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:4px">${E(me.name)} ${getBadges(me)}</b>
       <span style="font-size:11px;font-weight:800;color:var(--text-3);background:var(--surface-2);padding:4px 12px;border-radius:20px;display:inline-block">${E(me.email)}</span>
       <div style="margin-top:10px">${vb}</div>
       
