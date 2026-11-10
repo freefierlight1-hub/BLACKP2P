@@ -141,92 +141,6 @@ html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 .swal2-input,.swal2-textarea,.swal2-select{background:var(--surface-2)!important;border:1px solid var(--border)!important;border-radius:9px!important;font-family:'Cairo',sans-serif!important;color:var(--text)!important}
 
 /* =========================================
-   المعرض العمودي (مثل فيسبوك) وصفحة البائع
-   ========================================= */
-.fullscreen-gallery-popup {
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: 100vw !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    border-radius: 0 !important;
-    border: none !important;
-    background: #000 !important;
-}
-.fullscreen-gallery-close {
-    color: #fff !important;
-    font-size: 30px !important;
-    top: 15px !important;
-    right: 15px !important;
-    z-index: 9999 !important;
-    background: rgba(0,0,0,0.5) !important;
-    border-radius: 50% !important;
-    width: 40px !important;
-    height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border: 1px solid rgba(255,255,255,0.2) !important;
-}
-.vertical-gallery-container {
-    width: 100vw;
-    height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    background: #000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* المسافة المطلوبة */
-    padding-bottom: 20px;
-    scrollbar-width: none; /* Firefox */
-}
-.vertical-gallery-container::-webkit-scrollbar { display: none; } /* Chrome */
-.vertical-gallery-img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-    background: #000;
-    cursor: zoom-in;
-}
-
-.seller-profile-header {
-    background: var(--surface);
-    border-radius: var(--r-lg);
-    padding: 20px 15px;
-    text-align: center;
-    border: 1px solid var(--border);
-    margin-bottom: 15px;
-    box-shadow: var(--shadow);
-}
-.seller-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 15px;
-}
-.seller-stat-box {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-.seller-stat-value {
-    font-size: 15px;
-    font-weight: 900;
-    color: var(--text);
-    line-height: 1.2;
-}
-.seller-stat-label {
-    font-size: 9px;
-    font-weight: 800;
-    color: var(--text-3);
-    margin-top: 2px;
-}
-/* =========================================
    المعرض العمودي المخصص (مثل فيسبوك) ونظام التكبير
    ========================================= */
 .custom-gallery-overlay {
@@ -241,6 +155,8 @@ html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 .custom-gallery-close:hover { background: rgba(255,255,255,0.4); }
 .custom-gallery-img {
     width: 100vw; max-width: 100vw; height: auto; min-height: 50vh; display: block; scroll-snap-align: start; margin: 0; padding: 0; cursor: pointer; object-fit: contain;
+    margin-bottom: 10px; /* المسافة المطلوبة 10 بكسل */
+    border-bottom: 10px solid transparent; /* تأكيد المسافة */
 }
 
 /* نافذة التكبير (Zoom) */
@@ -248,6 +164,6 @@ html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
     position: fixed; inset: 0; z-index: 100001; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: none; backdrop-filter: blur(5px);
 }
 .custom-zoom-img {
-    max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.2s ease-out; transform-origin: center center; user-select: none; cursor: grab;
+    max-width: 100%; max-height: 100%; object-fit: contain; transform-origin: center center; user-select: none; cursor: grab;
 }
 .custom-zoom-img:active { cursor: grabbing; }
