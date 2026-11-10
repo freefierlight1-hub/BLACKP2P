@@ -95,6 +95,13 @@ const initials=n=>{n=String(n||'?').trim();const a=n.split(' ');return (a[0]?.[0
 
 let me=null,isAdmin=false,S={},P={},N={},T={},view='feed',VS='',OT='run',OD=[],MP=[],U=[],GU=[],shown=new Set(),F={q:'',game:'',sort:'new'};
 let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized=false;
+let pendingPostId = null; // متغير لحفظ رابط الإعلان عند الدخول من الخارج
+
+// استخراج رقم الإعلان من الرابط فور تحميل الصفحة
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('post')) {
+    pendingPostId = urlParams.get('post');
+}
 
 const clearU = () => { U.forEach(f => f()); U = []; };
 const clearGU = () => { GU.forEach(f => f()); GU = []; };
@@ -199,26 +206,23 @@ onAuthStateChanged(auth, async u => {
     $('nav').classList.remove('hidden');
     $('bal').textContent = '0 ج';
     
+    // التحقق من وجود رابط إعلان قبل التوجيه
     if (!initialized) { 
-    initialized = true; 
-    go('feed');
-    
-    // --- [كود فتح المنشور من الرابط الخارجي] ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get('post');
-    if (postId) {
-        setTimeout(() => {
-            openPost(postId);
-        }, 500); // تأخير نصف ثانية لضمان تحميل بيانات المستخدم
-    }
-    // -----------------------------------------
+        initialized = true; 
+        if (pendingPostId) {
+            openPost(pendingPostId);
+            // مسح الرابط من شريط العنوان حتى لا يفتح مجدداً عند تحديث الصفحة
+            window.history.replaceState({}, document.title, window.location.pathname);
+            pendingPostId = null;
+        } else {
+            go('feed'); 
+        }
     }
 
     const r = R('users/' + u.uid);
     
     GU.push(onValue(r, s => {
       if (s.exists()) {
-        // تم إصلاح المشكلة: وضع uid بعد الداتا لمنع الكتابة فوقه
         me = {...s.val(), uid: u.uid}; 
         userLoaded = true;
         $('bal').textContent = (me.balance || 0) + ' ج';
@@ -307,7 +311,6 @@ function feed() {
   </div>
   <div id="list" class="posts-grid"></div>`;
   
-  // تحسين البحث (Debounce)
   let searchTimeout;
   $('q').oninput = e => { 
       clearTimeout(searchTimeout);
@@ -378,16 +381,24 @@ function renderFeed() {
   loadT([...new Set(a.map(p => p.sellerId))]);
 }
 
+// --- تعديل دالة المشاركة لحل مشكلة التكرار ---
 window.sharePost = (game, price, id) => {
     const url = window.location.origin + window.location.pathname + '?post=' + id;
-    const text = `تصفح هذا الحساب على منصة BLACKP2P الآمنة:\n🎮 ${game}\n💰 السعر: ${price} ج\n🔗 الرابط: ${url}`;
+    const text = `تصفح هذا الحساب على منصة BLACKP2P الآمنة:\n🎮 ${game}\n💰 السعر: ${price} ج`;
     if (navigator.share) {
-        navigator.share({ title: 'BLACKP2P - ' + game, text: text, url: url }).catch(()=>{});
+        // إذا كان المتصفح يدعم المشاركة، نرسل النص والرابط منفصلين حتى لا يتكرر
+        navigator.share({ 
+            title: 'BLACKP2P - ' + game, 
+            text: text, 
+            url: url 
+        }).catch(()=>{});
     } else {
-        navigator.clipboard.writeText(text);
+        // إذا لم يدعم المتصفح المشاركة، ننسخ النص والرابط معاً
+        navigator.clipboard.writeText(text + '\n🔗 الرابط: ' + url);
         ok('تم نسخ رابط الإعلان للمشاركة');
     }
 };
+// -------------------------------------------
 
 window.toggleFav = async postId => {
     if (!me) return signIn();
@@ -408,12 +419,18 @@ window.toggleFav = async postId => {
     } catch(e) { bad(e); }
 };
 
-// ==========================================
-// إصلاح مشكلة الصلاحيات عند فتح البوست
-// ==========================================
+// --- تعديل دالة فتح المنشور لضمان عملها مع الروابط المباشرة ---
 window.openPost = async id => {
   try {
-    clearU(); view = 'post'; const p = (await get(R('posts/' + id))).val(); if (!p) return go('feed');
+    clearU(); view = 'post'; 
+    
+    // إخفاء شاشة تسجيل الدخول إن وجدت وعرض الهيكل
+    if (!$('app').innerHTML.includes('post-slider')) {
+        $('app').innerHTML = `<div class="card" style="padding:14px;margin-top:10px"><div class="skeleton" style="height:250px;margin-bottom:12px"></div><div class="skeleton" style="height:20px;width:50%;margin-bottom:8px"></div><div class="skeleton" style="height:40px"></div></div>`;
+    }
+
+    const p = (await get(R('posts/' + id))).val(); 
+    if (!p) { bad(new Error('هذا الإعلان غير موجود أو تم حذفه.')); return go('feed'); }
     
     runTransaction(R(`posts/${id}/views`), v => (v || 0) + 1).catch(()=>{});
     const views = (p.views || 0) + 1;
@@ -421,7 +438,6 @@ window.openPost = async id => {
     let liked = false;
     let isFav = false;
     
-    // تأمين جلب بيانات المفضلة والإعجابات في حال كان المستخدم غير مسجل أو لا يملك صلاحية
     if (me) {
         try { liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); } catch(e) { console.log("No access to likes"); }
         try { isFav = (await get(R(`favorites/${me.uid}/${id}`))).exists(); } catch(e) { console.log("No access to favorites"); }
@@ -435,7 +451,10 @@ window.openPost = async id => {
     } catch(e) { console.log("No access to ratings"); }
     T[p.sellerId] = avg;
 
-    const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
+    const ph = Security.img(p.photos); 
+    const mine = me && p.sellerId === me.uid; 
+    const tr = trust(p); 
+    const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
     const sliderHtml = ph.length > 0 ? `
         <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:10px;">
@@ -527,7 +546,7 @@ window.openPost = async id => {
 
   } catch(e) { bad(e); }
 };
-// ==========================================
+// -----------------------------------------------------------
 
 const paintLike = (l, n) => { if($('lk')) $('lk').innerHTML = `<i class="fa-${l ? 'solid text-red' : 'regular'} fa-heart" style="${l ? 'color:#dc2626' : ''}"></i> ${n}`; };
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
@@ -600,7 +619,6 @@ window.add = function() {
           photos.push(await img(f));
       }
       
-      // تم إرسال البيانات مشفرة إلى الـ Worker (مستحسن بدلاً من التشفير في الواجهة)
       const TEMP_KEY = "A7x!9pQ2$mW5vB8@kL1zR4tY6nC3hJ0sX9fG2dE5w";
       const encryptAES = async (text, secret) => {
           const enc = new TextEncoder();
@@ -713,7 +731,6 @@ window.openChat = cid => {
   $('mi').oninput = () => { if (Date.now() - last > 2500) { last = Date.now(); set(R(`chats/${cid}/typing/${me.uid}`), last).catch(()=>{}); } };
   
   const renderMsg = m => {
-    // تأمين الصور من ثغرة XSS
     const safeUrl = m.imageUrl && (m.imageUrl.startsWith('http') || /^data:image\//.test(m.imageUrl)) ? m.imageUrl : '';
     if (m.type === 'image' && safeUrl) { return `<img src="${E(safeUrl)}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="zoom(this.src)">`; }
     else if (m.type === 'transaction') { return `<div style="width:100%;display:flex;justify-content:center;margin:6px 0"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:260px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${E(m.txType || 'معاملة')}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${E((m.txId||'').slice(0,8))}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${E(m.amount)} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span><b style="color:${m.status==='approved'||m.status==='completed'?'var(--success-tx)':'var(--warn-tx)'}">${E(m.status)}</b></div></div></div>`; }
