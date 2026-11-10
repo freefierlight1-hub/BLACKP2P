@@ -690,7 +690,6 @@ async set(){
     const currentGames = s.games ? s.games.join(', ') : defaultGames; 
     const currentServers = s.servers ? s.servers.join(', ') : defaultServers; 
     
-    // الحقول تمت إضافة autoReplyText هنا لضمان عدم حدوث خطأ عند الحفظ
     const f=[
         ['siteName','اسم الموقع'],['supportEmail','بريد الدعم'],['bankName','اسم البنك'],
         ['accountName','اسم الحساب'],['walletNumber','رقم المحفظة'],['commission','العمولة %'],
