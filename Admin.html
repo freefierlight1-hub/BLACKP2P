@@ -228,6 +228,9 @@ const log=async(action, detail, oldVal=null, newVal=null)=>{
 // ═══════════════════════════════════════════════════════════════════════════
 const confirmPIN = async (actionName) => {
     try {
+        // التأكد من وجود مستخدم مسجل قبل طلب التأكيد
+        if (!auth.currentUser) throw new Error('انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.');
+
         const r = await Swal.fire({
             title: 'تأكيد أمني مطلوب',
             html: `<div style="text-align:right;direction:rtl;">
@@ -241,8 +244,11 @@ const confirmPIN = async (actionName) => {
             cancelButtonText: 'إلغاء'
         });
         if (!r.isConfirmed) throw new Error('CANCEL');
+        
         const provider = new GoogleAuthProvider();
-        await reauthenticateWithPopup(auth, provider);
+        // التعديل هنا: تمرير auth.currentUser بدلاً من auth
+        await reauthenticateWithPopup(auth.currentUser, provider);
+        
         await log('تأكيد أمني', `تم تأكيد العملية: ${actionName}`);
         return true;
     } catch (e) {
