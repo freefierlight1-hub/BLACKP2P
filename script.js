@@ -417,11 +417,15 @@ async function loadT(ids) {
   let n = 0;
   for (const s of ids) if (!(s in T)) { 
       T[s] = 0; n++; 
-      const x = await get(R('ratings/' + s)); const v = Object.values(x.val() || {}).map(o => o.rating); 
-      T[s] = v.length ? v.reduce((a,b) => a+b) / v.length : 0; 
+      try {
+          const x = await get(R('ratings/' + s)); const v = Object.values(x.val() || {}).map(o => o.rating); 
+          T[s] = v.length ? v.reduce((a,b) => a+b) / v.length : 0; 
+      } catch(e) { console.log("Rating err", e); }
       
-      const uSnap = await get(R('users/' + s));
-      if(uSnap.exists()) { const u = uSnap.val(); S_PRO[s] = u.isPro && (u.proUntil || 0) > Date.now(); }
+      try {
+          const uSnap = await get(R('users/' + s));
+          if(uSnap.exists()) { const u = uSnap.val(); S_PRO[s] = u.isPro && (u.proUntil || 0) > Date.now(); }
+      } catch(e) { console.log("User err", e); S_PRO[s] = false; }
   }
   if (n && view === 'feed') renderFeed();
   if (n && view === 'seller') sellerProfile(currentSellerId);
@@ -561,11 +565,12 @@ function feed() {
 }
 
 function renderFeed() {
+  // فلترة صارمة جداً للتأكد من أننا لا نعرض إلا الإعلانات النشطة فقط
   let a = Object.entries(P).map(([id,p]) => ({id, ...p})).filter(p => p.status === 'active');
   const q = F.q.toLowerCase();
   a = a.filter(p => (!q || [p.game,p.desc,p.server].join(' ').toLowerCase().includes(q)) && (!F.game || (p.game||'').toLowerCase() === F.game.toLowerCase()));
   
-  // الترتيب الجديد: أولوية لبائعين VIP
+  // الترتيب: أولوية لبائعين VIP
   a.sort((x,y) => {
       const xPro = S_PRO[x.sellerId] ? 1 : 0;
       const yPro = S_PRO[y.sellerId] ? 1 : 0;
@@ -601,7 +606,6 @@ function renderFeed() {
         </div>`;
     }
     
-    // تنسيق التوهج الذهبي للإعلانات VIP
     const cardStyle = isVipSeller ? 'border: 2px solid #eab308; box-shadow: 0 0 12px rgba(234,179,8,0.3);' : '';
 
     return `<div class="post-card" onclick="openPost('${p.id}')" style="display:flex; flex-direction:column; position:relative; ${cardStyle}">
@@ -674,7 +678,6 @@ window.bumpPost = async (id) => {
         const p = pSnap.val();
         if (!p) return bad(new Error('الإعلان غير موجود'));
         
-        // التحقق من مرور 6 ساعات
         if (Date.now() - p.createdAt < 6 * 3600000) {
             return bad(new Error('يمكنك رفع الإعلان مرة واحدة كل 6 ساعات.'));
         }
@@ -686,19 +689,27 @@ window.bumpPost = async (id) => {
     } catch(e) { Swal.close(); bad(e); }
 };
 
+// إصلاح خطأ الصلاحيات ومنع عرض الإعلانات المحذوفة
 window.openPost = async id => {
   try {
     clearU(); view = 'post'; 
     if (!$('app').innerHTML.includes('post-slider')) {
         $('app').innerHTML = `<div class="card" style="padding:14px;margin-top:10px"><div class="skeleton" style="height:250px;margin-bottom:12px"></div><div class="skeleton" style="height:20px;width:50%;margin-bottom:8px"></div><div class="skeleton" style="height:40px"></div></div>`;
     }
+    
     const p = (await get(R('posts/' + id))).val(); 
-    if (!p) { bad(new Error('هذا الإعلان غير موجود أو تم حذفه.')); return go('feed'); }
+    if (!p) { bad(new Error('هذا الإعلان غير موجود أو تم حذفه نهائياً.')); return go('feed'); }
+    
+    // منع فتح الإعلانات المحذوفة إلا لصاحبها
+    if (p.status !== 'active' && p.sellerId !== me.uid) {
+        return bad(new Error('هذا الإعلان تم حذفه أو غير متاح حالياً.'));
+    }
     
     let sellerData = {};
-    try { sellerData = (await get(R('users/' + p.sellerId))).val() || {}; } catch(e) {}
+    try { sellerData = (await get(R('users/' + p.sellerId))).val() || {}; } catch(e) { console.log("seller data perm", e); }
     const isProSeller = sellerData.isPro && (sellerData.proUntil || 0) > Date.now();
 
+    // استخدام catch لتجنب ظهور خطأ الصلاحيات إذا لم يكن المستخدم صاحب الإعلان
     runTransaction(R(`posts/${id}/views`), v => (v || 0) + 1).catch(()=>{});
     const views = (p.views || 0) + 1;
 
@@ -818,7 +829,6 @@ window.add = function() {
     return;
   }
 
-  // التحقق من حد الإعلانات (مجاني vs VIP)
   const isPro = me.isPro && (me.proUntil || 0) > Date.now();
   const maxAdsAllowed = isPro ? (Number(S.maxAdsPro) || 50) : (Number(S.maxAdsFree) || 5);
   const myActivePosts = Object.values(P).filter(p => p.sellerId === me.uid && p.status === 'active').length;
@@ -889,9 +899,14 @@ window.add = function() {
       const encryptedEmail = await encryptAES(em, TEMP_KEY); const encryptedPass = await encryptAES(pw, TEMP_KEY);
 
       const id = push(R('posts')).key; 
-      await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: 'pending', createdAt: Date.now(), featured: false, isAutoBuy: $('a_auto').checked });
+      
+      // هنا تم إصلاح ميزة VIP بحيث ينشر الإعلان مباشرة إذا كان المستخدم VIP
+      await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: isPro ? 'active' : 'pending', createdAt: Date.now(), featured: isPro ? true : false, isAutoBuy: $('a_auto').checked });
+      
       await set(R('post_private/' + id), {email: encryptedEmail, password: encryptedPass});
-      Swal.close(); ok('تم الإرسال للمراجعة'); go('feed');
+      Swal.close(); 
+      if(isPro) { ok('تم نشر إعلانك فوراً (عضوية VIP)'); } else { ok('تم الإرسال للمراجعة'); }
+      go('feed');
     } catch(e) { Swal.close(); bad(e); $('a_b').disabled = false; $('a_b').innerHTML = 'نشر للمراجعة'; }
   };
 };
@@ -971,14 +986,12 @@ async function send(cid, text, image) {
   await set(push(R(`chats/${cid}/messages`)), m);
   await update(R('chats/' + cid), {lastMessage: image ? '📷 صورة' : m.text.slice(0, 60), updatedAt: Date.now(), adminRead: false});
   
-  // الرد التلقائي لبائع الـ VIP
   try {
       const chat = (await get(R('chats/' + cid))).val();
       const receiverId = chat.buyerId === me.uid ? chat.sellerId : chat.buyerId;
       if(receiverId && receiverId !== 'admin_support') {
           const receiverData = (await get(R('users/' + receiverId))).val();
           if(receiverData && receiverData.isPro && (receiverData.proUntil || 0) > Date.now() && receiverData.autoReplyText) {
-              // نتحقق إذا كانت الرسالة السابقة ليست رد تلقائي لتجنب التكرار
               const msgsSnap = await get(query(R(`chats/${cid}/messages`), limitToLast(2)));
               const msgs = Object.values(msgsSnap.val() || {}).sort((a,b) => b.createdAt - a.createdAt);
               if (msgs.length > 0 && msgs[0].type !== 'auto_reply') {
@@ -1217,7 +1230,6 @@ function profile() {
   
   const vb = me.verified ? `<span class="badge badge-success" style="padding:4px 10px; font-size:11px; border-radius:20px; background:rgba(16,185,129,0.1); border:1px solid var(--success-bd); color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> حساب موثق</span>` : VS === 'pending' ? `<div style="margin-top:12px;background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-tx);border-radius:10px;padding:10px;font-size:11px;font-weight:800"><i class="fa-solid fa-hourglass-half"></i> طلب التوثيق قيد المراجعة</div>` : `${VS === 'rejected' ? '<p style="font-size:11px;font-weight:800;color:var(--danger-tx);background:var(--danger-bg);padding:10px;border-radius:10px;border:1px solid var(--danger-bd);margin-top:10px">تم رفض الطلب. أعد المحاولة بصور أوضح.</p>' : ''}<button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px;font-size:12.5px" onclick="verify()"><i class="fa-solid fa-shield-halved"></i> توثيق الحساب الآن</button>`;
 
-  // إحصائيات متقدمة للـ VIP
   let totalViews = 0, totalLikes = 0;
   if (isPro) {
       Object.values(P).filter(p => p.sellerId === me.uid).forEach(p => {
@@ -1238,7 +1250,6 @@ function profile() {
       <span style="font-size:11px;font-weight:800;color:var(--text-3);background:var(--surface-2);padding:4px 12px;border-radius:20px;display:inline-block; position:relative; z-index:2;">${E(me.email)}</span>
       <div style="margin-top:10px; position:relative; z-index:2;">${vb}</div>
       
-      <!-- إحصائيات المستخدم -->
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-top:16px; position:relative; z-index:2;">
           <div style="background:var(--success-bg); border:1px solid var(--success-bd); border-radius:10px; padding:10px 4px;">
               <span style="font-size:9px; color:var(--success-tx); font-weight:800; display:block; margin-bottom:4px;">الرصيد</span>
@@ -1271,7 +1282,6 @@ function profile() {
       ` : ''}
   </div>
   
-  <!-- لوحة الإحالات -->
   <div class="card" style="background:linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%); border-color:var(--border);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <b style="font-size:13px; color:var(--text);"><i class="fa-solid fa-users" style="color:var(--purple-solid);"></i> أرباح الإحالات</b>
