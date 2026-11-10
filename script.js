@@ -13,7 +13,7 @@ window.$ = $;
 const Security = {
   amount(v,min=1,max=100000000){const n=Math.round(Number(v));if(!Number.isFinite(n)||n<min||n>max)throw new Error(`المبلغ غير صالح`);return n},
   text(v,min=1,max=500){v=String(v||'').trim();if(v.length<min||v.length>max)throw new Error(`النص يجب أن يكون بين ${min} و ${max} حرفاً`);return v},
-  // فحص الروابط والمحتوى (منع الأرقام والروابط)
+  // فحص الروابط والمحتوى (منع الأرقام والروابط والإيميلات)
   noLinks(v){ if(/(https?:\/\/[^\s]+|www\.[^\s]+|wa\.me\/[^\s]+|t\.me\/[^\s]+|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|\b\d{9,15}\b)/gi.test(v)) throw new Error('يمنع وضع روابط أو أرقام هواتف أو إيميلات في الوصف.'); return v; },
   file(f){if(!f||!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>8e6)throw new Error('الملف يجب أن يكون صورة JPG/PNG/WebP بحجم أقصى 8MB');return f},
   chat(t){if(/(whats|telegram|واتس|تيليجرام|تلجرام|\d{10,}|\S+@\S+\.\S+)/i.test(t))throw new Error('ممنوع مشاركة وسائل تواصل خارج المنصة');return t},
@@ -96,17 +96,19 @@ const initials=n=>{n=String(n||'?').trim();const a=n.split(' ');return (a[0]?.[0
 
 // دالة حساب مستويات البائع
 const getSellerLevel = (deals = 0, isPro = false) => {
-    if (isPro) return { name: 'بائع ذهبي', color: 'var(--gold-solid)', bg: 'var(--gold-bg)', icon: 'fa-crown' };
-    if (deals >= 50) return { name: 'خبير', color: 'var(--warn-solid)', bg: 'var(--warn-bg)', icon: 'fa-star' };
-    if (deals >= 10) return { name: 'محترف', color: 'var(--info-solid)', bg: 'var(--info-bg)', icon: 'fa-medal' };
+    if (isPro) return { name: 'بائع ذهبي', color: 'var(--gold-tx)', bg: 'var(--gold-bg)', icon: 'fa-crown' };
+    if (deals >= 50) return { name: 'خبير', color: 'var(--warn-tx)', bg: 'var(--warn-bg)', icon: 'fa-star' };
+    if (deals >= 10) return { name: 'محترف', color: 'var(--info-tx)', bg: 'var(--info-bg)', icon: 'fa-medal' };
     return { name: 'مبتدئ', color: 'var(--text-3)', bg: 'var(--surface-2)', icon: 'fa-seedling' };
 };
 
 let me=null,isAdmin=false,S={},P={},N={},T={},view='feed',VS='',OT='run',OD=[],MP=[],U=[],GU=[],shown=new Set();
-let F={q:'',game:'',sort:'new', pMin:'', pMax:'', server:'', link:'', verified:false};
+let F={q:'',game:'',sort:'new', pMin:'', pMax:'', server:'', link:'', verified:false, sellerId:null};
 let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized=false;
 
-// Lightbox System
+// ==========================================
+// نظام عرض الصور الاحترافي (Lightbox & Zoom)
+// ==========================================
 let currentLbImages = []; let currentLbIndex = 0; let touchStartX = 0; let touchStartY = 0;
 let currentScale = 1; let startDistance = 0; let startScale = 1; let translateX = 0; let translateY = 0; let startTranslateX = 0; let startTranslateY = 0; let isZooming = false;
 
@@ -200,9 +202,7 @@ onAuthStateChanged(auth, async u => {
       const urlParams = new URLSearchParams(window.location.search);
       const refCode = urlParams.get('ref');
       const newUser = {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now(), completedDeals: 0, refBonusPaid: false};
-      if (refCode && refCode !== u.uid) {
-          newUser.referredBy = refCode;
-      }
+      if (refCode && refCode !== u.uid) { newUser.referredBy = refCode; }
       await set(r, newUser);
     } else {
       update(r, {lastSeen: Date.now(), deviceInfo: navigator.userAgent.slice(0,120)}).catch(()=>{});
@@ -242,6 +242,7 @@ function feed() {
   const sortOpts = [['new','الأحدث'],['lo','الأرخص'],['hi','الأغلى']];
   
   $('app').innerHTML = `
+  ${F.sellerId ? `<div class="card" style="padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;background:var(--info-bg);border-color:var(--info-bd)"><span style="font-size:12px;font-weight:800;color:var(--info-tx)"><i class="fa-solid fa-filter"></i> يتم عرض إعلانات بائع محدد</span><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;min-height:28px;border:none;background:transparent" onclick="F.sellerId=null; go('feed')">إلغاء التصفية <i class="fa-solid fa-xmark"></i></button></div>` : ''}
   <div style="display:flex; gap:8px; margin-bottom:10px;">
       <div style="position:relative; flex:1;">
         <i class="fa-solid fa-search" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:13px;pointer-events:none"></i>
@@ -265,7 +266,6 @@ function feed() {
 }
 
 window.openFilters = () => {
-    const games = S.games && S.games.length > 0 ? S.games : ['فري فاير','ببجي موبايل','كلاش أوف كلانس','فورتنايت','روبلوكس'];
     const servers = S.servers && S.servers.length > 0 ? S.servers : ['MENA','Europe','Asia','Global','North America'];
     const linkTypes = ['Google','Facebook','Apple','Email'];
     
@@ -302,6 +302,7 @@ function renderFeed() {
   const q = F.q.toLowerCase();
   
   a = a.filter(p => {
+      if (F.sellerId && p.sellerId !== F.sellerId) return false;
       if (q && ![p.game,p.desc,p.server].join(' ').toLowerCase().includes(q)) return false;
       if (F.game && (p.game||'').toLowerCase() !== F.game.toLowerCase()) return false;
       if (F.pMin && p.price < Number(F.pMin)) return false;
@@ -313,7 +314,7 @@ function renderFeed() {
   });
 
   a.sort((x,y) => {
-      // ترتيب المميزين أولاً، ثم المميزين (برو)، ثم الأحدث
+      // ترتيب المميزين أولاً (برو)، ثم المميزين (نجمة)، ثم الأحدث
       const xPro = x.sellerIsPro ? 1 : 0;
       const yPro = y.sellerIsPro ? 1 : 0;
       if (xPro !== yPro) return yPro - xPro;
@@ -400,7 +401,8 @@ window.openSellerProfile = async (uid) => {
         const postsSnap = await get(query(R('posts'), orderByChild('sellerId'), equalTo(uid)));
         const posts = Object.values(postsSnap.val() || {}).filter(p => p.status === 'active');
         
-        const lvl = getSellerLevel(u.completedDeals || 0, u.isPro);
+        const isPro = u.isPro && (u.proUntil||0) > Date.now();
+        const lvl = getSellerLevel(u.completedDeals || 0, isPro);
         
         Swal.fire({
             title: 'الملف الشخصي للبائع',
@@ -430,11 +432,9 @@ window.openSellerProfile = async (uid) => {
             width: '90%'
         }).then(r => {
             if (r.isConfirmed) {
-                // فلترة الإعلانات في السوق
-                F = {q:'', game:'', sort:'new', pMin:'', pMax:'', server:'', link:'', verified:false};
+                // تفعيل فلتر البائع والانتقال للسوق
+                F = {q:'', game:'', sort:'new', pMin:'', pMax:'', server:'', link:'', verified:false, sellerId: uid};
                 go('feed');
-                // يمكن تحسينها لاحقاً بفلترة حقيقية بالبائع
-                Swal.fire({toast:true, position:'bottom', text:'لا يمكن تصفية السوق ببائع محدد حالياً', icon:'info', showConfirmButton:false, timer:3000});
             }
         });
     } catch(e) { Swal.close(); bad(e); }
@@ -571,10 +571,13 @@ window.add = function() {
     return;
   }
   
-  // التحقق من حد النشر للبائعين العاديين (مثلاً 5 إعلانات)
+  // التحقق من حد النشر للبائعين
   const myPostsCount = Object.values(P).filter(p => p.sellerId === me.uid).length;
   const isPro = me.isPro && (me.proUntil || 0) > Date.now();
-  const limit = isPro ? 50 : 5;
+  
+  // قراءة الحدود من الإعدادات
+  const limit = isPro ? (Number(S.maxAdsPro) || 50) : (Number(S.maxAdsFree) || 5); 
+  
   if (myPostsCount >= limit) {
       return bad(new Error(`لقد وصلت للحد الأقصى (${limit}) من الإعلانات النشطة. ${!isPro ? 'اشترك في الباقة المميزة لنشر المزيد.' : ''}`));
   }
@@ -782,7 +785,7 @@ window.confirmRx = async cid => {
         const buyerSnap = await get(R(`users/${me.uid}`));
         const buyer = buyerSnap.val() || {};
         if (buyer.referredBy && !buyer.refBonusPaid) {
-            const bonus = 10; // مبلغ المكافأة (10 جنيهات)
+            const bonus = Number(S.refBonus) || 10; // قراءة المكافأة من الإعدادات
             await runTransaction(R(`users/${buyer.referredBy}/balance`), v => (Number(v) || 0) + bonus);
             await notify(buyer.referredBy, 'مكافأة إحالة', `تم إضافة ${bonus} ج لرصيدك لأن صديقك أكمل أول صفقة.`);
             await update(R(`users/${me.uid}`), { refBonusPaid: true });
@@ -832,6 +835,7 @@ function profile() {
   
   const lvl = getSellerLevel(me.completedDeals || 0, me.isPro && (me.proUntil || 0) > Date.now());
   const refLink = `${window.location.origin}${window.location.pathname}?ref=${me.uid}`;
+  const refBonus = Number(S.refBonus) || 10;
 
   $('app').innerHTML = `
   <div class="card" style="text-align:center;padding:24px 16px;margin-top:8px">
@@ -847,13 +851,13 @@ function profile() {
   
   <div class="card" style="border-color:var(--gold-bd);">
       <div class="sec-title" style="color:var(--gold-tx); border-bottom-color:var(--gold-bd);"><i class="fa-solid fa-crown"></i> الباقة المميزة (برو)</div>
-      <p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">احصل على شارة ذهبية، ظهور إعلاناتك أولاً، وإمكانية نشر 50 إعلاناً نشطاً.</p>
+      <p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">احصل على شارة ذهبية، ظهور إعلاناتك أولاً، وإمكانية نشر المزيد من الإعلانات.</p>
       <button class="btn btn-gold" style="width:100%; font-size:12px;" onclick="buyPro()">ترقية الحساب الآن</button>
   </div>
 
   <div class="card" style="background:var(--surface-2); border-color:var(--border);">
       <div class="sec-title"><i class="fa-solid fa-share-nodes"></i> نظام الإحالة</div>
-      <p style="font-size:11px; color:var(--text-3); margin-bottom:8px;">شارك الرابط مع أصدقائك. عند إتمامهم لأول صفقة، ستحصل على <b>10 جنيهات</b> مجاناً في رصيدك.</p>
+      <p style="font-size:11px; color:var(--text-3); margin-bottom:8px;">شارك الرابط مع أصدقائك. عند إتمامهم لأول صفقة، ستحصل على <b>${refBonus} جنيهات</b> مجاناً في رصيدك.</p>
       <div style="display:flex; gap:5px;">
           <input type="text" value="${refLink}" readonly style="margin:0; font-size:11px; background:var(--surface); text-align:left;" dir="ltr">
           <button class="btn btn-primary" onclick="navigator.clipboard.writeText('${refLink}'); ok('تم نسخ الرابط');" style="padding:0 12px;"><i class="fa-solid fa-copy"></i></button>
@@ -869,31 +873,39 @@ function profile() {
 
 // شراء باقة برو
 window.buyPro = async () => {
-    const price = 50; // سعر الباقة 50 ج
+    const price = Number(S.proPrice) || 50;
+    const days = Number(S.proDays) || 30;
     const isPro = me.isPro && (me.proUntil || 0) > Date.now();
     
     if (isPro) {
-        return Swal.fire({
-            title: 'باقة نشطة!',
-            text: `اشتراكك ساري حتى: ${new Date(me.proUntil).toLocaleDateString('ar-EG')}`,
-            icon: 'info'
-        });
+        return Swal.fire({ title: 'باقة نشطة!', text: `اشتراكك ساري حتى: ${new Date(me.proUntil).toLocaleDateString('ar-EG')}`, icon: 'info' });
     }
     
     if (me.balance < price) {
         return bad(new Error(`رصيدك غير كافٍ. تحتاج ${price} ج.`));
     }
     
-    if (!await ask(`هل تريد ترقية حسابك إلى بائع مميز لمدة 30 يوماً مقابل ${price} ج من رصيدك؟`)) return;
+    if (!await ask(`هل تريد ترقية حسابك إلى بائع مميز لمدة ${days} يوماً مقابل ${price} ج من رصيدك؟`)) return;
     
     try {
         Swal.fire({title:'جاري الترقية...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        const proUntil = Date.now() + (30 * 24 * 60 * 60 * 1000);
+        const proUntil = Date.now() + (days * 24 * 60 * 60 * 1000);
         
+        // 1. خصم الرصيد وتحديث حالة المستخدم
         await runTransaction(R(`users/${me.uid}/balance`), v => (Number(v) || 0) - price);
         await update(R(`users/${me.uid}`), { isPro: true, proUntil });
         
-        await notify(me.uid, 'تهانينا! أنت بائع مميز', 'تمت ترقية حسابك بنجاح لمدة 30 يوماً.');
+        // 2. تحديث جميع إعلاناته الحالية لتكون "مميزة"
+        const userPostsSnap = await get(query(R('posts'), orderByChild('sellerId'), equalTo(me.uid)));
+        if (userPostsSnap.exists()) {
+            const updates = {};
+            Object.keys(userPostsSnap.val()).forEach(pid => {
+                updates[`posts/${pid}/sellerIsPro`] = true;
+            });
+            await update(ref(db), updates);
+        }
+        
+        await notify(me.uid, 'تهانينا! أنت بائع مميز', `تمت ترقية حسابك بنجاح لمدة ${days} يوماً.`);
         
         Swal.close();
         ok('تمت الترقية بنجاح!');
