@@ -388,15 +388,96 @@ window.userInfo=async uid=>{try{
   const isPro = u.isPro && (u.proUntil||0) > Date.now();
   const lvl = isPro ? {n:'بائع ذهبي', c:'var(--gold-tx)', b:'var(--gold-bg)', i:'fa-crown'} : (u.completedDeals>=50 ? {n:'خبير', c:'var(--warn-tx)', b:'var(--warn-bg)', i:'fa-star'} : (u.completedDeals>=10 ? {n:'محترف', c:'var(--info-tx)', b:'var(--info-bg)', i:'fa-medal'} : {n:'مبتدئ', c:'var(--text-3)', b:'var(--surface-2)', i:'fa-seedling'}));
   
-  const avatarHtml = `<div style="width:64px;height:64px;border-radius:14px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:22px;overflow:hidden;flex-shrink:0">${u.photo ? `<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">` : E(u.name?.charAt(0)||'?')}</div>`;
-  const overviewTab = `<div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">${avatarHtml}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:3px"><b style="font-size:15px;font-weight:900;color:var(--text)">${E(u.name||'غير معروف')}</b>${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:12px"></i>':''}${u.suspended?'<span class="badge badge-danger">محظور</span>':''}</div><p style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p><p style="font-size:9px;color:var(--text-4);margin-top:3px" dir="ltr">${E(uid)}</p><span class="badge" style="background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c}; margin-top:4px;"><i class="fa-solid ${lvl.i}"></i> ${lvl.n} (${u.completedDeals||0} صفقة)</span></div></div><div class="info-grid"><div class="info-cell"><span class="info-label">الرصيد</span><span class="info-value" style="color:var(--success-tx)">${u.balance||0} ج</span></div><div class="info-cell"><span class="info-label">التقييم</span><span class="info-value" style="color:var(--warn-tx)">${avg!=='—'?'⭐ '+avg:'—'}</span></div><div class="info-cell"><span class="info-label">التسجيل</span><span class="info-value" style="font-size:11px">${ago(u.createdAt||Date.now())}</span></div><div class="info-cell"><span class="info-label">آخر ظهور</span><span class="info-value" style="font-size:11px">${ago(u.lastSeen||Date.now())}</span></div><div class="info-cell" style="grid-column:1/-1"><span class="info-label">الجهاز</span><span class="info-value" style="font-size:11px;font-weight:700">${E(dev(u.deviceInfo))}</span></div>${u.banReason?`<div class="info-cell" style="grid-column:1/-1;background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">سبب الحظر</span><span class="info-value" style="color:var(--danger-tx);font-size:11px">${E(u.banReason)}</span></div>`:''}</div>`;
-  const financialTab = `<div class="info-grid"><div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd)"><span class="info-label" style="color:var(--success-tx)">إجمالي الشحن</span><span class="info-value" style="color:var(--success-tx)">${sum(mp,'approved')} ج</span></div><div class="info-cell" style="background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">إجمالي السحب</span><span class="info-value" style="color:var(--danger-tx)">${sum(mw,'approved')} ج</span></div><div class="info-cell"><span class="info-label">صفقات مكتملة</span><span class="info-value" style="color:var(--success-tx)">${md.filter(d=>d.status==='completed').length}</span></div><div class="info-cell"><span class="info-label">نزاعات</span><span class="info-value" style="color:var(--danger-tx)">${md.filter(d=>d.status==='disputed').length}</span></div></div>`;
-  const postsTab = ps.length === 0 ? '<p style="font-size:12px;color:var(--text-4);text-align:center;padding:20px">لا يوجد إعلانات</p>' : ps.slice(0,10).map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;margin-bottom:5px"><div style="flex:1;min-width:0"><b style="font-size:12px;color:var(--text);display:block">${E(p.game)}</b><span style="font-size:10px;color:var(--text-3)">${timeAgo(p.createdAt)}</span></div><div style="text-align:left"><b style="font-size:12px;color:var(--text);display:block">${p.price} ج</b>${statusBadge(p.status)}</div></div>`).join('');
-  const verificationTab = vf ? `<div class="info-cell" style="margin-bottom:10px"><span class="info-label">الحالة</span><span class="info-value">${statusBadge(vf.status)}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${imgs([vf.idUrl,vf.selfieUrl]).map(x=>`<img src="${x}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="zoom('${x}')">`).join('')}</div>` : '<p style="font-size:12px;color:var(--text-4);text-align:center;padding:20px">لا يوجد توثيق</p>';
-  Swal.fire({ title: 'معلومات المستخدم', html: `<div class="modal-tabs"><button class="modal-tab active" onclick="switchUserTab('overview',this)">نظرة عامة</button><button class="modal-tab" onclick="switchUserTab('financial',this)">المالية</button><button class="modal-tab" onclick="switchUserTab('posts',this)">الإعلانات (${ps.length})</button><button class="modal-tab" onclick="switchUserTab('verify',this)">التوثيق</button></div><div style="text-align:right;max-height:60vh;overflow-y:auto;padding:2px" dir="rtl"><div id="utab-overview">${overviewTab}</div><div id="utab-financial" style="display:none">${financialTab}</div><div id="utab-posts" style="display:none">${postsTab}</div><div id="utab-verify" style="display:none">${verificationTab}</div></div>`, width: '92%', showCloseButton: true, showConfirmButton: false, padding: '14px' });
-  window.switchUserTab = (tab, btn) => { document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active'); ['overview','financial','posts','verify'].forEach(t => { $('utab-'+t).style.display = t === tab ? 'block' : 'none'; }); };
-}catch(e){Swal.close();bad(e)}};
+  // --- تحسين نظرة عامة ---
+  const avatarHtml = `<div style="width:56px;height:56px;border-radius:12px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:20px;overflow:hidden;flex-shrink:0">${u.photo ? `<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">` : E(u.name?.charAt(0)||'?')}</div>`;
+  
+  const overviewTab = `
+  <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+          ${avatarHtml}
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+                  <b style="font-size:14px;font-weight:900;color:var(--text)">${E(u.name||'غير معروف')}</b>
+                  ${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:12px"></i>':''}
+                  ${u.suspended?'<span class="badge badge-danger" style="font-size:8px;padding:1px 5px">محظور</span>':''}
+              </div>
+              <p style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p>
+              <p style="font-size:9px;color:var(--text-4);" dir="ltr">${E(uid)}</p>
+              <span class="badge" style="background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c}; width:fit-content; font-size:9px; padding:2px 6px;"><i class="fa-solid ${lvl.i}"></i> ${lvl.n} (${u.completedDeals||0} صفقة)</span>
+          </div>
+      </div>
+      
+      <div class="info-grid" style="gap:8px">
+          <div class="info-cell" style="padding:8px"><span class="info-label" style="font-size:9px">الرصيد</span><span class="info-value" style="color:var(--success-tx);font-size:12px">${u.balance||0} ج</span></div>
+          <div class="info-cell" style="padding:8px"><span class="info-label" style="font-size:9px">التقييم</span><span class="info-value" style="color:var(--warn-tx);font-size:12px">${avg!=='—'?'⭐ '+avg:'—'}</span></div>
+          <div class="info-cell" style="padding:8px"><span class="info-label" style="font-size:9px">التسجيل</span><span class="info-value" style="font-size:11px">${ago(u.createdAt||Date.now())}</span></div>
+          <div class="info-cell" style="padding:8px"><span class="info-label" style="font-size:9px">آخر ظهور</span><span class="info-value" style="font-size:11px">${ago(u.lastSeen||Date.now())}</span></div>
+          <div class="info-cell" style="grid-column:1/-1;padding:8px"><span class="info-label" style="font-size:9px">الجهاز</span><span class="info-value" style="font-size:11px;font-weight:700">${E(dev(u.deviceInfo))}</span></div>
+          ${u.banReason?`<div class="info-cell" style="grid-column:1/-1;background:var(--danger-bg);border-color:var(--danger-bd);padding:8px"><span class="info-label" style="color:var(--danger-tx);font-size:9px">سبب الحظر</span><span class="info-value" style="color:var(--danger-tx);font-size:11px">${E(u.banReason)}</span></div>`:''}
+      </div>
+  </div>`;
 
+  // --- تحسين المالية ---
+  const financialTab = `
+  <div class="info-grid" style="gap:8px">
+      <div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd);padding:8px"><span class="info-label" style="color:var(--success-tx);font-size:9px">إجمالي الشحن</span><span class="info-value" style="color:var(--success-tx);font-size:12px">${sum(mp,'approved')} ج</span></div>
+      <div class="info-cell" style="background:var(--danger-bg);border-color:var(--danger-bd);padding:8px"><span class="info-label" style="color:var(--danger-tx);font-size:9px">إجمالي السحب</span><span class="info-value" style="color:var(--danger-tx);font-size:12px">${sum(mw,'approved')} ج</span></div>
+      <div class="info-cell" style="padding:8px"><span class="info-label" style="font-size:9px">صفقات مكتملة</span><span class="info-value" style="color:var(--success-tx);font-size:12px">${md.filter(d=>d.status==='completed').length}</span></div>
+      <div class="info-cell" style="padding:8px"><span class="info-label" style="font-size:9px">نزاعات</span><span class="info-value" style="color:var(--danger-tx);font-size:12px">${md.filter(d=>d.status==='disputed').length}</span></div>
+  </div>`;
+
+  // --- تحسين الإعلانات ---
+  const postsTab = ps.length === 0 ? '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد إعلانات</p>' : ps.slice(0,10).map(p=>`
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
+      <div style="flex:1;min-width:0">
+          <b style="font-size:12px;color:var(--text);display:block">${E(p.game)}</b>
+          <span style="font-size:9px;color:var(--text-3)">${timeAgo(p.createdAt)}</span>
+      </div>
+      <div style="text-align:left;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <b style="font-size:12px;color:var(--text);display:block">${p.price} ج</b>
+          ${statusBadge(p.status)}
+      </div>
+  </div>`).join('');
+
+  // --- تحسين التوثيق ---
+  const verificationTab = vf ? `
+  <div class="info-cell" style="margin-bottom:10px;padding:8px"><span class="info-label" style="font-size:9px">الحالة</span><span class="info-value">${statusBadge(vf.status)}</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${imgs([vf.idUrl,vf.selfieUrl]).map(x=>`<img src="${x}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="zoom('${x}')">`).join('')}
+  </div>` : '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد توثيق</p>';
+
+  // --- إعدادات النافذة المنبثقة ---
+  Swal.fire({ 
+      title: '<span style="font-size:15px;font-weight:900;color:var(--text);">معلومات المستخدم</span>', 
+      html: `
+      <div style="text-align:right;max-height:65vh;overflow-y:auto;padding:2px" dir="rtl">
+          <div class="modal-tabs">
+              <button class="modal-tab active" onclick="switchUserTab('overview',this)">نظرة عامة</button>
+              <button class="modal-tab" onclick="switchUserTab('financial',this)">المالية</button>
+              <button class="modal-tab" onclick="switchUserTab('posts',this)">الإعلانات (${ps.length})</button>
+              <button class="modal-tab" onclick="switchUserTab('verify',this)">التوثيق</button>
+          </div>
+          <div id="utab-overview">${overviewTab}</div>
+          <div id="utab-financial" style="display:none">${financialTab}</div>
+          <div id="utab-posts" style="display:none">${postsTab}</div>
+          <div id="utab-verify" style="display:none">${verificationTab}</div>
+      </div>`, 
+      width: '95%', 
+      maxWidth: '550px', 
+      showCloseButton: true, 
+      showConfirmButton: false, 
+      padding: '14px',
+      customClass: { popup: 'user-info-modal' }
+  });
+  
+  window.switchUserTab = (tab, btn) => { 
+      document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active')); 
+      btn.classList.add('active'); 
+      ['overview','financial','posts','verify'].forEach(t => { 
+          $('utab-'+t).style.display = t === tab ? 'block' : 'none'; 
+      }); 
+  };
+}catch(e){Swal.close();bad(e)}};
 window.postInfo=async id=>{try{
   const p=(await get(R('posts/'+id))).val();
   Swal.fire({title:E(p.game),width:'92%',showCloseButton:true,showConfirmButton:false,padding:'14px',html:`<div style="text-align:right" dir="rtl">${thumbs(imgs(p.photos))}<p style="margin:8px 0;color:var(--text-2);font-weight:600;font-size:12px">${E(p.desc)}</p><div class="info-grid"><div class="info-cell"><span class="info-label">السيرفر</span><span class="info-value" style="font-size:11px">${E(p.server)}</span></div><div class="info-cell"><span class="info-label">الربط</span><span class="info-value" style="font-size:11px">${E(p.linkType)}</span></div><div class="info-cell"><span class="info-label">السعر</span><span class="info-value" style="color:var(--success-tx)">${p.price} ج</span></div><div class="info-cell"><span class="info-label">الحالة</span><span class="info-value">${statusBadge(p.status)}</span></div></div><div class="info-cell" style="margin-top:6px"><span class="info-label">البائع</span><span class="info-value">${ulink(p.sellerId,p.sellerName)}</span></div><div style="margin-top:8px">${op('عرض بيانات الحساب',()=>viewPrivateInfo(id),'btn-warning')}</div></div>`});
