@@ -35,30 +35,7 @@ const requireAuth = () => {
     return true;
 };
 
-const form=(title,html,fn,btn='إرسال')=>Swal.fire({
-  title,html,
-  showCancelButton:true,
-  confirmButtonText:btn,
-  cancelButtonText:'إلغاء',
-  preConfirm:async()=>{
-    try{
-      const cbtn = Swal.getConfirmButton();
-      cbtn.disabled = true;
-      cbtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري المعالجة...';
-      await fn();
-      return true;
-    }catch(e){
-      const cbtn = Swal.getConfirmButton();
-      cbtn.disabled = false;
-      cbtn.innerHTML = btn;
-      Swal.showValidationMessage(e.message);
-      return false;
-    }
-  }
-});
-
-const inp=(id,ph,t='text')=>`<input id="${id}" type="${t}" placeholder="${ph}">`;
-
+// تحسين ضغط الصور (WebP)
 const compressToBlob = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
     const i = new Image();
     i.onload = () => {
@@ -71,7 +48,8 @@ const compressToBlob = (f, text = 'BLACKP2P') => new Promise((res, rej) => {
         ctx.fillStyle = 'rgba(24, 24, 27, 0.2)';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(text, c.width / 2, c.height / 2);
-        c.toBlob((blob) => res(blob), 'image/jpeg', 0.7); 
+        const type = c.toDataURL('image/webp').indexOf('data:image/webp') === 5 ? 'image/webp' : 'image/jpeg';
+        c.toBlob((blob) => res(blob), type, 0.7); 
     };
     i.onerror = () => rej(new Error('تعذر قراءة الصورة'));
     i.src = URL.createObjectURL(f);
@@ -97,6 +75,7 @@ let me=null,isAdmin=false,S={},P={},N={},T={},view='feed',VS='',OT='run',OD=[],M
 let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized=false;
 let pendingPostId = new URLSearchParams(window.location.search).get('post');
 let refCode = new URLSearchParams(window.location.search).get('ref');
+let feedLimit = 20; // جلب البيانات على دفعات
 
 const clearU = () => { U.forEach(f => f()); U = []; };
 const clearGU = () => { GU.forEach(f => f()); GU = []; };
@@ -105,6 +84,34 @@ document.getElementById('theme-toggle')?.addEventListener('click', () => {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
 });
+
+// الشارات (Badges)
+const getBadges = (user) => {
+    if (!user) return '';
+    let badges = [];
+    const isPro = user.isPro && (user.proUntil || 0) > Date.now();
+    if (isPro) badges.push('<span title="عضو برو" style="color:#eab308; margin-right:4px;"><i class="fa-solid fa-crown"></i></span>');
+    if (user.verified) badges.push('<span title="حساب موثق" style="color:#059669; margin-right:4px;"><i class="fa-solid fa-circle-check"></i></span>');
+    if ((user.completedDeals || 0) >= 50) badges.push('<span title="خبير (50+ صفقة)" style="color:#ea580c; margin-right:4px;"><i class="fa-solid fa-star"></i></span>');
+    if (user.rating >= 4.5) badges.push('<span title="تقييم ممتاز" style="color:#3b82f6; margin-right:4px;"><i class="fa-solid fa-medal"></i></span>');
+    return badges.join('');
+};
+
+// شرح نسبة الثقة
+window.showTrust = (score, verified, deals, rating) => {
+    Swal.fire({
+        title: 'تفاصيل نسبة الثقة',
+        html: `
+        <div style="text-align:right; font-family:'Cairo'; font-size:13px;">
+            <p style="margin-bottom:10px; color:var(--text-3);">يتم حساب نسبة الثقة بناءً على نشاط البائع في المنصة:</p>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:8px 0;"><span>حساب موثق:</span> <b style="color:var(--success-tx)">${verified ? '+40%' : '0%'}</b></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:8px 0;"><span>تقييم البائع (${rating}):</span> <b style="color:var(--info-tx)">+${Math.round((rating||0)/5*30)}%</b></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:8px 0;"><span>عمر الحساب:</span> <b style="color:var(--warn-tx)">+30%</b></div>
+            <div style="display:flex; justify-content:space-between; padding:12px 0; font-size:16px;"><b>النتيجة النهائية:</b> <b style="color:var(--success-solid);">${score}%</b></div>
+        </div>`,
+        confirmButtonText: 'حسناً'
+    });
+};
 
 function showMaintenanceScreen(){
     $('nav').classList.add('hidden');
@@ -157,7 +164,7 @@ window.go = v => {
     if (maintenanceActive) { showMaintenanceScreen(); return; }
     clearU(); view = v;
     document.querySelectorAll('.nav-item').forEach(b => { b.classList.toggle('active', b.dataset.tab === v); });
-    ({feed, add, chats, notes, wallet, me: profile, orders, favorites, chat: null, terms: showTermsPage}[v]||feed)();
+    ({feed, add, wanted, chats, notes, wallet, me: profile, orders, favorites, chat: null, terms: showTermsPage}[v]||feed)();
 };
 
 window.signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => {
@@ -191,16 +198,10 @@ onAuthStateChanged(auth, async u => {
     $('nav').classList.remove('hidden');
     $('bal').textContent = '0 ج';
     
-    // التوجيه الذكي
     if (!initialized) { 
         initialized = true; 
-        if (pendingPostId) {
-            openPost(pendingPostId);
-            window.history.replaceState({}, document.title, window.location.pathname);
-            pendingPostId = null;
-        } else {
-            go('feed'); 
-        }
+        if (pendingPostId) { openPost(pendingPostId); window.history.replaceState({}, document.title, window.location.pathname); pendingPostId = null; }
+        else { go('feed'); }
     }
 
     const r = R('users/' + u.uid);
@@ -226,23 +227,22 @@ onAuthStateChanged(auth, async u => {
 
     const snap = await get(r);
     if (!snap.exists()) {
-      // كود تسجيل مستخدم جديد + مكافأة الإحالة
-      const newUser = {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now()};
+      const newUser = {name: u.displayName || 'مستخدم', email: u.email, photo: u.photoURL || '', balance: 0, suspended: false, deviceInfo: navigator.userAgent.slice(0,120), createdAt: Date.now(), lastSeen: Date.now(), completedDeals: 0, refCount: 0, refEarnings: 0};
       
-      // إذا كان هناك كود إحالة في الرابط
+      // نظام الإحالات المتقدم
       if (refCode && refCode !== u.uid) {
           try {
               const refSnap = await get(R('users/' + refCode));
               if (refSnap.exists()) {
                   newUser.referredBy = refCode;
-                  // إضافة المكافأة للمُحيل
                   const bonus = Number(S.refBonus) || 10;
                   await runTransaction(R(`users/${refCode}/balance`), v => (Number(v) || 0) + bonus);
-                  await notify(refCode, 'مكافأة إحالة', `تم تسجيل مستخدم جديد عبر رابطك! تم إضافة ${bonus} ج لرصيدك.`);
+                  await runTransaction(R(`users/${refCode}/refCount`), v => (Number(v) || 0) + 1);
+                  await runTransaction(R(`users/${refCode}/refEarnings`), v => (Number(v) || 0) + bonus);
+                  await notify(refCode, 'مكافأة إحالة جديدة', `تم تسجيل مستخدم جديد عبر رابطك! تم إضافة ${bonus} ج لرصيدك.`);
               }
           } catch(e) { console.log("Ref error", e); }
       }
-      
       set(r, newUser).catch(err => console.log("Error saving new user:", err));
     } else {
       update(r, {lastSeen: Date.now(), deviceInfo: navigator.userAgent.slice(0,120)}).catch(()=>{});
@@ -270,6 +270,8 @@ onAuthStateChanged(auth, async u => {
       N = s.val() || {};
       const c = Object.values(N).filter(n => !n.read).length;
       $('nb').textContent = c; $('nb').classList.toggle('hidden', !c);
+      
+      // التنبيهات الفورية
       Object.entries(N).forEach(([id, n]) => {
         if (n.popup && !n.read && !n.fields && !shown.has(id)) {
           shown.add(id);
@@ -294,6 +296,38 @@ async function loadT(ids) {
   if (n && view === 'feed') renderFeed();
 }
 
+// طلبات الشراء (Wanted)
+async function wanted() {
+    if(!requireAuth()) return;
+    $('app').innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><h2 style="font-size:18px; font-weight:900; color:var(--text);"><i class="fa-solid fa-bullhorn" style="color:var(--warn-solid);"></i> طلبات الشراء</h2><button class="btn btn-primary" style="padding:8px 12px; font-size:12px;" onclick="addWanted()"><i class="fa-solid fa-plus"></i> أضف طلبك</button></div><div id="wanted-list" style="display:grid; gap:8px;"><div class="skeleton" style="height:80px;"></div><div class="skeleton" style="height:80px;"></div></div>`;
+    U.push(onValue(query(R('wanted_posts'), limitToLast(50)), s => {
+        const w = Object.entries(s.val() || {}).map(([id, p]) => ({id, ...p})).sort((a,b) => b.createdAt - a.createdAt);
+        if(w.length === 0) { $('wanted-list').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-4); font-weight:700;">لا توجد طلبات شراء حالياً.</div>'; return; }
+        $('wanted-list').innerHTML = w.map(p => `<div class="card" style="padding:12px;"><div style="display:flex; justify-content:space-between; margin-bottom:6px;"><b style="font-size:14px; color:var(--text);">${E(p.game)}</b><b style="font-size:14px; color:var(--success-tx);">${p.budget} ج</b></div><p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">${E(p.desc)}</p><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:var(--text-4);">بواسطة ${E(p.buyerName)} · ${ago(p.createdAt)}</span><button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="chatWithBuyer('${p.buyerId}', '${p.id}')">تواصل معه</button></div></div>`).join('');
+    }));
+}
+window.addWanted = () => {
+    if(!requireAuth()) return;
+    const gamesList = S.games && S.games.length > 0 ? S.games : ['فري فاير','ببجي موبايل','كلاش أوف كلانس','فورتنايت','روبلوكس'];
+    form('طلب شراء جديد', `<select id="w_g">${gamesList.map(g => `<option value="${E(g)}">${E(g)}</option>`).join('')}</select><input id="w_b" type="number" placeholder="ميزانيتك (ج)"><textarea id="w_d" placeholder="اكتب تفاصيل الحساب الذي تبحث عنه..."></textarea>`, async () => {
+        const g = Security.text($('w_g').value, 2, 40), b = Security.amount($('w_b').value, 1, 100000000), d = Security.text($('w_d').value, 5, 500);
+        await set(push(R('wanted_posts')), { buyerId: me.uid, buyerName: me.name, game: g, budget: b, desc: d, createdAt: Date.now() });
+        ok('تم نشر طلب الشراء'); wanted();
+    });
+};
+window.chatWithBuyer = async (buyerId, wantedId) => {
+    if(!requireAuth()) return;
+    if(buyerId === me.uid) return bad(new Error('هذا طلبك الخاص.'));
+    try {
+        Swal.fire({title:'جاري التحميل...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+        const cid = `wanted_${wantedId}_${me.uid}_${Date.now()}`;
+        await set(R('chats/' + cid), { buyerId, sellerId: me.uid, buyerName: (await get(R('users/'+buyerId+'/name'))).val() || 'مشتري', sellerName: me.name, lastMessage: 'استفسار عن طلبك', dealStatus: '', status: 'open', updatedAt: Date.now(), adminRead: false });
+        await set(R(`user_chats/${buyerId}/${cid}`), true);
+        await set(R(`user_chats/${me.uid}/${cid}`), true);
+        Swal.close(); openChat(cid);
+    } catch(e) { Swal.close(); bad(e); }
+};
+
 function feed() {
   const games = S.games && S.games.length > 0 ? S.games : ['فري فاير','ببجي موبايل','كلاش أوف كلانس','فورتنايت','روبلوكس'];
   const sortOpts = [['new','الأحدث'],['lo','الأرخص'],['hi','الأغلى']];
@@ -310,12 +344,13 @@ function feed() {
   <div style="display:flex;gap:5px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px" class="hide-scroll">
     ${sortOpts.map(([k,l]) => `<button class="chip ${F.sort===k?'active':''}" data-sort="${k}" style="padding:5px 12px;font-size:11px"><i class="fa-solid ${k==='new'?'fa-clock':k==='lo'?'fa-arrow-down-wide-short':'fa-arrow-up-wide-short'}" style="font-size:9px"></i>${l}</button>`).join('')}
   </div>
-  <div id="list" class="posts-grid"></div>`;
+  <div id="list" class="posts-grid"></div>
+  <div id="load-more" style="text-align:center; margin-top:20px;"></div>`;
   
   let searchTimeout;
-  $('q').oninput = e => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { F.q = e.target.value; renderFeed(); }, 300); };
-  document.querySelectorAll('[data-game]').forEach(b => b.onclick = () => { F.game = b.dataset.game; document.querySelectorAll('[data-game]').forEach(x => x.classList.toggle('active', x.dataset.game === F.game)); renderFeed(); });
-  document.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { F.sort = b.dataset.sort; document.querySelectorAll('[data-sort]').forEach(x => x.classList.toggle('active', x.dataset.sort === F.sort)); renderFeed(); });
+  $('q').oninput = e => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { F.q = e.target.value; feedLimit = 20; renderFeed(); }, 300); };
+  document.querySelectorAll('[data-game]').forEach(b => b.onclick = () => { F.game = b.dataset.game; document.querySelectorAll('[data-game]').forEach(x => x.classList.toggle('active', x.dataset.game === F.game)); feedLimit = 20; renderFeed(); });
+  document.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { F.sort = b.dataset.sort; document.querySelectorAll('[data-sort]').forEach(x => x.classList.toggle('active', x.dataset.sort === F.sort)); feedLimit = 20; renderFeed(); });
   renderFeed();
 }
 
@@ -325,9 +360,11 @@ function renderFeed() {
   a = a.filter(p => (!q || [p.game,p.desc,p.server].join(' ').toLowerCase().includes(q)) && (!F.game || (p.game||'').toLowerCase() === F.game.toLowerCase()));
   a.sort((x,y) => F.sort === 'lo' ? x.price - y.price : F.sort === 'hi' ? y.price - x.price : (y.featured?1:0) - (y.featured?1:0) || y.createdAt - x.createdAt);
   
-  if (a.length === 0) { $('list').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-4);"><i class="fa-regular fa-face-frown" style="font-size: 32px; margin-bottom: 8px;"></i><p>لا توجد إعلانات مطابقة</p></div>`; return; }
+  if (a.length === 0) { $('list').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-4);"><i class="fa-regular fa-face-frown" style="font-size: 32px; margin-bottom: 8px;"></i><p>لا توجد إعلانات مطابقة</p></div>`; $('load-more').innerHTML = ''; return; }
   
-  $('list').innerHTML = a.map(p => {
+  const sliced = a.slice(0, feedLimit);
+  
+  $('list').innerHTML = sliced.map(p => {
     const photos = Security.img(p.photos); 
     const tr = trust(p); 
     const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
@@ -368,14 +405,21 @@ function renderFeed() {
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border)">
           <div style="display:flex;align-items:center;gap:6px;min-width:0">
             <div class="avatar-initial" style="width:24px; height:24px; font-size:10px;">${E(initials(p.sellerName))}</div>
-            <span style="font-size:11px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span>
+            <span style="font-size:11px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(p.sellerName)}</span> ${getBadges(p)}
           </div>
-          <span class="trust-meter ${trc}" style="font-size:9px; padding:2px 6px;"><i class="fa-solid fa-shield-halved"></i> ${tr}%</span>
+          <span class="trust-meter ${trc}" style="font-size:9px; padding:2px 6px; cursor:pointer;" onclick="event.stopPropagation(); showTrust(${tr}, ${p.sellerVerified}, 0, ${T[p.sellerId]||0})"><i class="fa-solid fa-shield-halved"></i> ${tr}%</span>
         </div>
       </div>
     </div>`;
   }).join('');
-  loadT([...new Set(a.map(p => p.sellerId))]);
+  
+  if (a.length > feedLimit) {
+      $('load-more').innerHTML = `<button class="btn btn-ghost" onclick="feedLimit += 20; renderFeed();" style="width:100%; font-size:12px;">عرض المزيد من الإعلانات <i class="fa-solid fa-chevron-down"></i></button>`;
+  } else {
+      $('load-more').innerHTML = '';
+  }
+  
+  loadT([...new Set(sliced.map(p => p.sellerId))]);
 }
 
 window.sharePost = (game, price, id) => {
@@ -487,13 +531,12 @@ window.openPost = async id => {
             <div class="avatar-initial" style="width:46px;height:46px;font-size:18px">${E(initials(p.sellerName))}</div>
             <div style="flex:1;min-width:0">
                 <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
-                    <b style="font-size:15px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b>
-                    ${p.sellerVerified ? '<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:13px"></i>' : ''}
+                    <b style="font-size:15px;font-weight:900;color:var(--text)">${E(p.sellerName)}</b> ${getBadges(p)}
                 </div>
                 <span style="font-size:11px;color:var(--text-3);font-weight:700">عضو منذ ${new Date(p.sellerSince||Date.now()).toLocaleDateString('ar-EG')}</span>
             </div>
             <div style="text-align:center">
-                <span class="trust-meter ${trc}" style="margin-bottom:4px; font-size:10px;"><i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة</span>
+                <span class="trust-meter ${trc}" style="margin-bottom:4px; font-size:10px; cursor:pointer;" onclick="showTrust(${tr}, ${p.sellerVerified}, 0, ${avg})"><i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة</span>
                 <span class="info-value" style="color:var(--warn-tx);font-size:12px;display:block">${avg ? '⭐ ' + avg.toFixed(1) : 'لا يوجد تقييم'}</span>
             </div>
         </div>
@@ -502,7 +545,7 @@ window.openPost = async id => {
 
     ${p.status === 'active' && !mine ? `
     <div style="position:fixed;bottom:60px;left:0;right:0;padding:10px 15px;background:var(--glass-strong);backdrop-filter:blur(10px);border-top:1px solid var(--border);z-index:40;max-width:640px;margin:0 auto;">
-        <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;border-radius:12px;box-shadow:var(--shadow-lg);font-weight:900;" onclick="buy('${id}')"><i class="fa-solid fa-shield-halved"></i> شراء الآن (${p.price} ج)</button>
+        <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;border-radius:12px;box-shadow:var(--shadow-lg);font-weight:900; ${p.isAutoBuy ? 'background:var(--gold-solid); color:#fff;' : ''}" onclick="buy('${id}', ${p.isAutoBuy||false})"><i class="fa-solid fa-shield-halved"></i> ${p.isAutoBuy ? 'شراء فوري' : 'شراء الآن'} (${p.price} ج)</button>
     </div>` : `<p style="text-align:center;font-size:13px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
     
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
@@ -519,14 +562,14 @@ const paintLike = (l, n) => { if($('lk')) $('lk').innerHTML = `<i class="fa-${l 
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
 window.zoom = u => Swal.fire({ imageUrl: u, imageWidth: '100%', imageHeight: 'auto', width: '100vw', padding: '0', showConfirmButton: false, showCloseButton: true, background: '#0a0a0a' });
 
-window.buy = async function(id) {
+window.buy = async function(id, isAutoBuy) {
   if(!requireAuth()) return;
   try {
     Security.limit('buy', 3, 6e4);
-    if (!await ask('هل أنت متأكد من الشراء؟ سيتم حجز المبلغ حتى تؤكد الاستلام.')) return;
+    if (!await ask(isAutoBuy ? 'هل أنت متأكد من الشراء الفوري؟ سيتم خصم المبلغ وتحويلك للدردشة فوراً.' : 'هل أنت متأكد من الشراء؟ سيتم حجز المبلغ حتى تؤكد الاستلام.')) return;
     Swal.fire({title:'جاري تنفيذ الشراء بأمان...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
     const idToken = await auth.currentUser.getIdToken();
-    const response = await fetch(WORKER_URL + "/buy", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: id }) });
+    const response = await fetch(WORKER_URL + "/buy", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: id, isAutoBuy: isAutoBuy }) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
     Swal.close(); ok('تم الشراء بنجاح'); openChat(result.chatId);
@@ -551,6 +594,10 @@ window.add = function() {
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">السعر (ج)</label><input id="a_p" type="number" placeholder="مثال: 500" style="margin-bottom:12px">
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">نوع الربط</label><select id="a_l" style="margin-bottom:12px" onchange="updateLinkInput()">${linkTypes.map(l => `<option value="${l}">${l}</option>`).join('')}</select>
     
+    <label style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; margin-bottom:12px; background:var(--gold-bg); padding:10px; border-radius:8px; border:1px solid var(--gold-bd); color:var(--gold-tx);">
+        <input type="checkbox" id="a_auto" style="width:auto; margin:0;"> تفعيل "الشراء الفوري" (يتحول المبلغ فوراً لبائعك بمجرد الضغط)
+    </label>
+
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">صور الحساب (حتى 10 صور)</label>
     <div style="position:relative;border:2px dashed var(--border-2);background:var(--surface-2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px"><input id="a_f" type="file" accept="image/*" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer"><i class="fa-solid fa-cloud-arrow-up" style="font-size:26px;color:var(--text-3);margin-bottom:6px;display:block"></i><span style="font-size:12px;font-weight:800;color:var(--text-2);display:block">اضغط لاختيار الصور</span><span id="file-count" style="font-size:10.5px;color:var(--text-3);font-weight:700;margin-top:4px;display:block"></span></div>
     <div style="background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:11px;margin-bottom:14px"><p style="font-size:11px;color:var(--warn-tx);font-weight:900;margin-bottom:8px"><i class="fa-solid fa-lock"></i> بيانات الدخول (مشفرة)</p><input id="a_e" type="text" placeholder="إيميل / اسم الحساب" style="background:var(--surface);border-color:var(--warn-bd);margin-bottom:6px;font-size:12px"><input id="a_w" type="password" placeholder="كلمة المرور" style="background:var(--surface);border-color:var(--warn-bd);margin:0;font-size:12px"></div>
@@ -585,7 +632,8 @@ window.add = function() {
       };
       const encryptedEmail = await encryptAES(em, TEMP_KEY); const encryptedPass = await encryptAES(pw, TEMP_KEY);
 
-      const id = push(R('posts')).key; await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: 'pending', createdAt: Date.now(), featured: false });
+      const id = push(R('posts')).key; 
+      await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: 'pending', createdAt: Date.now(), featured: false, isAutoBuy: $('a_auto').checked });
       await set(R('post_private/' + id), {email: encryptedEmail, password: encryptedPass});
       Swal.close(); ok('تم الإرسال للمراجعة'); go('feed');
     } catch(e) { Swal.close(); bad(e); $('a_b').disabled = false; $('a_b').innerHTML = 'نشر للمراجعة'; }
@@ -819,16 +867,10 @@ window.upgradePro = async () => {
 
 function profile() {
   if(!requireAuth()) return;
-  
-  // حساب التقييم
   const rating = T[me.uid] ? T[me.uid].toFixed(1) : 'جديد';
   const isPro = me.isPro && (me.proUntil || 0) > Date.now();
   
-  const vb = me.verified ? 
-    `<span class="badge badge-success" style="padding:4px 10px; font-size:11px; border-radius:20px; background:rgba(16,185,129,0.1); border:1px solid var(--success-bd); color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> حساب موثق</span>` : 
-    VS === 'pending' ? 
-    `<div style="margin-top:12px;background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-tx);border-radius:10px;padding:10px;font-size:11px;font-weight:800"><i class="fa-solid fa-hourglass-half"></i> طلب التوثيق قيد المراجعة</div>` : 
-    `${VS === 'rejected' ? '<p style="font-size:11px;font-weight:800;color:var(--danger-tx);background:var(--danger-bg);padding:10px;border-radius:10px;border:1px solid var(--danger-bd);margin-top:10px">تم رفض الطلب. أعد المحاولة بصور أوضح.</p>' : ''}<button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px;font-size:12.5px" onclick="verify()"><i class="fa-solid fa-shield-halved"></i> توثيق الحساب الآن</button>`;
+  const vb = me.verified ? `<span class="badge badge-success" style="padding:4px 10px; font-size:11px; border-radius:20px; background:rgba(16,185,129,0.1); border:1px solid var(--success-bd); color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> حساب موثق</span>` : VS === 'pending' ? `<div style="margin-top:12px;background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-tx);border-radius:10px;padding:10px;font-size:11px;font-weight:800"><i class="fa-solid fa-hourglass-half"></i> طلب التوثيق قيد المراجعة</div>` : `${VS === 'rejected' ? '<p style="font-size:11px;font-weight:800;color:var(--danger-tx);background:var(--danger-bg);padding:10px;border-radius:10px;border:1px solid var(--danger-bd);margin-top:10px">تم رفض الطلب. أعد المحاولة بصور أوضح.</p>' : ''}<button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px;font-size:12.5px" onclick="verify()"><i class="fa-solid fa-shield-halved"></i> توثيق الحساب الآن</button>`;
 
   $('app').innerHTML = `
   <div class="card" style="text-align:center;padding:24px 16px;margin-top:8px; background:var(--surface); border:1px solid var(--border); border-radius:14px;">
@@ -857,24 +899,29 @@ function profile() {
       </div>
   </div>
   
+  <!-- لوحة الإحالات -->
+  <div class="card" style="background:linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%); border-color:var(--border);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <b style="font-size:13px; color:var(--text);"><i class="fa-solid fa-users" style="color:var(--purple-solid);"></i> أرباح الإحالات</b>
+          <b style="font-size:14px; color:var(--success-tx);">${me.refEarnings||0} ج</b>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-3); font-weight:700; margin-bottom:12px;">
+          <span>عدد الإحالات: ${me.refCount||0} شخص</span>
+          <span>مكافأة كل شخص: ${S.refBonus||10} ج</span>
+      </div>
+      <button class="btn btn-ghost" style="width:100%; font-size:11px; border-color:var(--purple-bd); color:var(--purple-tx); background:var(--purple-bg);" onclick="copyRef()"><i class="fa-solid fa-copy"></i> نسخ رابط الدعوة</button>
+  </div>
+
   <div style="display:grid;gap:8px">
       ${isPro ? '' : `<button class="btn btn-gold" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="upgradePro()"><i class="fa-solid fa-crown" style="margin-left:8px; color:#fff;"></i> ترقية الحساب إلى الباقة المميزة (برو)</button>`}
-      
       <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="go('orders')"><i class="fa-solid fa-receipt" style="margin-left:8px; color:var(--text-3); width:20px; text-align:center;"></i> طلباتي وإعلاناتي</button>
-      
       <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="go('favorites')"><i class="fa-solid fa-heart" style="margin-left:8px; color:var(--text-3); width:20px; text-align:center;"></i> المفضلة (الإعلانات المحفوظة)</button>
-      
-      <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="copyRef()"><i class="fa-solid fa-user-plus" style="margin-left:8px; color:var(--text-3); width:20px; text-align:center;"></i> دعوة الأصدقاء (نسخ رابط الإحالة)</button>
-      
       <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="supportChat()"><i class="fa-solid fa-headset" style="margin-left:8px; color:var(--text-3); width:20px; text-align:center;"></i> الدعم الفني</button>
-      
       <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px; justify-content:flex-start; padding-right:16px;" onclick="showTermsPage('terms')"><i class="fa-solid fa-file-contract" style="margin-left:8px; color:var(--text-3); width:20px; text-align:center;"></i> الشروط والأحكام</button>
-      
       <button class="btn btn-ghost" style="width:100%;padding:14px;font-size:13px;color:var(--danger-tx);border-color:var(--danger-bd); justify-content:flex-start; padding-right:16px;" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket" style="margin-left:8px; color:var(--danger-tx); width:20px; text-align:center;"></i> تسجيل الخروج</button>
   </div>`;
 }
 
-// صفحة المفضلة
 async function favorites() {
     if(!requireAuth()) return;
     $('app').innerHTML = `<h2 style="font-size:18px; font-weight:900; color:var(--text); margin-bottom:14px;"><i class="fa-solid fa-heart" style="color:#dc2626;"></i> الإعلانات المفضلة</h2><div id="fav-list" class="posts-grid"><div class="skeleton" style="height:200px"></div><div class="skeleton" style="height:200px"></div></div>`;
@@ -882,11 +929,8 @@ async function favorites() {
         const favsSnap = await get(R(`favorites/${me.uid}`));
         const favIds = Object.keys(favsSnap.val() || {});
         if(favIds.length === 0) return $('fav-list').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-4); font-size:12px; font-weight:700;"><i class="fa-regular fa-heart" style="font-size:32px; margin-bottom:8px; opacity:0.5;"></i><br>لا توجد إعلانات في المفضلة حالياً.</div>';
-        
         const favPosts = Object.entries(P).filter(([id, p]) => favIds.includes(id)).map(([id, p]) => ({id, ...p}));
-        
         if(favPosts.length === 0) return $('fav-list').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-4); font-size:12px; font-weight:700;"><i class="fa-regular fa-heart" style="font-size:32px; margin-bottom:8px; opacity:0.5;"></i><br>الإعلانات التي أضفتها للمفضلة تم حذفها أو بيعها.</div>';
-        
         $('fav-list').innerHTML = favPosts.map(p => {
             const photos = Security.img(p.photos); 
             const tr = trust(p); 
