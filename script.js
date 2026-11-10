@@ -199,7 +199,20 @@ onAuthStateChanged(auth, async u => {
     $('nav').classList.remove('hidden');
     $('bal').textContent = '0 ج';
     
-    if (!initialized) { initialized = true; go('feed'); }
+    if (!initialized) { 
+    initialized = true; 
+    go('feed');
+    
+    // --- [كود فتح المنشور من الرابط الخارجي] ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('post');
+    if (postId) {
+        setTimeout(() => {
+            openPost(postId);
+        }, 500); // تأخير نصف ثانية لضمان تحميل بيانات المستخدم
+    }
+    // -----------------------------------------
+    }
 
     const r = R('users/' + u.uid);
     
