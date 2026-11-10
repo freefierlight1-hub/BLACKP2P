@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الشروط والأحكام - BLACKP2P</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root { --primary: #18181b; --gold: #ca8a04; --bg: #f8fafc; --text: #1e293b; --text-2: #475569; --border: #e2e8f0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.8; padding-bottom: 50px; }
+.header { background: var(--primary); color: #fff; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.header h1 { font-size: 22px; font-weight: 900; margin-bottom: 5px; }
+.header p { font-size: 12px; color: #a1a1aa; }
+.container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+.trust-section { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
+.stamp { background: #fff; border: 2px dashed var(--border); border-radius: 12px; padding: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; position: relative; overflow: hidden; }
+.stamp::before { content: ''; position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: rgba(202, 138, 4, 0.1); border-radius: 50%; }
+.stamp i { font-size: 26px; color: var(--primary); background: #f1f5f9; padding: 12px; border-radius: 50%; border: 2px solid var(--gold); }
+.stamp h3 { font-size: 13px; font-weight: 900; color: var(--primary); }
+.stamp p { font-size: 10px; color: var(--text-2); font-weight: 700; }
+.paper { background: #fff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+.paper h2 { font-size: 18px; font-weight: 900; color: var(--primary); margin-top: 25px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.paper h2:first-child { margin-top: 0; }
+.paper h2 i { color: var(--gold); font-size: 16px; }
+.paper p { font-size: 14px; color: var(--text-2); font-weight: 600; margin-bottom: 15px; text-align: justify; }
+.paper ul { padding-right: 20px; margin-bottom: 15px; }
+.paper li { font-size: 14px; color: var(--text-2); font-weight: 600; margin-bottom: 8px; text-align: justify; }
+.warning-box { background: #fef2f2; border: 1px solid #fecaca; border-right: 4px solid #ef4444; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+.warning-box p { color: #991b1b; font-weight: 800; margin: 0; font-size: 13px; }
+.date-badge { display: inline-block; background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; margin-bottom: 20px; }
+.footer-actions { text-align: center; margin-top: 30px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: #fff; text-decoration: none; padding: 12px 30px; border-radius: 10px; font-size: 14px; font-weight: 900; transition: opacity 0.2s; }
+.btn:hover { opacity: 0.9; }
+@media (max-width: 480px) { .trust-section { grid-template-columns: 1fr; } .paper { padding: 18px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>BLACKP2P</h1>
+    <p>وثيقة الشروط والأحكام وسياسة الخصوصية</p>
+</div>
+
+<div class="container">
+    
+    <!-- أختام الأمان (الشهادات) -->
+    <div class="trust-section">
+        <div class="stamp">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h3>حماية مصرفية</h3>
+            <p>تشفير AES-256</p>
+        </div>
+        <div class="stamp">
+            <i class="fa-solid fa-vault"></i>
+            <h3>نظام الضمان (Escrow)</h3>
+            <p>أموالك محجوزة حتى الاستلام</p>
+        </div>
+        <div class="stamp">
+            <i class="fa-solid fa-user-check"></i>
+            <h3>بائعون موثقون</h3>
+            <p>هوية تم التحقق منها</p>
+        </div>
+        <div class="stamp">
+            <i class="fa-solid fa-scale-balanced"></i>
+            <h3>عدالة النزاعات</h3>
+            <p>حماية للبائع والمشتري</p>
+        </div>
+    </div>
+
+    <!-- المستند القانوني -->
+    <div class="paper">
+        <div class="date-badge"><i class="fa-regular fa-calendar"></i> آخر تحديث: نوفمبر 2026</div>
+
+        <div class="warning-box">
+            <p><i class="fa-solid fa-triangle-exclamation"></i> تنبيه هام: استخدامك لمنصة BLACKP2P يعني موافقتك التامة على جميع الشروط المذكورة أدناه. يرجى القراءة بعناية.</p>
+        </div>
+
+        <h2><i class="fa-solid fa-1"></i> طبيعة عمل المنصة</h2>
+        <p>منصة BLACKP2P هي منصة وسيطة (Brokerage Platform) تهدف لتسهيل عمليات بيع وشراء الحسابات بين المستخدمين. المنصة <b>لا تمتلك</b> الحسابات المعروضة، ولا تتحمل أي مسؤولية عن أي إجراء تتخذه شركات الألعاب (مثل الحظر أو تعليق الحساب) بعد إتمام عملية البيع.</p>
+
+        <h2><i class="fa-solid fa-2"></i> نظام الضمان المالي (Escrow)</h2>
+        <p>لضمان حقوق الطرفين، تعتمد المنصة نظام الضمان:</p>
+        <ul>
+            <li>يقوم المشتري بدفع المبلغ للمنصة (يُخصم من محفظته).</li>
+            <li>يظل المبلغ <b>محجوزاً لدى المنصة</b> ولا يستلمه البائع فوراً.</li>
+            <li>يقوم البائع بتسليم الحساب عبر الدردشة.</li>
+            <li>يتأكد المشتري من الحساب، يغير كلمة المرور، ثم يضغط "تأكيد الاستلام".</li>
+            <li>عندها فقط، يتم تحويل المبلغ للبائع (بعد خصم عمولة المنصة).</li>
+        </ul>
+
+        <h2><i class="fa-solid fa-3"></i> شروط وواجبات البائع</h2>
+        <ul>
+            <li>يجب أن يكون الحساب المعروض ملكاً قانونياً للبائع.</li>
+            <li>يُمنع منعاً باتاً عرض أو بيع حسابات مسروقة أو مخترقة. أي مستخدم يثبت تورطه في ذلك سيتم حظر حسابه وتجميد أمواله فوراً وإبلاغ الجهات المختصة إن لزم الأمر.</li>
+            <li>يجب إرفاق صور حقيقية للحساب وكتابة وصف دقيق ومطابق للواقع.</li>
+            <li>يجب تسليم بيانات الحساب كاملة للمشتري فور بدء الصفقة.</li>
+        </ul>
+
+        <h2><i class="fa-solid fa-4"></i> شروط وواجبات المشتري</h2>
+        <ul>
+            <li>بمجرد استلام بيانات الحساب، يتحمل المشتري مسؤولية تأمينه (تغيير الإيميل، كلمة المرور، ربطه بحسابه).</li>
+            <li>لا يحق للمشتري فتح نزاع بداعي "سرقة الحساب" إذا لم يقم بتأمينه بشكل صحيح.</li>
+            <li>يجب على المشتري تأكيد الاستلام بمجرد التأكد من صحة الحساب لإتمام الصفقة.</li>
+        </ul>
+
+        <h2><i class="fa-solid fa-5"></i> النزاعات والاسترداد</h2>
+        <p>في حال حدوث خلاف:</p>
+        <ul>
+            <li>يحق لأي من الطرفين فتح "نزاع" خلال <b>24 ساعة</b> من بدء عملية التسليم.</li>
+            <li>يقوم فريق الدعم بمراجعة الأدلة (المحادثات، الصور، لقطات الشاشة).</li>
+            <li>قرار الإدارة نهائي وملزم للطرفين. في حال ثبوت النصب، يتم استرداد المبلغ للمشتري وحظر البائع.</li>
+        </ul>
+
+        <h2><i class="fa-solid fa-6"></i> سياسة الخصوصية وتشفير البيانات</h2>
+        <ul>
+            <li>جميع بيانات الحسابات المعروضة (الإيميل وكلمة المرور) يتم تشفيرها باستخدام خوارزمية <b>AES-256</b> قبل حفظها في قاعدة البيانات.</li>
+            <li>لا يمكن لأي شخص (حتى إدارة المنصة) رؤية هذه البيانات أثناء التصفح العادي.</li>
+            <li>المنصة لا تقوم ببيع أو مشاركة بيانات المستخدمين (الاسم، الإيميل) مع أي طرف ثالث.</li>
+        </ul>
+
+        <h2><i class="fa-solid fa-7"></i> تعليق وحظر الحسابات</h2>
+        <p>تحتفظ إدارة BLACKP2P بالحق الكامل في تعليق أو حظر أي حساب يخالف القوانين، أو يحاول التلاعب بالأسعار، أو يسيء استخدام نظام الدردشة، أو يثبت تورطه في عمليات احتيال، دون إشعار مسبق.</p>
+
+    </div>
+
+    <div class="footer-actions">
+        <a href="index.html" class="btn"><i class="fa-solid fa-arrow-right"></i> العودة إلى المنصة</a>
+    </div>
+
+</div>
+
+</body>
+  </html>
