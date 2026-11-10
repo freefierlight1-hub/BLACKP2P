@@ -373,18 +373,14 @@ window.openPost = async id => {
     const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; T[p.sellerId] = avg;
     const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const mainImg = ph.length > 0 ? ph[0] : null; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
-    // سلايدر الصور + شريط مصغر + زر المعاينة
+    // السلايدر فقط بدون صور مصغرة
     const sliderHtml = ph.length > 0 ? `
-        <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000;">
+        <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:10px;">
             <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
-                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:320px;background:var(--surface-2);" onclick="zoom('${img}')">`).join('')}
+                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:auto;max-height:60vh;min-height:250px;background:#000;cursor:pointer;" onclick="zoom('${img}')">`).join('')}
             </div>
+            ${ph.length > 1 ? `<button class="btn btn-ghost" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; border:none; font-size:11px; padding:5px 12px; border-radius:20px;" onclick="previewAllImages()"><i class="fa-solid fa-images"></i> معاينة الكل (${ph.length})</button>` : ''}
         </div>
-        ${ph.length > 1 ? `
-        <div style="display:flex; align-items:center; gap:6px; overflow-x:auto; padding:10px 0; scrollbar-width:none;" class="hide-scroll">
-            ${ph.map(img => `<img src="${img}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; border:1px solid var(--border); cursor:pointer; flex-shrink:0;" onclick="document.getElementById('post-slider').scrollTo({left: document.getElementById('post-slider').scrollWidth * ${ph.indexOf(img)} / ${ph.length}, behavior: 'smooth'})">`).join('')}
-            <button class="btn btn-ghost" style="padding:4px 10px; font-size:10px; white-space:nowrap; flex-shrink:0; margin-right:auto; border-color:var(--info-bd); color:var(--info-tx); background:var(--info-bg);" onclick="previewAllImages()"><i class="fa-solid fa-expand"></i> معاينة الكل</button>
-        </div>` : ''}
     ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
 
     $('app').innerHTML = `
@@ -453,14 +449,15 @@ window.openPost = async id => {
     
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
     
-    // دالة عرض جميع الصور عمودياً
+    // دالة معاينة جميع الصور بحجم الشاشة الكامل
     window.previewAllImages = () => {
         if(ph.length === 0) return;
-        const imagesHtml = ph.map(img => `<img src="${img}" style="width:100%; border-radius:8px; margin-bottom:10px; object-fit:contain;">`).join('');
+        const imagesHtml = ph.map(img => `<div style="width:100%; margin-bottom:10px; background:#000; display:flex; justify-content:center;"><img src="${img}" style="width:100%; max-height:80vh; object-fit:contain; cursor:pointer;" onclick="zoom('${img}')"></div>`).join('');
         Swal.fire({ 
-            title: 'معاينة الصور', 
-            html: `<div style="max-height:70vh; overflow-y:auto; padding:5px;">${imagesHtml}</div>`, 
-            width: '95%', 
+            title: 'معرض الصور', 
+            html: `<div style="max-height:85vh; overflow-y:auto; width:100%; margin:0; padding:0;">${imagesHtml}</div>`, 
+            width: '100vw', 
+            padding: '0',
             showConfirmButton: false, 
             showCloseButton: true,
             background: '#0a0a0a',
@@ -476,11 +473,11 @@ window.zoom = u => Swal.fire({
     imageUrl: u, 
     imageWidth: '100%', 
     imageHeight: 'auto', 
+    width: '100vw',
     padding: '0', 
     showConfirmButton: false, 
     showCloseButton: true, 
-    background: '#0a0a0a',
-    customClass: { image: 'max-h-[90vh] w-full object-contain' }
+    background: '#0a0a0a' 
 });
 window.buy = async function(id) {
   if(!requireAuth()) return;
