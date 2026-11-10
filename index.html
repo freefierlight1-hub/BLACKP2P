@@ -14,7 +14,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
 <!-- ربط ملف التنسيقات (CSS) -->
 <link rel="stylesheet" href="style.css">
@@ -61,16 +60,12 @@
   </div>
 </nav>
 
-<!-- ربط ملف الجافا سكريبت (تم التحديث إلى script2.js) -->
 <script type="module" src="script.js"></script>
 
-<!-- ربط ملف Service Worker لتشغيل التطبيق -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('SW registered'))
-        .catch(err => console.log('SW error', err));
+      navigator.serviceWorker.register('sw.js').then(reg => console.log('SW registered')).catch(err => console.log('SW error', err));
     });
   }
 </script>
