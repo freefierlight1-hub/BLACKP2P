@@ -108,6 +108,80 @@ document.getElementById('theme-toggle')?.addEventListener('click', () => {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
 });
 
+// =========================================
+// المعرض العمودي ونظام التكبير (جديد)
+// =========================================
+let zoomScale = 1, initialDist = 0;
+
+window.openCustomGallery = (ph) => {
+    if(ph.length === 0) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-gallery-overlay';
+    overlay.innerHTML = `
+        <div class="custom-gallery-header">
+            <div class="custom-gallery-close" onclick="this.parentElement.parentElement.remove()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        ${ph.map(img => `<img src="${img}" class="custom-gallery-img" onclick="openCustomZoom('${img}')" loading="lazy">`).join('')}
+    `;
+    document.body.appendChild(overlay);
+};
+
+window.openCustomZoom = (url) => {
+    zoomScale = 1;
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-zoom-overlay';
+    overlay.innerHTML = `
+        <div style="position:absolute; top:20px; right:20px; color:white; font-size:24px; cursor:pointer; z-index:10; background:rgba(0,0,0,0.5); width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%;" onclick="event.stopPropagation(); this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></div>
+        <img src="${url}" class="custom-zoom-img">
+    `;
+    document.body.appendChild(overlay);
+    const imgEl = overlay.querySelector('img');
+    
+    // Double Tap support
+    let lastTap = 0;
+    imgEl.addEventListener('touchend', (e) => {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+            e.preventDefault();
+            if (zoomScale === 1) { zoomScale = 2.5; } else { zoomScale = 1; }
+            imgEl.style.transform = `scale(${zoomScale})`;
+        }
+        lastTap = currentTime;
+    });
+
+    // Pinch to zoom support
+    imgEl.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            initialDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+        }
+    });
+
+    imgEl.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+            const scaleChange = dist / initialDist;
+            zoomScale = Math.max(1, Math.min(zoomScale * scaleChange, 5));
+            imgEl.style.transform = `scale(${zoomScale})`;
+            initialDist = dist;
+        }
+    });
+
+    // Mouse double click support
+    imgEl.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        if (zoomScale === 1) { zoomScale = 2.5; } else { zoomScale = 1; }
+        imgEl.style.transform = `scale(${zoomScale})`;
+    });
+
+    // Close on clicking the background
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+};
+// =========================================
+
 const getBadges = (user) => {
     if (!user) return '';
     let badges = [];
@@ -324,12 +398,7 @@ async function loadT(ids) {
   if (n && view === 'seller') sellerProfile(currentSellerId);
 }
 
-// =========================================
-// صفحة البائع العامة والمتابعة (جديد)
-// =========================================
 let currentSellerId = null;
-let currentSellerData = null;
-let isFollowingSeller = false;
 
 window.sellerProfile = async (uid) => {
     currentSellerId = uid;
@@ -339,7 +408,6 @@ window.sellerProfile = async (uid) => {
         const userSnap = await get(R('users/' + uid));
         if (!userSnap.exists()) return bad(new Error('البائع غير موجود.'));
         const u = userSnap.val();
-        currentSellerData = u;
         
         const postsSnap = await get(query(R('posts'), orderByChild('sellerId'), equalTo(uid)));
         const posts = Object.entries(postsSnap.val() || {}).map(([id, p]) => ({id, ...p})).filter(p => p.status === 'active').sort((a,b) => b.createdAt - a.createdAt);
@@ -348,8 +416,7 @@ window.sellerProfile = async (uid) => {
         const rs = Object.values(rtSnap.val() || {}).map(o => o.rating);
         const avg = rs.length ? (rs.reduce((a,b) => a+b,0) / rs.length).toFixed(1) : 'جديد';
         
-        // التحقق من حالة المتابعة
-        isFollowingSeller = false;
+        let isFollowingSeller = false;
         if (me && me.uid !== uid) {
             const followSnap = await get(R(`followers/${uid}/${me.uid}`));
             isFollowingSeller = followSnap.exists();
@@ -422,7 +489,8 @@ window.toggleFollow = async (sellerId) => {
     if (me.uid === sellerId) return bad(new Error('لا يمكنك متابعة نفسك.'));
     try {
         const r = R(`followers/${sellerId}/${me.uid}`);
-        if (isFollowingSeller) {
+        const snap = await get(r);
+        if (snap.exists()) {
             await remove(r);
             await runTransaction(R(`users/${sellerId}/followersCount`), v => Math.max(0, (v || 1) - 1));
             ok('تم إلغاء المتابعة');
@@ -430,34 +498,10 @@ window.toggleFollow = async (sellerId) => {
             await set(r, true);
             await runTransaction(R(`users/${sellerId}/followersCount`), v => (v || 0) + 1);
             ok('تمت المتابعة بنجاح');
-            // إرسال إشعار للبائع
             notify(sellerId, 'متابع جديد', `قام ${me.name} بمتابعة حسابك.`);
         }
         sellerProfile(sellerId);
     } catch(e) { bad(e); }
-};
-
-// =========================================
-// المعرض العمودي (مثل فيسبوك)
-// =========================================
-window.previewAllImagesVertical = (ph) => {
-    if(ph.length === 0) return;
-    const imagesHtml = ph.map(img => `
-        <img src="${img}" class="vertical-gallery-img" onclick="zoom('${img}')" loading="lazy">
-    `).join('');
-    
-    Swal.fire({
-        html: `<div class="vertical-gallery-container">${imagesHtml}</div>`,
-        width: '100vw',
-        padding: '0',
-        showConfirmButton: false,
-        showCloseButton: true,
-        background: '#000',
-        customClass: { 
-            popup: 'fullscreen-gallery-popup',
-            closeButton: 'fullscreen-gallery-close'
-        }
-    });
 };
 
 function feed() {
@@ -606,12 +650,13 @@ window.openPost = async id => {
 
     const ph = Security.img(p.photos); const mine = me && p.sellerId === me.uid; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
+    // استخدام دالة المعرض الجديدة
     const sliderHtml = ph.length > 0 ? `
         <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; margin-bottom:10px;">
             <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
-                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:auto;max-height:60vh;min-height:250px;background:#000;cursor:zoom-in;" onclick="previewAllImagesVertical(${JSON.stringify(ph).replace(/"/g, '&quot;')})">`).join('')}
+                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:auto;max-height:60vh;min-height:250px;background:#000;cursor:pointer;" onclick="openCustomGallery(${JSON.stringify(ph).replace(/"/g, '&quot;')})">`).join('')}
             </div>
-            ${ph.length > 1 ? `<button class="btn btn-ghost" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; border:none; font-size:11px; padding:5px 12px; border-radius:20px;" onclick="previewAllImagesVertical(${JSON.stringify(ph).replace(/"/g, '&quot;')})"><i class="fa-solid fa-images"></i> معاينة الكل (${ph.length})</button>` : ''}
+            ${ph.length > 1 ? `<button class="btn btn-ghost" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; border:none; font-size:11px; padding:5px 12px; border-radius:20px;" onclick="openCustomGallery(${JSON.stringify(ph).replace(/"/g, '&quot;')})"><i class="fa-solid fa-images"></i> معاينة الكل (${ph.length})</button>` : ''}
         </div>
     ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
 
@@ -684,7 +729,6 @@ window.openPost = async id => {
 
 const paintLike = (l, n) => { if($('lk')) $('lk').innerHTML = `<i class="fa-${l ? 'solid text-red' : 'regular'} fa-heart" style="${l ? 'color:#dc2626' : ''}"></i> ${n}`; };
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
-window.zoom = u => Swal.fire({ imageUrl: u, imageWidth: '100%', imageHeight: 'auto', width: '100vw', padding: '0', showConfirmButton: false, showCloseButton: true, background: '#0a0a0a' });
 
 window.buy = async function(id, isAutoBuy) {
   if(!requireAuth()) return;
@@ -873,7 +917,7 @@ window.openChat = cid => {
   $('mi').oninput = () => { if (Date.now() - last > 2500) { last = Date.now(); set(R(`chats/${cid}/typing/${me.uid}`), last).catch(()=>{}); } };
   
   const renderMsg = m => {
-    if (m.type === 'image' && (m.imageUrl.startsWith('http') || /^data:image\//.test(m.imageUrl))) { return `<img src="${m.imageUrl}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="zoom(this.src)">`; }
+    if (m.type === 'image' && (m.imageUrl.startsWith('http') || /^data:image\//.test(m.imageUrl))) { return `<img src="${m.imageUrl}" style="border-radius:8px;max-height:200px;max-width:100%;object-fit:contain;cursor:pointer;display:block" onclick="openCustomZoom('${m.imageUrl}')">`; }
     else if (m.type === 'transaction') { return `<div style="width:100%;display:flex;justify-content:center;margin:6px 0"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:260px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span><b style="color:${m.status==='approved'||m.status==='completed'?'var(--success-tx)':'var(--warn-tx)'}">${m.status}</b></div></div></div>`; }
     else if (m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
     else if (m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble" style="white-space:pre-line;text-align:right;direction:rtl;"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
