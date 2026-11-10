@@ -373,11 +373,18 @@ window.openPost = async id => {
     const liked = (await get(R(`likes/${id}/${me.uid}`))).exists(); const rs = Object.values((await get(R('ratings/' + p.sellerId))).val() || {}).map(o => o.rating); const avg = rs.length ? rs.reduce((a,b) => a+b) / rs.length : 0; T[p.sellerId] = avg;
     const ph = Security.img(p.photos); const mine = p.sellerId === me.uid; const mainImg = ph.length > 0 ? ph[0] : null; const tr = trust(p); const trc = tr > 70 ? 'trust-high' : tr > 40 ? 'trust-mid' : 'trust-low';
     
-    // عرض الصور طولياً (مثل فيسبوك)
+    // سلايدر الصور + شريط مصغر + زر المعاينة
     const sliderHtml = ph.length > 0 ? `
-        <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
-            ${ph.map(img => `<img src="${img}" style="width:100%; border-radius:12px; object-fit:cover; max-height:500px; background:var(--surface-2); cursor:pointer;" onclick="zoom('${img}')">`).join('')}
+        <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000;">
+            <div id="post-slider" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;">
+                ${ph.map(img => `<img src="${img}" style="flex:0 0 100%;scroll-snap-align:center;object-fit:contain;height:320px;background:var(--surface-2);" onclick="zoom('${img}')">`).join('')}
+            </div>
         </div>
+        ${ph.length > 1 ? `
+        <div style="display:flex; align-items:center; gap:6px; overflow-x:auto; padding:10px 0; scrollbar-width:none;" class="hide-scroll">
+            ${ph.map(img => `<img src="${img}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; border:1px solid var(--border); cursor:pointer; flex-shrink:0;" onclick="document.getElementById('post-slider').scrollTo({left: document.getElementById('post-slider').scrollWidth * ${ph.indexOf(img)} / ${ph.length}, behavior: 'smooth'})">`).join('')}
+            <button class="btn btn-ghost" style="padding:4px 10px; font-size:10px; white-space:nowrap; flex-shrink:0; margin-right:auto; border-color:var(--info-bd); color:var(--info-tx); background:var(--info-bg);" onclick="previewAllImages()"><i class="fa-solid fa-expand"></i> معاينة الكل</button>
+        </div>` : ''}
     ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
 
     $('app').innerHTML = `
@@ -445,12 +452,36 @@ window.openPost = async id => {
     </div>` : `<p style="text-align:center;font-size:13px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
     
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
+    
+    // دالة عرض جميع الصور عمودياً
+    window.previewAllImages = () => {
+        if(ph.length === 0) return;
+        const imagesHtml = ph.map(img => `<img src="${img}" style="width:100%; border-radius:8px; margin-bottom:10px; object-fit:contain;">`).join('');
+        Swal.fire({ 
+            title: 'معاينة الصور', 
+            html: `<div style="max-height:70vh; overflow-y:auto; padding:5px;">${imagesHtml}</div>`, 
+            width: '95%', 
+            showConfirmButton: false, 
+            showCloseButton: true,
+            background: '#0a0a0a',
+            color: '#fff'
+        });
+    };
+
   } catch(e) { bad(e); }
 };
 const paintLike = (l, n) => { $('lk').innerHTML = `<i class="fa-${l ? 'solid text-red' : 'regular'} fa-heart" style="${l ? 'color:#dc2626' : ''}"></i> ${n}`; };
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
-window.zoom = u => Swal.fire({imageUrl: u, imageWidth: '100%', showConfirmButton: false, showCloseButton: true, background: '#0a0a0a'});
-
+window.zoom = u => Swal.fire({ 
+    imageUrl: u, 
+    imageWidth: '100%', 
+    imageHeight: 'auto', 
+    padding: '0', 
+    showConfirmButton: false, 
+    showCloseButton: true, 
+    background: '#0a0a0a',
+    customClass: { image: 'max-h-[90vh] w-full object-contain' }
+});
 window.buy = async function(id) {
   if(!requireAuth()) return;
   try {
