@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- تم إزالة مكتبة crypto-js لعدم الحاجة إليها -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
 <!-- ربط ملف التنسيقات (CSS) -->
 <link rel="stylesheet" href="style.css">
@@ -40,7 +40,16 @@
 </header>
 
 <div id="tick" class="hidden"></div>
+
+<!-- منطقة عرض المحتوى الرئيسي -->
 <main id="app"></main>
+
+<!-- الفوتر (الشروط وسياسة الخصوصية) -->
+<div id="site-footer" style="text-align:center; padding:15px; font-size:11px; color:var(--text-3); font-weight:700; margin-top:20px;">
+    <a href="javascript:void(0)" onclick="showTermsPage('terms')" style="text-decoration:underline; color:var(--text-3);">الشروط والأحكام</a> 
+    <span style="margin:0 8px;">|</span> 
+    <a href="javascript:void(0)" onclick="showTermsPage('privacy')" style="text-decoration:underline; color:var(--text-3);">سياسة الخصوصية</a>
+</div>
 
 <nav id="nav" class="hidden">
   <div class="nav-inner">
@@ -52,9 +61,10 @@
   </div>
 </nav>
 
-<!-- ربط ملف الجافا سكريبت (JS) -->
-<script type="module" src="script.js"></script>
-<!-- ربط ملف Service Worker لتشغيل زر التثبيت -->
+<!-- ربط ملف الجافا سكريبت (تم التحديث إلى script2.js) -->
+<script type="module" src="script2.js"></script>
+
+<!-- ربط ملف Service Worker لتشغيل التطبيق -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
