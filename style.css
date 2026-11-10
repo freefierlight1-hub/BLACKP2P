@@ -1,6 +1,3 @@
-/* =========================================
-   1. المتغيرات العامة والألوان (Theme Variables)
-   ========================================= */
 :root{ 
     --bg:#f1f3f7; --surface:#ffffff; --surface-2:#f8f9fc; --surface-3:#eef0f5; 
     --border:#e2e5eb; --border-2:#d4d8e0; --text:#0f172a; --text-2:#334155; 
@@ -9,6 +6,7 @@
     --danger-bg:rgba(239,68,68,0.12); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#b91c1c; --danger-solid:#dc2626; 
     --warn-bg:rgba(245,158,11,0.12); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#b45309; --warn-solid:#d97706; 
     --info-bg:rgba(59,130,246,0.12); --info-bd:rgba(59,130,246,0.3); --info-tx:#1d4ed8; --info-solid:#2563eb; 
+    --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); --gold-tx:#854d0e; --gold-solid:#ca8a04;
     --neutral-bg:rgba(148,163,184,0.1); --neutral-bd:rgba(148,163,184,0.25); --neutral-tx:#475569; 
     --shadow:0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04); 
     --shadow-lg:0 4px 12px rgba(15,23,42,0.08); 
@@ -23,23 +21,19 @@ html.dark{
     --danger-bg:rgba(239,68,68,0.15); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#f87171; --danger-solid:#ef4444; 
     --warn-bg:rgba(245,158,11,0.15); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#fbbf24; --warn-solid:#f59e0b; 
     --info-bg:rgba(59,130,246,0.15); --info-bd:rgba(59,130,246,0.3); --info-tx:#60a5fa; --info-solid:#3b82f6; 
+    --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); --gold-tx:#fde047; --gold-solid:#eab308;
     --neutral-bg:rgba(255,255,255,0.06); --neutral-bd:rgba(255,255,255,0.1); --neutral-tx:#d4d4d8; 
     --shadow:0 1px 3px rgba(0,0,0,0.4); --shadow-lg:0 4px 12px rgba(0,0,0,0.5); 
 }
 
-/* =========================================
-   2. الإعدادات الأساسية (Base Styles)
-   ========================================= */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
-body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5;padding-bottom:80px;overflow-x:hidden}
+body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5;padding-bottom:80px;overflow-x:hidden;transition:background-color 0.3s, color 0.3s;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,textarea,select{font-family:inherit;color:inherit}
 img{max-width:100%;display:block}
 
-/* =========================================
-   3. الهيدر والناڤ بار (Header & Nav)
-   ========================================= */
+/* Header & Nav */
 #header{position:sticky;top:0;z-index:50;background:var(--glass-strong);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
 .header-inner{max-width:640px;margin:0 auto;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:52px}
 .brand{display:flex;align-items:center;gap:8px;min-width:0}
@@ -61,10 +55,8 @@ html.dark #tick{background:#fafafa;color:#0a0a0a}#tick.hidden{display:none}
 .nav-item i{font-size:16px}.nav-item.active{color:var(--text);background:var(--neutral-bg)}
 html.dark .nav-item.active{color:#fafafa;background:rgba(255,255,255,0.08)}
 
-/* =========================================
-   4. المكونات العامة (Cards, Buttons, Inputs)
-   ========================================= */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;margin-bottom:10px;box-shadow:var(--shadow);transition:border-color 0.15s, box-shadow 0.15s}
+/* UI Elements */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;margin-bottom:10px;box-shadow:var(--shadow);transition:border-color 0.15s, box-shadow 0.15s, background-color 0.3s}
 .card-hover:hover{border-color:var(--border-2);box-shadow:var(--shadow-lg)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border-radius:10px;font-size:12.5px;font-weight:900;white-space:nowrap;border:1px solid transparent;transition:opacity 0.15s, background-color 0.15s;min-height:40px}
 .btn:active{opacity:0.75}.btn:disabled{opacity:0.4;cursor:not-allowed}
@@ -74,6 +66,7 @@ html.dark .btn-primary{background:#fafafa;color:#0a0a0a;border-color:#fafafa}
 .btn-success{background:var(--success-solid);color:#fff;border-color:var(--success-solid)}
 .btn-danger{background:var(--danger-solid);color:#fff;border-color:var(--danger-solid)}
 .btn-outline{background:transparent;color:var(--text);border-color:var(--border-2)}
+.btn-gold{background:var(--gold-solid);color:#fff;border-color:var(--gold-solid)}
 input,textarea,select{width:100%;padding:10px 13px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-weight:600;outline:none;transition:border-color 0.15s;margin-bottom:10px;min-height:42px}
 input:focus,textarea:focus,select:focus{border-color:var(--text-3);background:var(--surface)}
 .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:900;line-height:1.4;border:1px solid;white-space:nowrap}
@@ -82,40 +75,37 @@ input:focus,textarea:focus,select:focus{border-color:var(--text-3);background:va
 .badge-warning{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}
 .badge-info{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx)}
 .badge-neutral{background:var(--neutral-bg);border-color:var(--neutral-bd);color:var(--neutral-tx)}
+.badge-gold{background:var(--gold-bg);border-color:var(--gold-bd);color:var(--gold-tx)}
 .chip{display:inline-flex;align-items:center;padding:7px 14px;border-radius:20px;font-size:11.5px;font-weight:800;background:var(--surface);border:1px solid var(--border);color:var(--text-3);white-space:nowrap;flex-shrink:0;min-height:34px}
 .chip.active{background:var(--text);color:#fff;border-color:var(--text)}
 html.dark .chip.active{background:#fafafa;color:#0a0a0a;border-color:#fafafa}
-/* =========================================
-   تصميم شبكة الصور في السوق (Feed Post Grid)
-   ========================================= */
-.post-img-wrap { position: relative; width: 100%; height: 220px; background: var(--surface-2); overflow: hidden; border-radius: 12px 12px 0 0; }
-@media (min-width: 640px) { .post-img-wrap { height: 260px; } }
 
+/* Post Grid & Media */
+.posts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (max-width: 480px) { .posts-grid { grid-template-columns: 1fr; } }
+.post-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; box-shadow: var(--shadow); }
+.post-card:hover { transform: translateY(-2px); border-color: var(--border-2); box-shadow: var(--shadow-lg); }
+.post-img-wrap { position: relative; width: 100%; height: 220px; background: var(--surface-2); overflow: hidden; }
+@media (min-width: 640px) { .post-img-wrap { height: 260px; } }
 .post-media-grid { display: grid; gap: 2px; width: 100%; height: 100%; background: var(--surface-3); }
 .post-media-grid.single { grid-template-columns: 1fr; }
 .post-media-grid.multi { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-
 .post-media-item { position: relative; width: 100%; height: 100%; cursor: pointer; overflow: hidden; display: flex; }
 .post-media-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
 .post-media-item:hover img { transform: scale(1.03); }
+.post-media-more { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26px; font-weight: 900; pointer-events: none; }
+.post-card-image-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-4); font-size: 24px; }
+.post-price-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); color: #fff; padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 900; }
+.post-featured-badge { position: absolute; top: 8px; right: 8px; background: var(--gold-solid); color: #fff; padding: 2px 7px; border-radius: 6px; font-size: 9.5px; font-weight: 900; display: flex; align-items: center; gap: 3px; }
+.post-body { padding: 10px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+.avatar-initial { width: 22px; height: 22px; border-radius: 6px; background: #18181b; color: #fff; font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+html.dark .avatar-initial { background: #fafafa; color: #0a0a0a; }
+.trust-meter { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 5px; }
+.trust-high { background: var(--success-bg); color: var(--success-tx); border: 1px solid var(--success-bd); }
+.trust-mid { background: var(--warn-bg); color: var(--warn-tx); border: 1px solid var(--warn-bd); }
+.trust-low { background: var(--danger-bg); color: var(--danger-tx); border: 1px solid var(--danger-bd); }
 
-.post-media-more { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; font-weight: 900; pointer-events: none; }
-
-/* =========================================
-   شاشة عرض الصور المكبرة (Lightbox)
-   ========================================= */
-.fb-lightbox { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; backdrop-filter: blur(5px); }
-.fb-lightbox.active { opacity: 1; pointer-events: auto; }
-.fb-lightbox-img-wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.fb-lightbox-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; transition: transform 0.1s ease-out; touch-action: none; }
-.fb-lb-btn { position: absolute; width: 44px; height: 44px; background: rgba(255,255,255,0.1); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: 0.2s; z-index: 100000; border: 1px solid rgba(255,255,255,0.2); }
-.fb-lb-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.1); }
-.fb-lb-close { top: 20px; right: 20px; }
-.fb-lb-counter { position: absolute; top: 25px; left: 25px; color: #fff; font-size: 13px; font-weight: 800; background: rgba(0,0,0,0.6); padding: 5px 14px; border-radius: 20px; letter-spacing: 1px; z-index: 100000; }
-@media (max-width: 640px) { .fb-lb-btn { width: 38px; height: 38px; font-size: 15px; } }
-/* =========================================
-   6. الدردشة (Chat)
-   ========================================= */
+/* Chat */
 .chat-shell{display:flex;flex-direction:column;height:calc(100dvh - 120px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
 .chat-header{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);flex-shrink:0}
 .chat-avatar{width:36px;height:36px;border-radius:10px;background:#18181b;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -143,31 +133,26 @@ html.dark .msg-bubble.me{background:#fafafa;color:#0a0a0a}
 .chat-input-bar input{margin:0;flex:1;background:var(--surface-2);min-height:38px}
 .chat-input-bar .icon-btn{width:36px;height:36px}
 
-/* =========================================
-   7. SweetAlert2 (Custom Popups)
-   ========================================= */
+/* Modals & Swal */
 .swal2-popup{border-radius:14px!important;font-family:'Cairo',sans-serif!important;padding:18px!important;background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important;max-width:420px!important}
 .swal2-title{font-weight:900!important;font-size:16px!important;color:var(--text)!important}
 .swal2-confirm{background:var(--text)!important;color:#fff!important;border-radius:9px!important;font-weight:800!important;padding:8px 18px!important;box-shadow:none!important}
 html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 .swal2-cancel{background:var(--surface-2)!important;color:var(--text-2)!important;border-radius:9px!important;font-weight:800!important;padding:8px 18px!important}
+.swal2-input,.swal2-textarea,.swal2-select{background:var(--surface-2)!important;border:1px solid var(--border)!important;border-radius:9px!important;font-family:'Cairo',sans-serif!important;color:var(--text)!important}
 
-/* =========================================
-   8. نظام عرض الصور المكبرة (Facebook Lightbox)
-   ========================================= */
+/* Lightbox */
 .fb-lightbox { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; backdrop-filter: blur(5px); }
 .fb-lightbox.active { opacity: 1; pointer-events: auto; }
-.fb-lightbox-img-wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 40px 10px; }
-.fb-lightbox-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.fb-lightbox-img-wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.fb-lightbox-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; transition: transform 0.1s ease-out; touch-action: none; }
 .fb-lb-btn { position: absolute; width: 44px; height: 44px; background: rgba(255,255,255,0.1); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: 0.2s; z-index: 100000; border: 1px solid rgba(255,255,255,0.2); }
 .fb-lb-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.1); }
 .fb-lb-close { top: 20px; right: 20px; }
-.fb-lb-prev { left: 15px; top: 50%; transform: translateY(-50%); }
-.fb-lb-next { right: 15px; top: 50%; transform: translateY(-50%); }
-.fb-lb-counter { position: absolute; top: 25px; left: 25px; color: #fff; font-size: 13px; font-weight: 800; background: rgba(0,0,0,0.6); padding: 5px 14px; border-radius: 20px; letter-spacing: 1px; }
+.fb-lb-counter { position: absolute; top: 25px; left: 25px; color: #fff; font-size: 13px; font-weight: 800; background: rgba(0,0,0,0.6); padding: 5px 14px; border-radius: 20px; letter-spacing: 1px; z-index: 100000; }
+@media (max-width: 640px) { .fb-lb-btn { width: 38px; height: 38px; font-size: 15px; } }
 
-@media (max-width: 640px) { 
-    .fb-lb-btn { width: 38px; height: 38px; font-size: 15px; } 
-    .fb-lb-prev { left: 8px; } 
-    .fb-lb-next { right: 8px; } 
-}
+/* Filters Modal Overrides */
+.filter-modal .swal2-html-container { margin: 0 !important; padding: 0 !important; }
+.filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: right; }
+.filter-grid label { font-size: 11px; font-weight: 800; color: var(--text-3); margin-bottom: 4px; display: block; }
