@@ -83,7 +83,6 @@ const img = async f => {
     const blob = await compressToBlob(file);
     const formData = new FormData();
     formData.append('image', blob, 'image.jpg');
-    // استخدام الـ Worker المحمي بدلاً من ImgBB المباشر
     const idToken = await auth.currentUser.getIdToken();
     const res = await fetch(WORKER_URL + "/upload", { method: 'POST', headers: { 'Authorization': 'Bearer ' + idToken }, body: formData });
     const data = await res.json();
@@ -101,6 +100,9 @@ let maintenanceActive=false, settingsLoaded=false, userLoaded=false, initialized
 let pendingPostId = new URLSearchParams(window.location.search).get('post');
 let refCode = new URLSearchParams(window.location.search).get('ref');
 let feedLimit = 20;
+
+// ✅ متغير لحفظ مكان التمرير
+const scrollPositions = {};
 
 const clearU = () => { U.forEach(f => f()); U = []; };
 const CHW = new Map(), CHD = new Map(), CHWsub = new Set(), shownDeal = new Set(); const clearGU = () => { GU.forEach(f => f()); GU = []; CHW.clear(); CHD.clear(); CHWsub.clear(); shownDeal.clear(); };
@@ -278,12 +280,35 @@ function showSignInScreen(){
     </div>`;
 }
 
-window.go = v => {
+// ✅ دالة التنقل المحسنة (تتذكر التمرير وتدعم زر الرجوع)
+window.go = (v, fromHistory = false) => {
     if (maintenanceActive) { showMaintenanceScreen(); return; }
+    
+    if (view && view !== v) {
+        scrollPositions[view] = window.scrollY;
+    }
+
+    if (!fromHistory && (!history.state || history.state.view !== v)) {
+        history.pushState({ view: v }, '', '#' + v);
+    }
+
     clearU(); view = v;
     document.querySelectorAll('.nav-item').forEach(b => { b.classList.toggle('active', b.dataset.tab === v); });
     ({feed, add, wanted, chats, notes, wallet, me: profile, orders, favorites, seller: null, chat: null, terms: showTermsPage}[v]||feed)();
 };
+
+// ✅ مستمع زر الرجوع في الهاتف
+window.addEventListener('popstate', (e) => {
+    if (e.state) {
+        if (e.state.view === 'post' && e.state.postId) {
+            openPost(e.state.postId, true);
+        } else if (e.state.view) {
+            go(e.state.view, true);
+        }
+    } else {
+        go('feed', true);
+    }
+});
 
 window.goToSeller = async (uid) => {
     if (!uid) return;
@@ -384,7 +409,7 @@ onAuthStateChanged(auth, async u => {
       if (!maintenanceActive && wasMaintenance && me) { $('nav').classList.remove('hidden'); go('feed'); }
     }));
     
-    // ✅ تحسين الأداء: جلب 150 إعلان فقط بدلاً من الكل
+    // تحسين الأداء: جلب 150 إعلان فقط
     GU.push(onValue(query(R('posts'), orderByChild('status'), equalTo('active'), limitToLast(150)), s => {
       const allPosts = s.val() || {};
       P = Object.fromEntries(Object.entries(allPosts).filter(([id, p]) => p && p.status === 'active'));
@@ -707,8 +732,15 @@ window.bumpPost = async (id) => {
     } catch(e) { Swal.close(); bad(e); }
 };
 
-window.openPost = async id => {
+// ✅ دالة فتح الإعلان (تتذكر التمرير وتدعم زر الرجوع)
+window.openPost = async (id, fromHistory = false) => {
   try {
+    if (view === 'feed') scrollPositions['feed'] = window.scrollY;
+
+    if (!fromHistory && (!history.state || history.state.postId !== id)) {
+        history.pushState({ view: 'post', postId: id }, '', '#post-' + id);
+    }
+
     clearU(); view = 'post'; 
     if (!$('app').innerHTML.includes('post-slider')) {
         $('app').innerHTML = `<div class="card" style="padding:14px;margin-top:10px"><div class="skeleton" style="height:250px;margin-bottom:12px"></div><div class="skeleton" style="height:20px;width:50%;margin-bottom:8px"></div><div class="skeleton" style="height:40px"></div></div>`;
@@ -753,7 +785,7 @@ window.openPost = async id => {
     ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
 
     $('app').innerHTML = `
-    <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
+    <button class="btn btn-ghost" onclick="history.back()" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
     
     <div class="card" style="padding:14px;overflow:hidden;padding-bottom:80px; ${isProSeller ? 'border:2px solid #eab308; box-shadow:0 0 15px rgba(234,179,8,0.15);' : ''}"> 
       ${sliderHtml}
@@ -907,7 +939,6 @@ window.add = function() {
       
       const photos = []; for (const f of fs) { photos.push(await img(f)); }
       
-      // ✅ تشفير البيانات في السيرفر بدلاً من المتصفح
       Swal.update({title:'جاري تأمين بيانات الحساب...'});
       const idToken = await auth.currentUser.getIdToken();
       const encRes = await fetch(WORKER_URL + "/encrypt", {
@@ -1173,7 +1204,6 @@ window.reveal = async (pid, cid) => {
     try { 
         Swal.fire({title:'جاري فك التشفير...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
         const idToken = await auth.currentUser.getIdToken();
-        // ✅ إصلاح ثغرة IDOR: تمرير chatId للتحقق من الصفقة
         const response = await fetch(WORKER_URL + "/decrypt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: pid, chatId: cid }) });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
@@ -1187,7 +1217,6 @@ window.confirmRx = async cid => {
         if (!await ask('هل قمت بضغط زر (عرض البيانات) وتغيير بيانات الحساب لضمان عدم سرقته؟ لا يمكن التراجع بعد التأكيد.')) return; 
         Swal.fire({title:'جاري تأكيد الاستلام...', didOpen:()=>Swal.showLoading()});
         const idToken = await auth.currentUser.getIdToken();
-        // ✅ إصلاح العمولة: استدعاء الـ Worker لحسابها في السيرفر
         const response = await fetch(WORKER_URL + "/confirm-receipt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ chatId: cid }) });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
@@ -1207,10 +1236,8 @@ window.dispute = async cid => {
         if (exist.exists() && exist.val().status === 'pending') throw new Error('يوجد نزاع مفتوح بالفعل.'); 
         if (me.uid !== d.buyerId && me.uid !== d.sellerId) throw new Error('غير مصرح'); 
 
-        // 1. إرسال رسالة النظام أولاً (قبل التجميد)
         await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: '⚠️ تم فتح نزاع. يرجى الانتظار.', createdAt: Date.now()});
 
-        // 2. ثم تحديث حالة النزاع وتجميد الدردشة
         const updates = {}; 
         updates['refund_queue/' + chat.dealId] = { buyerId: d.buyerId, sellerId: d.sellerId, amount: d.amount, status: 'pending', reason: Security.text(r, 5, 500), createdAt: Date.now(), raisedBy: me.uid, raisedByRole: me.uid === d.buyerId ? 'المشتري' : 'البائع' }; 
         updates[`deals/${chat.dealId}/status`] = 'disputed'; 
@@ -1354,7 +1381,6 @@ window.upgradePro = async () => {
     try {
         Swal.fire({title:'جاري الترقية...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
         const idToken = await auth.currentUser.getIdToken();
-        // ✅ إصلاح ثغرة تفعيل VIP مجاناً: يتم الخصم في السيرفر
         const response = await fetch(WORKER_URL + "/upgrade-pro", { method: 'POST', headers: { 'Authorization': 'Bearer ' + idToken } });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
@@ -1521,4 +1547,4 @@ function renderOrders() {
   $('ol').innerHTML = items.length ? items.join('') : '<div class="empty-state"><i class="fa-regular fa-folder-open"></i><p>لا يوجد شيء هنا</p></div>';
 }
 
-window.setOT = k => { OT = k; renderOrders(); };
+window.setOT = k => { OT = k; renderOrders(); };9
