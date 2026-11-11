@@ -414,6 +414,13 @@ onAuthStateChanged(auth, async u => {
   } catch(e) { console.error(e); }
 });
 
+// قراءة الحقول العامة فقط من ملف أي مستخدم (القواعد تمنع قراءة الملف كاملاً)
+const PUB_FIELDS = ['name','photo','verified','isPro','proUntil','createdAt','followersCount','completedDeals','autoReplyText'];
+async function pubUser(uid) {
+  const o = {};
+  await Promise.all(PUB_FIELDS.map(async k => { try { const v = (await get(R(`users/${uid}/${k}`))).val(); if (v !== null && v !== undefined) o[k] = v; } catch(e) {} }));
+  return o;
+}
 const trust = p => { const age = Math.min(30, (Date.now() - (p.sellerSince || Date.now())) / 864e5 / 10); return Math.round((p.sellerVerified ? 40 : 0) + age + (T[p.sellerId] || 0) / 5 * 30); };
 async function loadT(ids) {
   let n = 0;
@@ -425,8 +432,7 @@ async function loadT(ids) {
       } catch(e) { console.log("Rating err", e); }
       
       try {
-          const uSnap = await get(R('users/' + s));
-          if(uSnap.exists()) { const u = uSnap.val(); S_PRO[s] = u.isPro && (u.proUntil || 0) > Date.now(); }
+          const u = await pubUser(s); S_PRO[s] = !!u.isPro && (u.proUntil || 0) > Date.now();
       } catch(e) { console.log("User err", e); S_PRO[s] = false; }
   }
   if (n && view === 'feed') renderFeed();
@@ -440,9 +446,8 @@ window.sellerProfile = async (uid) => {
     $('app').innerHTML = `<div class="card" style="padding:20px; text-align:center;"><div class="skeleton" style="width:80px; height:80px; border-radius:50%; margin:0 auto 10px;"></div><div class="skeleton" style="height:20px; width:50%; margin:0 auto 10px;"></div><div class="skeleton" style="height:40px; width:100%;"></div></div>`;
     
     try {
-        const userSnap = await get(R('users/' + uid));
-        if (!userSnap.exists()) return bad(new Error('البائع غير موجود.'));
-        const u = userSnap.val();
+        const u = await pubUser(uid);
+        if (!u.name) return bad(new Error('البائع غير موجود.'));
         
         const postsSnap = await get(query(R('posts'), orderByChild('sellerId'), equalTo(uid)));
         const posts = Object.entries(postsSnap.val() || {}).map(([id, p]) => ({id, ...p})).filter(p => p.status === 'active').sort((a,b) => b.createdAt - a.createdAt);
@@ -725,7 +730,7 @@ window.openPost = async id => {
     }
     
     let sellerData = {};
-    try { sellerData = (await get(R('users/' + p.sellerId))).val() || {}; } catch(e) { console.log("seller data perm", e); }
+    try { sellerData = await pubUser(p.sellerId); } catch(e) { console.log("seller data perm", e); }
     const isProSeller = sellerData.isPro && (sellerData.proUntil || 0) > Date.now();
 
     // استخدام catch لتجنب ظهور خطأ الصلاحيات إذا لم يكن المستخدم صاحب الإعلان
@@ -1018,7 +1023,7 @@ async function send(cid, text, image) {
       const chat = (await get(R('chats/' + cid))).val();
       const receiverId = chat.buyerId === me.uid ? chat.sellerId : chat.buyerId;
       if(receiverId && receiverId !== 'admin_support') {
-          const receiverData = (await get(R('users/' + receiverId))).val();
+          const receiverData = await pubUser(receiverId);
           if(receiverData && receiverData.isPro && (receiverData.proUntil || 0) > Date.now() && receiverData.autoReplyText) {
               const msgsSnap = await get(query(R(`chats/${cid}/messages`), limitToLast(2)));
               const msgs = Object.values(msgsSnap.val() || {}).sort((a,b) => b.createdAt - a.createdAt);
