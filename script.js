@@ -382,7 +382,8 @@ onAuthStateChanged(auth, async u => {
       if (!maintenanceActive && wasMaintenance && me) { $('nav').classList.remove('hidden'); go('feed'); }
     }));
     
-    GU.push(onValue(R('posts'), s => {
+    // تحسين الأداء: جلب آخر 150 إعلان فقط
+    GU.push(onValue(query(R('posts'), orderByChild('status'), equalTo('active'), limitToLast(150)), s => {
       const allPosts = s.val() || {};
       P = Object.fromEntries(Object.entries(allPosts).filter(([id, p]) => p && p.status === 'active'));
       if (view === 'feed' && $('list')) renderFeed();
@@ -904,16 +905,14 @@ window.add = function() {
       
       const photos = []; for (const f of fs) { photos.push(await img(f)); }
       
-      const TEMP_KEY = "A7x!9pQ2$mW5vB8@kL1zR4tY6nC3hJ0sX9fG2dE5w";
-      const encryptAES = async (text, secret) => {
-          const enc = new TextEncoder(); const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "PBKDF2" }, false, ["deriveBits", "deriveKey"]);
-          const salt = crypto.getRandomValues(new Uint8Array(16)); const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
-          const iv = crypto.getRandomValues(new Uint8Array(12)); const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(text));
-          const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
-          combined.set(salt, 0); combined.set(iv, salt.length); combined.set(new Uint8Array(encrypted), salt.length + iv.length);
-          return btoa(String.fromCharCode.apply(null, combined));
-      };
-      const encryptedEmail = await encryptAES(em, TEMP_KEY); const encryptedPass = await encryptAES(pw, TEMP_KEY);
+      // تشفير البيانات في السيرفر بدلاً من المتصفح
+      Swal.update({title:'جاري تأمين بيانات الحساب...'});
+      const idToken = await auth.currentUser.getIdToken();
+      const encRes = await fetch(WORKER_URL + "/encrypt", {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ email: em, password: pw })
+      });
+      const encData = await encRes.json();
+      if (!encRes.ok) throw new Error(encData.error || 'فشل تأمين البيانات.');
 
       const id = push(R('posts')).key; 
       
@@ -921,7 +920,7 @@ window.add = function() {
 
       await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: isPro ? 'active' : 'pending', createdAt: Date.now(), featured: isPro ? true : false, isAutoBuy: isAutoBuyChecked });
       
-      await set(R('post_private/' + id), {email: encryptedEmail, password: encryptedPass});
+      await set(R('post_private/' + id), {email: encData.encryptedEmail, password: encData.encryptedPass});
       Swal.close(); 
       if(isPro) { ok('تم نشر إعلانك فوراً (عضوية VIP)'); } else { ok('تم الإرسال للمراجعة'); }
       go('feed');
@@ -1180,6 +1179,7 @@ window.reveal = async (pid, cid) => {
 };
 
 window.confirmRx = async cid => { if(!requireAuth()) return; try { if (!await ask('هل قمت بضغط زر (عرض البيانات) وتغيير بيانات الحساب لضمان عدم سرقته؟ لا يمكن التراجع بعد التأكيد.')) return; const chat = (await get(R('chats/' + cid))).val(); if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); const d = (await get(R('deals/' + chat.dealId))).val(); if (!d) throw new Error('لم يتم العثور على بيانات الصفقة'); const com = Math.round(d.amount * (Number(S.commission) || 0) / 100); const updates = {}; updates[`deals/${chat.dealId}/status`] = 'completed'; updates[`chats/${cid}/dealStatus`] = 'completed'; updates[`pending_payouts/${chat.dealId}`] = { sellerId: d.sellerId, buyerId: me.uid, amount: d.amount - com, grossAmount: d.amount, commission: com, status: 'pending', createdAt: Date.now() }; await update(ref(db), updates); notify(d.sellerId, 'اكتملت الصفقة', `أُضيف ${d.amount - com} ج لأرباحك المعلقة.`, 'deal'); ok('تم تأكيد الاستلام'); } catch(e) { bad(e); } };
+
 window.dispute = async cid => { 
     if(!requireAuth()) return; 
     const {value: r} = await Swal.fire({ title:'سبب النزاع / الإبلاغ', input:'textarea', placeholder:'اكتب تفاصيل المشكلة بوضوح...', showCancelButton:true, confirmButtonText:'إرسال للإدارة', cancelButtonText:'إلغاء' }); 
@@ -1192,10 +1192,10 @@ window.dispute = async cid => {
         if (exist.exists() && exist.val().status === 'pending') throw new Error('يوجد نزاع مفتوح بالفعل.'); 
         if (me.uid !== d.buyerId && me.uid !== d.sellerId) throw new Error('غير مصرح'); 
 
-        // 1. إرسال رسالة النظام أولاً (قبل التجميد)
+        // إرسال رسالة النظام أولاً (قبل التجميد)
         await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: '⚠️ تم فتح نزاع. يرجى الانتظار.', createdAt: Date.now()});
 
-        // 2. ثم تحديث حالة النزاع وتجميد الدردشة
+        // ثم تحديث حالة النزاع وتجميد الدردشة
         const updates = {}; 
         updates['refund_queue/' + chat.dealId] = { buyerId: d.buyerId, sellerId: d.sellerId, amount: d.amount, status: 'pending', reason: Security.text(r, 5, 500), createdAt: Date.now(), raisedBy: me.uid, raisedByRole: me.uid === d.buyerId ? 'المشتري' : 'البائع' }; 
         updates[`deals/${chat.dealId}/status`] = 'disputed'; 
