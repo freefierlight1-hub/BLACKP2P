@@ -83,10 +83,12 @@ const img = async f => {
     const blob = await compressToBlob(file);
     const formData = new FormData();
     formData.append('image', blob, 'image.jpg');
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
+    // استخدام الـ Worker المحمي بدلاً من ImgBB المباشر
+    const idToken = await auth.currentUser.getIdToken();
+    const res = await fetch(WORKER_URL + "/upload", { method: 'POST', headers: { 'Authorization': 'Bearer ' + idToken }, body: formData });
     const data = await res.json();
-    if (data.success) return data.data.url;
-    throw new Error('فشل رفع الصورة، حاول مرة أخرى.');
+    if (data.success) return data.url;
+    throw new Error(data.error || 'فشل رفع الصورة، حاول مرة أخرى.');
 };
 
 const ago=t=>{const m=(Date.now()-t)/6e4;return m<1?'الآن':m<60?`${m|0}د`:m<1440?`${m/60|0}س`:`${m/1440|0}ي`};
@@ -382,7 +384,7 @@ onAuthStateChanged(auth, async u => {
       if (!maintenanceActive && wasMaintenance && me) { $('nav').classList.remove('hidden'); go('feed'); }
     }));
     
-    // تحسين الأداء: جلب آخر 150 إعلان فقط
+    // ✅ تحسين الأداء: جلب 150 إعلان فقط بدلاً من الكل
     GU.push(onValue(query(R('posts'), orderByChild('status'), equalTo('active'), limitToLast(150)), s => {
       const allPosts = s.val() || {};
       P = Object.fromEntries(Object.entries(allPosts).filter(([id, p]) => p && p.status === 'active'));
@@ -905,7 +907,7 @@ window.add = function() {
       
       const photos = []; for (const f of fs) { photos.push(await img(f)); }
       
-      // تشفير البيانات في السيرفر بدلاً من المتصفح
+      // ✅ تشفير البيانات في السيرفر بدلاً من المتصفح
       Swal.update({title:'جاري تأمين بيانات الحساب...'});
       const idToken = await auth.currentUser.getIdToken();
       const encRes = await fetch(WORKER_URL + "/encrypt", {
@@ -1171,6 +1173,7 @@ window.reveal = async (pid, cid) => {
     try { 
         Swal.fire({title:'جاري فك التشفير...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
         const idToken = await auth.currentUser.getIdToken();
+        // ✅ إصلاح ثغرة IDOR: تمرير chatId للتحقق من الصفقة
         const response = await fetch(WORKER_URL + "/decrypt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: pid, chatId: cid }) });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
@@ -1178,7 +1181,19 @@ window.reveal = async (pid, cid) => {
     } catch(e) { Swal.close(); bad(e); } 
 };
 
-window.confirmRx = async cid => { if(!requireAuth()) return; try { if (!await ask('هل قمت بضغط زر (عرض البيانات) وتغيير بيانات الحساب لضمان عدم سرقته؟ لا يمكن التراجع بعد التأكيد.')) return; const chat = (await get(R('chats/' + cid))).val(); if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); const d = (await get(R('deals/' + chat.dealId))).val(); if (!d) throw new Error('لم يتم العثور على بيانات الصفقة'); const com = Math.round(d.amount * (Number(S.commission) || 0) / 100); const updates = {}; updates[`deals/${chat.dealId}/status`] = 'completed'; updates[`chats/${cid}/dealStatus`] = 'completed'; updates[`pending_payouts/${chat.dealId}`] = { sellerId: d.sellerId, buyerId: me.uid, amount: d.amount - com, grossAmount: d.amount, commission: com, status: 'pending', createdAt: Date.now() }; await update(ref(db), updates); notify(d.sellerId, 'اكتملت الصفقة', `أُضيف ${d.amount - com} ج لأرباحك المعلقة.`, 'deal'); ok('تم تأكيد الاستلام'); } catch(e) { bad(e); } };
+window.confirmRx = async cid => { 
+    if(!requireAuth()) return; 
+    try { 
+        if (!await ask('هل قمت بضغط زر (عرض البيانات) وتغيير بيانات الحساب لضمان عدم سرقته؟ لا يمكن التراجع بعد التأكيد.')) return; 
+        Swal.fire({title:'جاري تأكيد الاستلام...', didOpen:()=>Swal.showLoading()});
+        const idToken = await auth.currentUser.getIdToken();
+        // ✅ إصلاح العمولة: استدعاء الـ Worker لحسابها في السيرفر
+        const response = await fetch(WORKER_URL + "/confirm-receipt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ chatId: cid }) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
+        Swal.close(); ok('تم تأكيد الاستلام بنجاح'); 
+    } catch(e) { Swal.close(); bad(e); } 
+};
 
 window.dispute = async cid => { 
     if(!requireAuth()) return; 
@@ -1192,10 +1207,10 @@ window.dispute = async cid => {
         if (exist.exists() && exist.val().status === 'pending') throw new Error('يوجد نزاع مفتوح بالفعل.'); 
         if (me.uid !== d.buyerId && me.uid !== d.sellerId) throw new Error('غير مصرح'); 
 
-        // إرسال رسالة النظام أولاً (قبل التجميد)
+        // 1. إرسال رسالة النظام أولاً (قبل التجميد)
         await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: '⚠️ تم فتح نزاع. يرجى الانتظار.', createdAt: Date.now()});
 
-        // ثم تحديث حالة النزاع وتجميد الدردشة
+        // 2. ثم تحديث حالة النزاع وتجميد الدردشة
         const updates = {}; 
         updates['refund_queue/' + chat.dealId] = { buyerId: d.buyerId, sellerId: d.sellerId, amount: d.amount, status: 'pending', reason: Security.text(r, 5, 500), createdAt: Date.now(), raisedBy: me.uid, raisedByRole: me.uid === d.buyerId ? 'المشتري' : 'البائع' }; 
         updates[`deals/${chat.dealId}/status`] = 'disputed'; 
@@ -1338,12 +1353,12 @@ window.upgradePro = async () => {
     
     try {
         Swal.fire({title:'جاري الترقية...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        const updates = {};
-        updates[`users/${me.uid}/balance`] = me.balance - price;
-        updates[`users/${me.uid}/isPro`] = true;
-        updates[`users/${me.uid}/proUntil`] = Date.now() + (days * 86400000);
+        const idToken = await auth.currentUser.getIdToken();
+        // ✅ إصلاح ثغرة تفعيل VIP مجاناً: يتم الخصم في السيرفر
+        const response = await fetch(WORKER_URL + "/upgrade-pro", { method: 'POST', headers: { 'Authorization': 'Bearer ' + idToken } });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
         
-        await update(ref(db), updates);
         Swal.close(); 
         ok('تمت ترقية حسابك بنجاح! أنت الآن عضو VIP 👑'); 
         profile(); 
