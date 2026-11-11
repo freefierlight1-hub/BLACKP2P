@@ -94,6 +94,8 @@ input:focus,textarea:focus,select:focus{border-color:var(--info-tx);background:v
 .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media (max-width:640px){.grid-2{grid-template-columns:1fr}}
 .skeleton{background:var(--surface-3);border-radius:8px;animation:skeletonPulse 1.2s ease-in-out infinite}@keyframes skeletonPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+
+/* SweetAlert Overrides */
 .swal2-popup{border-radius:16px!important;font-family:'Cairo',sans-serif!important;padding:20px!important;background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important;}
 .swal2-title{font-weight:900!important;font-size:16px!important;color:var(--text)!important}
 .swal2-confirm{background:var(--text)!important;color:var(--surface)!important;border-radius:10px!important;font-weight:900!important;padding:10px 20px!important}
@@ -125,7 +127,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--info-tx);background:v
 .chat-input-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
 .chat-input-bar input{margin:0;flex:1;background:var(--surface-2);min-height:42px;border-radius:20px;padding:0 16px}
 .chat-input-bar .icon-btn{width:40px;height:40px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:0.2s}
-.chat-input-bar .icon-btn:hover{background:var(--surface-3);color:var(--text)}
 
 /* Side Panel (Dispute / Support Tools) */
 .side-panel { position: fixed; top: 0; right: -360px; width: 340px; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 1000; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
@@ -154,9 +155,18 @@ input:focus,textarea:focus,select:focus{border-color:var(--info-tx);background:v
 .bulk-btn { background: rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition:0.2s;}
 .bulk-btn:hover{background: rgba(255,255,255,0.25);}
 .bulk-btn.danger { background: var(--danger-tx); }
-
-/* Scrollbars */
 .hide-scroll::-webkit-scrollbar{display:none}.hide-scroll{scrollbar-width:none}
+
+/* ✅ تصميم نافذة المستخدم المتجاوب */
+.user-info-modal .swal2-html-container { margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+.modal-tabs { display: flex; overflow-x: auto; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 10px; margin-bottom: 12px; scrollbar-width: none; }
+.modal-tabs::-webkit-scrollbar { display: none; }
+.modal-tab { flex: 0 0 auto; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 900; color: var(--text-3); white-space: nowrap; border: none; background: transparent; transition: 0.2s; }
+.modal-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.info-cell { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; justify-content: center; }
+.info-label { font-size: 9px; font-weight: 800; color: var(--text-4); margin-bottom: 2px; }
+.info-value { font-size: 11px; font-weight: 900; color: var(--text); word-break: break-all; }
 </style>
 </head>
 <body>
@@ -176,7 +186,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--info-tx);background:v
     <!-- Global Search -->
     <div class="global-search">
         <i class="fa-solid fa-search"></i>
-        <input id="global-search-input" placeholder="بحث عن مستخدم (بالإيميل أو ID)، إعلان..." onkeydown="if(event.key==='Enter') window.globalSearch(this.value)">
+        <input id="global-search-input" placeholder="بحث عن مستخدم، إعلان (Enter)..." onkeydown="if(event.key==='Enter') window.globalSearch(this.value)">
     </div>
 
     <div class="header-actions" style="display:flex; align-items:center; gap:8px;">
@@ -354,7 +364,6 @@ window.globalSearch = async (val) => {
     } catch(e) { Swal.close(); bad(e); }
 };
 
-// Feature 3: Post Info (Fixed)
 window.postInfo = async id => {
     try {
         const p = (await get(R('posts/' + id))).val();
@@ -366,10 +375,10 @@ window.postInfo = async id => {
                 ${thumbs(imgs(p.photos))}
                 <p style="margin:12px 0;color:var(--text-2);font-weight:600;font-size:13px;line-height:1.6;background:var(--surface-2);padding:10px;border-radius:8px;">${E(p.desc)}</p>
                 <div class="grid-2" style="margin-bottom:12px;">
-                    <div class="info-cell" style="background:var(--surface-2);padding:10px;border-radius:8px;border:1px solid var(--border)"><span style="font-size:10px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px;">السيرفر</span><b style="font-size:13px;color:var(--text)">${E(p.server)}</b></div>
-                    <div class="info-cell" style="background:var(--surface-2);padding:10px;border-radius:8px;border:1px solid var(--border)"><span style="font-size:10px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px;">الربط</span><b style="font-size:13px;color:var(--text)">${E(p.linkType)}</b></div>
-                    <div class="info-cell" style="background:var(--success-bg);padding:10px;border-radius:8px;border:1px solid var(--success-bd)"><span style="font-size:10px;color:var(--success-tx);font-weight:800;display:block;margin-bottom:4px;">السعر</span><b style="font-size:15px;color:var(--success-tx)">${p.price} ج</b></div>
-                    <div class="info-cell" style="background:var(--surface-2);padding:10px;border-radius:8px;border:1px solid var(--border)"><span style="font-size:10px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px;">الحالة</span>${statusBadge(p.status)}</div>
+                    <div class="info-cell"><span class="info-label">السيرفر</span><span class="info-value">${E(p.server)}</span></div>
+                    <div class="info-cell"><span class="info-label">الربط</span><span class="info-value">${E(p.linkType)}</span></div>
+                    <div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd)"><span class="info-label" style="color:var(--success-tx)">السعر</span><span class="info-value" style="color:var(--success-tx);font-size:15px">${p.price} ج</span></div>
+                    <div class="info-cell"><span class="info-label">الحالة</span><div class="info-value">${statusBadge(p.status)}</div></div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-2); padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
                     <span style="font-size:11px; color:var(--text-3); font-weight:800;">البائع:</span>
@@ -381,7 +390,6 @@ window.postInfo = async id => {
     } catch(e) { bad(e); }
 };
 
-// Feature 1: Full User Info with Timeline and Risk
 window.userInfo=async uid=>{try{
   Swal.fire({title:'جارٍ التحميل...',didOpen:()=>Swal.showLoading(),showConfirmButton:false});
   const g=async p=>(await get(R(p))).val();
@@ -462,12 +470,12 @@ window.userInfo=async uid=>{try{
       title: '<span style="font-size:15px;font-weight:900;color:var(--text);">ملف المستخدم</span>', 
       html: `
       <div style="text-align:right;max-height:65vh;overflow-y:auto;padding:2px" dir="rtl">
-          <div class="modal-tabs" style="display:flex;gap:4px;padding:4px;background:var(--surface-2);border-radius:10px;margin-bottom:16px;overflow-x:auto;">
-              <button class="modal-tab active" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);border:none;" onclick="switchUserTab('overview',this)">نظرة عامة</button>
-              <button class="modal-tab" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;color:var(--text-3);background:transparent;border:none;" onclick="switchUserTab('timeline',this)">السجل</button>
-              <button class="modal-tab" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;color:var(--text-3);background:transparent;border:none;" onclick="switchUserTab('financial',this)">المالية</button>
-              <button class="modal-tab" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;color:var(--text-3);background:transparent;border:none;" onclick="switchUserTab('posts',this)">الإعلانات (${ps.length})</button>
-              <button class="modal-tab" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;color:var(--text-3);background:transparent;border:none;" onclick="switchUserTab('verify',this)">التوثيق</button>
+          <div class="modal-tabs">
+              <button class="modal-tab active" onclick="switchUserTab('overview',this)">نظرة عامة</button>
+              <button class="modal-tab" onclick="switchUserTab('timeline',this)">السجل</button>
+              <button class="modal-tab" onclick="switchUserTab('financial',this)">المالية</button>
+              <button class="modal-tab" onclick="switchUserTab('posts',this)">الإعلانات (${ps.length})</button>
+              <button class="modal-tab" onclick="switchUserTab('verify',this)">التوثيق</button>
           </div>
           <div id="utab-overview">${overviewTab}</div>
           <div id="utab-timeline" style="display:none">${timelineTab}</div>
@@ -480,8 +488,8 @@ window.userInfo=async uid=>{try{
   });
   
   window.switchUserTab = (tab, btn) => { 
-      document.querySelectorAll('.modal-tab').forEach(b => { b.style.background = 'transparent'; b.style.color = 'var(--text-3)'; b.style.boxShadow = 'none'; }); 
-      btn.style.background = 'var(--surface)'; btn.style.color = 'var(--text)'; btn.style.boxShadow = 'var(--shadow-sm)'; 
+      document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active')); 
+      btn.classList.add('active'); 
       ['overview','timeline','financial','posts','verify'].forEach(t => { $('utab-'+t).style.display = t === tab ? 'block' : 'none'; }); 
   };
 }catch(e){Swal.close();bad(e)}};
@@ -521,7 +529,6 @@ window.deleteUserAccount = async (uid) => {
     } catch(e) { Swal.close(); bad(e); }
 };
 
-// Feature 4: Create Promo Code (Fixed)
 window.createPromoCode = async () => {
     const { value: formValues } = await Swal.fire({ 
         title: 'إنشاء كوبون جديد', 
@@ -967,7 +974,15 @@ function adminChat(cid){
     
     if(c.dealId && typeof c.dealId === 'string' && c.dealId.trim() !== '') {
         const dp = $('dp');
-        live.push(onValue(R('deals/'+c.dealId),x=>{ const d = x.val(); if(!d) return; const steps = ['held','delivered','completed']; const idx = steps.indexOf(d.status); dp.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${d.amount} ج</b>${statusBadge(d.status)}</div><div class="deal-steps"><div class="deal-step"><div class="deal-step-circle done"><i class="fa-solid fa-check"></i></div><span class="deal-step-label done">الدفع</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=1?'done':''}"><i class="fa-solid fa-box"></i></div><span class="deal-step-label ${idx>=1?'done':''}">التسليم</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=2?'done':''}"><i class="fa-solid fa-flag-checkered"></i></div><span class="deal-step-label ${idx>=2?'done':''}">الاكتمال</span></div></div></div>`; }));
+        live.push(onValue(R('deals/'+c.dealId),x=>{ const d = x.val(); if(!d) return; 
+            // إخفاء أزرار النزاع إذا كانت الصفقة منتهية
+            if (d.status === 'completed' || d.status === 'refunded' || d.status === 'cancelled') {
+                $('dispute-admin-tools').style.display = 'none';
+            } else {
+                $('dispute-admin-tools').style.display = 'block';
+            }
+
+            const steps = ['held','delivered','completed']; const idx = steps.indexOf(d.status); dp.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${d.amount} ج</b>${statusBadge(d.status)}</div><div class="deal-steps"><div class="deal-step"><div class="deal-step-circle done"><i class="fa-solid fa-check"></i></div><span class="deal-step-label done">الدفع</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=1?'done':''}"><i class="fa-solid fa-box"></i></div><span class="deal-step-label ${idx>=1?'done':''}">التسليم</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=2?'done':''}"><i class="fa-solid fa-flag-checkered"></i></div><span class="deal-step-label ${idx>=2?'done':''}">الاكتمال</span></div></div></div>`; }));
     } else { $('dp').innerHTML = ''; }
   }));
   live.push(onValue(query(R(`chats/${cid}/messages`),limitToLast(200)),s=>{
@@ -990,6 +1005,10 @@ window.adminResolveDispute = async (cid, action) => {
     if (!chat || !chat.dealId) return bad(new Error('لم يتم العثور على الصفقة'));
     const deal = (await get(R('deals/' + chat.dealId))).val();
     
+    if (deal.status === 'completed' || deal.status === 'refunded' || deal.status === 'cancelled') {
+        return bad(new Error('هذه الصفقة تم حلها بالفعل ولا يمكن اتخاذ إجراء جديد.'));
+    }
+
     if (action === 'release') {
         if (!await ask('تأكيد تحرير المبلغ للبائع وإنهاء النزاع؟')) return;
         Swal.fire({title:'جاري المعالجة...', didOpen:()=>Swal.showLoading()});
