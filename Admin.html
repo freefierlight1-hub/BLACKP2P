@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>لوحة التحكم - BLACKP2P</title>
+<title>لوحة التحكم الاحترافية - BLACKP2P</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = { darkMode: 'class' }
@@ -16,191 +16,55 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
 <style>
-/* ===== المتغيرات الأساسية ===== */
-:root{ 
---bg:#f1f3f7; --surface:#ffffff; --surface-2:#f8f9fc; --surface-3:#eef0f5; 
---border:#e2e5eb; --border-2:#d4d8e0; --text:#0f172a; --text-2:#334155; --text-3:#64748b; 
---text-4:#94a3b8; --glass-strong:rgba(255,255,255,0.92); --success-bg:rgba(16,185,129,0.12); 
---success-bd:rgba(16,185,129,0.3); --success-tx:#047857; --success-solid:#059669; 
---danger-bg:rgba(239,68,68,0.12); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#b91c1c; 
---danger-solid:#dc2626; --warn-bg:rgba(245,158,11,0.12); --warn-bd:rgba(245,158,11,0.3); 
---warn-tx:#b45309; --warn-solid:#d97706; --info-bg:rgba(59,130,246,0.12); 
---info-bd:rgba(59,130,246,0.3); --info-tx:#1d4ed8; --info-solid:#2563eb; 
---purple-bg:rgba(168,85,247,0.12); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#7e22ce; 
---purple-solid:#9333ea; --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); 
---gold-tx:#854d0e; --gold-solid:#ca8a04; --neutral-bg:rgba(148,163,184,0.1); 
---neutral-bd:rgba(148,163,184,0.25); --neutral-tx:#475569; 
---shadow:0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04); 
---shadow-lg:0 4px 12px rgba(15,23,42,0.08); --r-lg:14px; 
-}
-html.dark{ 
---bg:#0a0a0a; --surface:#17171a; --surface-2:#1f1f23; --surface-3:#27272c; 
---border:#2a2a30; --border-2:#3a3a42; --text:#fafafa; --text-2:#e4e4e7; 
---text-3:#a1a1aa; --text-4:#71717a; --glass-strong:rgba(23,23,26,0.95); 
---success-bg:rgba(16,185,129,0.15); --success-bd:rgba(16,185,129,0.3); --success-tx:#34d399; 
---success-solid:#10b981; --danger-bg:rgba(239,68,68,0.15); --danger-bd:rgba(239,68,68,0.3); 
---danger-tx:#f87171; --danger-solid:#ef4444; --warn-bg:rgba(245,158,11,0.15); 
---warn-bd:rgba(245,158,11,0.3); --warn-tx:#fbbf24; --warn-solid:#f59e0b; 
---info-bg:rgba(59,130,246,0.15); --info-bd:rgba(59,130,246,0.3); --info-tx:#60a5fa; 
---info-solid:#3b82f6; --purple-bg:rgba(168,85,247,0.15); --purple-bd:rgba(168,85,247,0.3); 
---purple-tx:#c084fc; --purple-solid:#a855f7; --gold-bg:rgba(234,179,8,0.15); 
---gold-bd:rgba(234,179,8,0.4); --gold-tx:#fde047; --gold-solid:#eab308; 
---neutral-bg:rgba(255,255,255,0.06); --neutral-bd:rgba(255,255,255,0.1); 
---neutral-tx:#d4d4d8; --shadow:0 1px 3px rgba(0,0,0,0.4); --shadow-lg:0 4px 12px rgba(0,0,0,0.5); 
-}
-
+:root{ --bg:#f1f3f7; --surface:#ffffff; --surface-2:#f8f9fc; --surface-3:#eef0f5; --border:#e2e5eb; --border-2:#d4d8e0; --text:#0f172a; --text-2:#334155; --text-3:#64748b; --text-4:#94a3b8; --glass-strong:rgba(255,255,255,0.92); --success-bg:rgba(16,185,129,0.12); --success-bd:rgba(16,185,129,0.3); --success-tx:#047857; --success-solid:#059669; --danger-bg:rgba(239,68,68,0.12); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#b91c1c; --danger-solid:#dc2626; --warn-bg:rgba(245,158,11,0.12); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#b45309; --warn-solid:#d97706; --info-bg:rgba(59,130,246,0.12); --info-bd:rgba(59,130,246,0.3); --info-tx:#1d4ed8; --info-solid:#2563eb; --purple-bg:rgba(168,85,247,0.12); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#7e22ce; --purple-solid:#9333ea; --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); --gold-tx:#854d0e; --gold-solid:#ca8a04; --neutral-bg:rgba(148,163,184,0.1); --neutral-bd:rgba(148,163,184,0.25); --neutral-tx:#475569; --shadow:0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04); --shadow-lg:0 4px 12px rgba(15,23,42,0.08); --r-lg:14px; }
+html.dark{ --bg:#0a0a0a; --surface:#17171a; --surface-2:#1f1f23; --surface-3:#27272c; --border:#2a2a30; --border-2:#3a3a42; --text:#fafafa; --text-2:#e4e4e7; --text-3:#a1a1aa; --text-4:#71717a; --glass-strong:rgba(23,23,26,0.95); --success-bg:rgba(16,185,129,0.15); --success-bd:rgba(16,185,129,0.3); --success-tx:#34d399; --success-solid:#10b981; --danger-bg:rgba(239,68,68,0.15); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#f87171; --danger-solid:#ef4444; --warn-bg:rgba(245,158,11,0.15); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#fbbf24; --warn-solid:#f59e0b; --info-bg:rgba(59,130,246,0.15); --info-bd:rgba(59,130,246,0.3); --info-tx:#60a5fa; --info-solid:#3b82f6; --purple-bg:rgba(168,85,247,0.15); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#c084fc; --purple-solid:#a855f7; --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); --gold-tx:#fde047; --gold-solid:#eab308; --neutral-bg:rgba(255,255,255,0.06); --neutral-bd:rgba(255,255,255,0.1); --neutral-tx:#d4d4d8; --shadow:0 1px 3px rgba(0,0,0,0.4); --shadow-lg:0 4px 12px rgba(0,0,0,0.5); }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{height:100%}
-body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;padding-bottom:70px;}
+body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;overflow-x:hidden;padding-bottom:70px;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-input,textarea,select{font-family:inherit;color:inherit}
-img{max-width:100%;display:block}
-
-/* ===== الترويسة والتبويبات ===== */
+input,textarea,select{font-family:inherit;color:inherit;width:100%;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;font-weight:600;outline:none;margin-bottom:9px}
+input:focus,textarea:focus,select:focus{border-color:var(--text-3);background:var(--surface)}
 #header{position:sticky;top:0;z-index:50;background:var(--glass-strong);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
 .header-inner{max-width:1400px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:56px}
-.brand{display:flex;align-items:center;gap:8px;min-width:0}
-.brand-mark{width:34px;height:34px;border-radius:10px;background:#18181b;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-html.dark .brand-mark{background:#fafafa;color:#0a0a0a}
-.brand-text{min-width:0}.brand-title{font-size:12px;font-weight:900;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand-sub{font-size:9px;font-weight:700;color:var(--text-3);margin-top:1px;white-space:nowrap}
-.header-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.icon-btn{width:36px;height:36px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);display:flex;align-items:center;justify-content:center;position:relative;font-size:13px;transition:background-color 0.15s;flex-shrink:0}
-.icon-btn:hover{background:var(--surface-3)}.icon-btn:active{opacity:0.75}
-#notif-badge{position:absolute;top:-4px;left:-4px;min-width:16px;height:16px;padding:0 4px;background:var(--danger-solid);color:#fff;font-size:9px;font-weight:900;border-radius:8px;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center}
-.user-chip{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;max-width:180px}
-.user-avatar{width:28px;height:28px;border-radius:8px;background:#18181b;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}html.dark .user-avatar{background:#fafafa;color:#0a0a0a}
-.user-meta{display:flex;flex-direction:column;min-width:0;overflow:hidden}.user-name{font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}.user-role{font-size:8px;font-weight:800;color:var(--text-3);white-space:nowrap;line-height:1.2}
-@media (max-width:640px){.user-meta{display:none}.user-chip{padding:3px}.brand-title{font-size:11px}.brand-sub{font-size:8px}.icon-btn{width:32px;height:32px;font-size:12px}}
-#maintenance-banner{background:var(--warn-bg);border-bottom:1px solid var(--warn-bd);color:var(--warn-tx);padding:8px 14px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px;justify-content:center;text-align:center}
-#maintenance-banner.hidden{display:none}
-#tabs{position:sticky;top:56px;z-index:40;background:var(--glass-strong);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:#18181b;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}html.dark .brand-mark{background:#fafafa;color:#0a0a0a}
+.global-search{flex:1;max-width:400px;position:relative;margin:0 10px;}
+.global-search input{margin:0;padding-right:35px;border-radius:20px;background:var(--surface-3);border:none;font-size:12px;height:36px;}
+.global-search i{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px;}
+#tabs{position:sticky;top:56px;z-index:40;background:var(--glass-strong);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 #tabs::-webkit-scrollbar{display:none}
 .tabs-inner{max-width:1400px;margin:0 auto;display:flex;gap:2px;padding:6px 10px;min-width:max-content}
-.nav-icon{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;color:var(--text-3);font-size:11.5px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background-color 0.15s, color 0.15s}
-.nav-icon i{font-size:12px}.nav-icon:hover{background:var(--neutral-bg);color:var(--text-2)}.nav-icon.active{background:var(--text);color:#fff;font-weight:900}html.dark .nav-icon.active{background:#fafafa;color:#0a0a0a}
-.nav-icon.logout{color:var(--danger-tx)}.nav-icon.logout:hover{background:var(--danger-bg)}
+.nav-icon{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;color:var(--text-3);font-size:11.5px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:0.15s}
+.nav-icon.active{background:var(--text);color:#fff;font-weight:900}html.dark .nav-icon.active{background:#fafafa;color:#0a0a0a}
+.nav-icon.logout{color:var(--danger-tx)}
 #v{max-width:1400px;margin:0 auto;padding:16px 14px 40px;min-height:calc(100vh - 110px)}
-@media (max-width:640px){#v{padding:12px 10px 32px}}
-
-/* ===== عناصر UI ===== */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;margin-bottom:10px;box-shadow:var(--shadow);transition:background-color 0.3s, border-color 0.3s}
-.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:900;line-height:1.4;border:1px solid;white-space:nowrap}
-.badge i{font-size:8px}.badge-success{background:var(--success-bg);border-color:var(--success-bd);color:var(--success-tx)}.badge-danger{background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-tx)}.badge-warning{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}.badge-info{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx)}.badge-neutral{background:var(--neutral-bg);border-color:var(--neutral-bd);color:var(--neutral-tx)}.badge-purple{background:var(--purple-bg);border-color:var(--purple-bd);color:var(--purple-tx)}.badge-gold{background:var(--gold-bg);border-color:var(--gold-bd);color:var(--gold-tx)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 12px;border-radius:9px;font-size:11.5px;font-weight:800;white-space:nowrap;border:1px solid transparent;transition:background-color 0.15s, opacity 0.15s;min-height:34px;flex-shrink:0}
-.btn i{font-size:11px}.btn:active{opacity:0.75}.btn:disabled{opacity:0.4;cursor:not-allowed}
-.btn-primary{background:var(--text);color:#fff;border-color:var(--text)}html.dark .btn-primary{background:#fafafa;color:#0a0a0a;border-color:#fafafa}.btn-primary:hover{opacity:0.88}
-.btn-ghost{background:var(--surface-2);color:var(--text-2);border-color:var(--border)}.btn-ghost:hover{background:var(--surface-3);border-color:var(--border-2)}
-.btn-success{background:var(--success-bg);color:var(--success-tx);border-color:var(--success-bd)}.btn-success:hover{background:var(--success-solid);color:#fff;border-color:var(--success-solid)}
-.btn-danger{background:var(--danger-bg);color:var(--danger-tx);border-color:var(--danger-bd)}.btn-danger:hover{background:var(--danger-solid);color:#fff;border-color:var(--danger-solid)}
-.btn-warning{background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn-bd)}.btn-warning:hover{background:var(--warn-solid);color:#fff;border-color:var(--warn-solid)}
-input,textarea,select{width:100%;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;font-weight:600;outline:none;margin-bottom:9px}
-input:focus,textarea:focus,select:focus{border-color:var(--text-3);background:var(--surface)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;margin-bottom:10px;box-shadow:var(--shadow)}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:900;border:1px solid;white-space:nowrap}
+.badge-success{background:var(--success-bg);border-color:var(--success-bd);color:var(--success-tx)}.badge-danger{background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-tx)}.badge-warning{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}.badge-info{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx)}.badge-neutral{background:var(--neutral-bg);border-color:var(--neutral-bd);color:var(--neutral-tx)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 12px;border-radius:9px;font-size:11.5px;font-weight:800;border:1px solid transparent;min-height:34px;flex-shrink:0}
+.btn-primary{background:var(--text);color:#fff}html.dark .btn-primary{background:#fafafa;color:#0a0a0a}
+.btn-ghost{background:var(--surface-2);color:var(--text-2);border-color:var(--border)}
+.btn-success{background:var(--success-bg);color:var(--success-tx);border-color:var(--success-bd)}
+.btn-danger{background:var(--danger-bg);color:var(--danger-tx);border-color:var(--danger-bd)}
+.btn-warning{background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn-bd)}
+.btn-info{background:var(--info-bg);color:var(--info-tx);border-color:var(--info-bd)}
+.btn-gold{background:var(--gold-solid);color:#fff;border-color:var(--gold-solid)}
 .stats-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-bottom:16px}
 @media (max-width:900px){.stats-grid{grid-template-columns:repeat(3, 1fr)}}
 @media (max-width:640px){.stats-grid{grid-template-columns:repeat(2, 1fr);gap:8px}}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);transition:border-color 0.15s, transform 0.15s}
-.stat-card:hover{border-color:var(--border-2);transform:translateY(-1px)}.stat-card:active{transform:scale(0.98)}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);transition:0.15s}
+.stat-card:hover{border-color:var(--border-2);transform:translateY(-1px)}
 .stat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:5px;border:1px solid}
-.stat-label{font-size:10px;font-weight:800;color:var(--text-3);line-height:1.2}.stat-value{font-size:20px;font-weight:900;color:var(--text);line-height:1.1;letter-spacing:-0.02em}
-@media (max-width:640px){.stat-card{padding:10px}.stat-icon{width:30px;height:30px;font-size:12px;margin-bottom:4px}.stat-value{font-size:18px}.stat-label{font-size:9px}}
+.sec-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900;color:var(--text);padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--border)}
 .skeleton{background:var(--surface-3);border-radius:8px;animation:skeletonPulse 1.2s ease-in-out infinite}@keyframes skeletonPulse{0%,100%{opacity:0.6}50%{opacity:1}}
-.hide-scroll::-webkit-scrollbar{display:none}.hide-scroll{scrollbar-width:none}
-.sec-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900;color:var(--text);padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--border)}.sec-title i{font-size:11px;color:var(--text-3)}
-.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-@media (max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}
-.chart-container{position:relative;height:160px;width:100%}
-@media (max-width:640px){.chart-container{height:140px}}
-
-/* ===== SweetAlert & Modals التنسيقات الجديدة ===== */
 .swal2-popup{border-radius:14px!important;font-family:'Cairo',sans-serif!important;padding:18px!important;background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important;max-width:420px!important}
 .swal2-title{font-weight:900!important;font-size:16px!important;color:var(--text)!important}
-.swal2-confirm{background:var(--text)!important;color:#fff!important;border-radius:9px!important;font-weight:800!important;padding:8px 18px!important;box-shadow:none!important}
+.swal2-confirm{background:var(--text)!important;color:#fff!important;border-radius:9px!important;font-weight:800!important;padding:8px 18px!important}
 html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 .swal2-cancel{background:var(--surface-2)!important;color:var(--text-2)!important;border-radius:9px!important;font-weight:800!important;padding:8px 18px!important}
-.swal2-input,.swal2-textarea,.swal2-select{background:var(--surface-2)!important;border:1px solid var(--border)!important;border-radius:9px!important;font-family:'Cairo',sans-serif!important;color:var(--text)!important}
-
-/* تصميم نافذة معلومات المستخدم */
-.user-info-modal {
-    border-radius: 16px !important;
-    background: var(--surface) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--border) !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
-}
-.user-info-modal .swal2-html-container {
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-}
-.modal-tabs {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    background: var(--surface-2);
-    border-radius: 10px;
-    margin-bottom: 14px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-.modal-tabs::-webkit-scrollbar { display: none; }
-.modal-tab {
-    flex: 1;
-    padding: 7px 8px;
-    border-radius: 8px;
-    font-size: 10.5px;
-    font-weight: 800;
-    color: var(--text-3);
-    text-align: center;
-    white-space: nowrap;
-    min-width: 70px;
-    transition: all 0.2s;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-}
-.modal-tab.active {
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: var(--shadow);
-}
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-}
-@media (max-width: 400px) {
-    .info-grid { grid-template-columns: 1fr; }
-}
-.info-cell {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 8px;
-}
-.info-label {
-    font-size: 9px;
-    font-weight: 800;
-    color: var(--text-4);
-    margin-bottom: 2px;
-}
-.info-value {
-    font-size: 11.5px;
-    font-weight: 900;
-    color: var(--text);
-    word-break: break-all;
-}
-
-/* ===== الشات ===== */
-.chat-shell{display:flex;flex-direction:column;height:calc(100dvh - 120px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);max-width:900px;margin:0 auto}
-@media (max-width:640px){.chat-shell{height:calc(100dvh - 105px);border-radius:0;border-left:none;border-right:none;margin:0 -10px}}
+/* Chat Styles */
+.chat-shell{display:flex;flex-direction:column;height:calc(100dvh - 120px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;max-width:900px;margin:0 auto}
 .chat-header{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);flex-shrink:0}
-.chat-avatar{width:36px;height:36px;border-radius:10px;background:#18181b;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}html.dark .chat-avatar{background:#fafafa;color:#0a0a0a}
-.chat-info{flex:1;min-width:0}.chat-name{font-size:13px;font-weight:900;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-status{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--text-3);margin-top:2px}
+.chat-avatar{width:36px;height:36px;border-radius:10px;background:#18181b;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-info{flex:1;min-width:0}.chat-name{font-size:13px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success-solid);flex-shrink:0}.status-dot.closed{background:var(--danger-solid)}.status-dot.frozen{background:var(--info-solid)}
 .deal-panel{background:var(--surface-2);border-bottom:1px solid var(--border);padding:10px 12px;flex-shrink:0}
 .deal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px}
@@ -216,20 +80,18 @@ html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 .msg-bubble.other{background:var(--surface);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px}
 .msg-time{font-size:9px;font-weight:700;opacity:0.55;margin-top:3px;display:block}
 .msg-system{display:flex;justify-content:center;margin:4px 0}.msg-system-bubble{background:var(--neutral-bg);border:1px solid var(--neutral-bd);padding:4px 11px;border-radius:11px;font-size:10.5px;font-weight:800;color:var(--text-3)}
-.msg-admin{display:flex;justify-content:center;margin:4px 0}.msg-admin-bubble{background:var(--info-bg);border:1px solid var(--info-bd);padding:5px 13px;border-radius:12px;font-size:11.5px;font-weight:900;color:var(--info-tx)}
+.msg-admin{display:flex;justify-content:center;margin:4px 0}.msg-admin-bubble{background:var(--info-bg);border:1px solid var(--info-bd);padding:5px 13px;border-radius:12px;font-size:11.5px;font-weight:900;color:var(--info-tx);white-space:pre-line;text-align:right;}
 .chat-input-bar{display:flex;align-items:center;gap:5px;padding:9px 10px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
 .chat-input-bar input{margin:0;flex:1;background:var(--surface-2);min-height:38px}
-.chat-input-bar .icon-btn{width:36px;height:36px}
-
-/* ===== اللوحة الجانبية والإجراءات ===== */
-.side-panel { position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 1000; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -4px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+/* Side Panel */
+.side-panel { position: fixed; top: 0; right: -340px; width: 320px; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 1000; transition: right 0.3s; box-shadow: -4px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
 .side-panel.open { right: 0; }
-.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; opacity: 0; pointer-events: none; transition: 0.3s; }
 .panel-overlay.open { opacity: 1; pointer-events: auto; }
 .panel-header { padding: 20px; text-align: center; border-bottom: 1px solid var(--border); background: var(--surface-2); }
 .panel-body { flex: 1; overflow-y: auto; padding: 15px; }
 .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 8px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); font-size: 11px; font-weight: 800; color: var(--text-2); cursor: pointer; transition: all 0.2s; }
+.action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 8px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); font-size: 11px; font-weight: 800; color: var(--text-2); cursor: pointer; transition: 0.2s; }
 .action-btn:hover { background: var(--surface-3); transform: translateY(-1px); }
 .action-btn i { font-size: 16px; }
 .action-btn.danger { color: var(--danger-tx); background: var(--danger-bg); border-color: var(--danger-bd); }
@@ -237,51 +99,53 @@ html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 .action-btn.success { color: var(--success-tx); background: var(--success-bg); border-color: var(--success-bd); }
 .action-btn.info { color: var(--info-tx); background: var(--info-bg); border-color: var(--info-bd); }
 .internal-notes { margin-top: 15px; background: var(--warn-bg); border: 1px solid var(--warn-bd); border-radius: 10px; padding: 10px; }
-
-/* شريط التحديد الجماعي */
+/* Bulk Bar */
 .bulk-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--text); color: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; transform: translateY(100%); transition: transform 0.3s ease; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
 .bulk-bar.show { transform: translateY(0); }
 .bulk-count { font-size: 14px; font-weight: 900; }
 .bulk-actions { display: flex; gap: 8px; }
 .bulk-btn { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; }
-.bulk-btn:hover { background: rgba(255,255,255,0.3); }
 .bulk-btn.danger { background: var(--danger-solid); }
-.bulk-btn.danger:hover { background: #b91c1c; }
-.quick-action-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid var(--border); }
-.quick-action-item:last-child { border-bottom: none; }
+/* Scrollbars */
+.hide-scroll::-webkit-scrollbar{display:none}.hide-scroll{scrollbar-width:none}
 </style>
 </head>
 <body>
 
 <audio id="chatSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-<audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
 <header id="header">
   <div class="header-inner">
-    <div class="brand">
+    <div class="brand" style="display:flex; align-items:center; gap:8px;">
       <div class="brand-mark">B</div>
-      <div class="brand-text">
-        <div class="brand-title">لوحة التحكم</div>
-        <div class="brand-sub">BLACKP2P</div>
+      <div class="brand-text hidden sm:block">
+        <div class="brand-title" style="font-size:12px; font-weight:900;">لوحة التحكم</div>
+        <div class="brand-sub" style="font-size:9px; color:var(--text-3);">BLACKP2P</div>
       </div>
     </div>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="go('note')" title="إشعارات"><i class="fa-solid fa-bell"></i><b id="notif-badge" class="hidden">0</b></button>
-      <button class="icon-btn" id="theme-toggle" title="الوضع"><i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline"></i></button>
-      <div class="user-chip">
-        <div class="user-meta">
-          <div class="user-name" id="user-email">—</div>
-          <div class="user-role" id="role-badge">—</div>
+    
+    <!-- Global Search -->
+    <div class="global-search">
+        <i class="fa-solid fa-search"></i>
+        <input id="global-search-input" placeholder="بحث عن مستخدم، إعلان (Enter)..." onkeydown="if(event.key==='Enter') window.globalSearch(this.value)">
+    </div>
+
+    <div class="header-actions" style="display:flex; align-items:center; gap:6px;">
+      <button class="icon-btn" onclick="go('note')" style="width:32px;height:32px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);"><i class="fa-solid fa-bell"></i><b id="notif-badge" class="hidden" style="position:absolute;top:-4px;left:-4px;background:var(--danger-solid);color:#fff;font-size:9px;border-radius:50%;padding:2px 5px;">0</b></button>
+      <button class="icon-btn" id="theme-toggle" style="width:32px;height:32px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);"><i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline"></i></button>
+      <div class="user-chip" style="display:flex; align-items:center; gap:6px; padding:3px 8px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px;">
+        <div class="user-meta hidden sm:flex" style="flex-direction:column; text-align:right;">
+          <div class="user-name" id="user-email" style="font-size:10px; font-weight:800;">—</div>
+          <div class="user-role" id="role-badge" style="font-size:8px; color:var(--text-3);">—</div>
         </div>
-        <div id="who" class="user-avatar">?</div>
+        <div id="who" class="user-avatar" style="width:28px;height:28px;border-radius:8px;background:#18181b;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;">?</div>
       </div>
     </div>
   </div>
 </header>
 
-<div id="maintenance-banner" class="hidden">
-  <i class="fa-solid fa-triangle-exclamation"></i>
-  <span>وضع الصيانة مفعّل — الموقع الرئيسي مغلق للمستخدمين</span>
+<div id="maintenance-banner" class="hidden" style="background:var(--warn-bg);color:var(--warn-tx);padding:8px;text-align:center;font-size:11px;font-weight:900;">
+  <i class="fa-solid fa-triangle-exclamation"></i> وضع الصيانة مفعّل
 </div>
 
 <nav id="tabs"><div class="tabs-inner" id="tabs-inner"></div></nav>
@@ -295,7 +159,7 @@ html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut,reauthenticateWithPopup} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getDatabase,ref,get,set,update,push,onValue,runTransaction,query,limitToLast,orderByChild,equalTo,remove,onChildAdded} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {getDatabase,ref,get,set,update,push,onValue,runTransaction,query,limitToLast,orderByChild,equalTo,remove} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const adminApp=initializeApp({apiKey:"AIzaSyAR9wR9J8Qh1Git78zIT4pc6VVWIKemN40",authDomain:"blackp2p.firebaseapp.com",databaseURL:"https://blackp2p-default-rtdb.firebaseio.com",projectId:"blackp2p",storageBucket:"blackp2p.firebasestorage.app",messagingSenderId:"875717005059",appId:"1:875717005059:web:4e91211f751dddf7a2e336"},"BLACKP2P_ADMIN");
 const auth=getAuth(adminApp),db=getDatabase(adminApp),R=p=>ref(db,p),$=id=>document.getElementById(id);
@@ -311,12 +175,11 @@ const timeAgo=t=>{const d=(Date.now()-t)/1000;if(d<60)return 'الآن';if(d<360
 
 let me=null,view='dash',H={},hc=0,live=[],S={},pageState={},adminIP='—',sysHealth={fb:false,cf:false};
 let selectedPosts = new Set(), selectedUsers = new Set();
-let lastPlayedSound = 0;
-let isFirstLoad = true;
+let chatFilter = 'all'; // all, open, frozen, closed
 
 try { fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>adminIP=d.ip).catch(()=>{}); } catch(e) {}
 
-const downloadExcel=(data, headers, filename)=>{ const ws_data = [headers.map(h => h.label)]; data.forEach(row => { ws_data.push(headers.map(h => { let val = row[h.key] ?? ''; if(h.key==='createdAt') val = new Date(val).toLocaleString('ar-EG'); return val; })); }); const ws = XLSX.utils.aoa_to_sheet(ws_data); ws['!cols'] = headers.map(() => ({ wch: 20 })); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "البيانات"); XLSX.writeFile(wb, filename + '.xlsx'); };
+const downloadExcel=(data, headers, filename)=>{ const ws_data = [headers.map(h => h.label)]; data.forEach(row => { ws_data.push(headers.map(h => { let val = row[h.key] ?? ''; if(h.key==='createdAt' || h.key==='at') val = new Date(val).toLocaleString('ar-EG'); return val; })); }); const ws = XLSX.utils.aoa_to_sheet(ws_data); ws['!cols'] = headers.map(() => ({ wch: 20 })); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "البيانات"); XLSX.writeFile(wb, filename + '.xlsx'); };
 
 const checkSystemHealth = async () => { try { await get(R('settings')); sysHealth.fb = true; } catch(e) { sysHealth.fb = false; } try { const res = await fetch(WORKER_URL + '/health'); if(res.ok) sysHealth.cf = true; else sysHealth.cf = false; } catch(e) { sysHealth.cf = false; } };
 
@@ -324,7 +187,7 @@ const getTabsByRole = (role) => {
     const allTabs = [ ['dash','الرئيسية','fa-house'], ['posts','الإعلانات','fa-rectangle-list'], ['dep','الشحن','fa-wallet'], ['wd','السحب','fa-money-bill-transfer'], ['ver','التوثيق','fa-id-card'], ['pay','الأرباح','fa-sack-dollar'], ['ref','النزاعات','fa-scale-balanced'], ['deals','الصفقات','fa-handshake'], ['cpn','الكوبونات','fa-ticket'], ['users','المستخدمون','fa-users'], ['chats','الدردشات','fa-comments'], ['note','إشعارات','fa-bell'], ['set','الإعدادات','fa-gear'], ['log','السجل','fa-clipboard-list'] ];
     if (role === 'owner' || role === 'super_admin' || !role) return allTabs;
     if (role === 'accountant') return allTabs.filter(t => ['dash','dep','wd','pay','ref','deals'].includes(t[0]));
-    if (role === 'support') return allTabs.filter(t => ['dash','users','chats','note'].includes(t[0]));
+    if (role === 'support') return allTabs.filter(t => ['dash','users','chats','note','ref'].includes(t[0]));
     return [allTabs[0]];
 };
 
@@ -339,7 +202,7 @@ const log=async(action, detail, oldVal=null, newVal=null)=>{
 
 const confirmPIN = async (actionName) => {
     try {
-        const r = await Swal.fire({ title: 'تأكيد أمني مطلوب', html: `<div style="text-align:right;direction:rtl;"><p style="font-size:12px;font-weight:700;color:var(--text-3);margin-bottom:8px;">العملية المطلوبة:</p><p style="font-size:14px;font-weight:900;color:var(--success-tx);background:var(--success-bg);padding:10px;border-radius:8px;border:1px solid var(--success-bd);margin-bottom:12px;">${E(actionName)}</p><p style="font-size:11px;color:var(--text-3);line-height:1.6;"><i class="fa-solid fa-shield-halved" style="color:var(--success-tx)"></i> سيتم فتح نافذة تأكيد هويتك عبر Google. هذه خطوة أمنية إلزامية لحماية أموال المنصة.</p></div>`, icon: 'warning', showCancelButton: true, confirmButtonText: 'تأكيد الهوية', cancelButtonText: 'إلغاء' });
+        const r = await Swal.fire({ title: 'تأكيد أمني مطلوب', html: `<div style="text-align:right;direction:rtl;"><p style="font-size:12px;font-weight:700;color:var(--text-3);margin-bottom:8px;">العملية المطلوبة:</p><p style="font-size:14px;font-weight:900;color:var(--success-tx);background:var(--success-bg);padding:10px;border-radius:8px;border:1px solid var(--success-bd);margin-bottom:12px;">${E(actionName)}</p><p style="font-size:11px;color:var(--text-3);line-height:1.6;"><i class="fa-solid fa-shield-halved" style="color:var(--success-tx)"></i> سيتم فتح نافذة تأكيد هويتك عبر Google. هذه خطوة أمنية إلزامية.</p></div>`, icon: 'warning', showCancelButton: true, confirmButtonText: 'تأكيد الهوية', cancelButtonText: 'إلغاء' });
         if (!r.isConfirmed) throw new Error('CANCEL');
         const provider = new GoogleAuthProvider();
         await reauthenticateWithPopup(auth.currentUser, provider);
@@ -348,8 +211,6 @@ const confirmPIN = async (actionName) => {
     } catch (e) {
         if (e.message === 'CANCEL') throw e;
         if (e.code === 'auth/popup-closed-by-user') throw new Error('تم إغلاق نافذة التأكيد.');
-        if (e.code === 'auth/user-mismatch') throw new Error('يجب التأكيد بنفس حساب المشرف المسجل.');
-        if (e.code === 'auth/popup-blocked') throw new Error('المتصفح يمنع النوافذ المنبثقة. اسمح بها وأعد المحاولة.');
         throw new Error('فشل التحقق من الهوية: ' + (e.message || e.code));
     }
 };
@@ -379,8 +240,7 @@ const reason=async t=>{const r=await Swal.fire({title:t,input:'text',inputPlaceh
 const ulink=(id,n)=>`<a style="font-weight:800;color:var(--text);cursor:pointer;text-decoration:underline" onclick="userInfo('${id}')">${E(n||id)}</a>`;
 const F={},fl=()=>F[view]||{},st=(d='all')=>fl().st||d,q=()=>(fl().q||'').toLowerCase(),hit=(o,ks)=>!q()||ks.map(k=>o[k]).join(' ').toLowerCase().includes(q());
 window.setF=(k,v)=>{F[view]=F[view]||{};F[view][k]=v;pageState[view]=1;show(view)};
-const moreBtn=(view,total,limit)=>total>limit?`<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="loadMoreData('${view}')"><i class="fa-solid fa-chevron-down"></i> جلب المزيد من السجلات</button>`:'';
-
+const moreBtn=(view,total,limit)=>total>limit?`<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="loadMoreData('${view}')"><i class="fa-solid fa-chevron-down"></i> جلب المزيد</button>`:'';
 window.loadMoreData = (v) => { pageState[v] = (pageState[v] || 1) + 1; show(v); };
 
 const statusBadge = (status) => {
@@ -393,7 +253,6 @@ const bar=(statuses, showDate=true)=>{ const dFrom = fl().dFrom || '', dTo = fl(
 const filterByDate = (arr) => { let res = arr; const dFrom = fl().dFrom, dTo = fl().dTo; if (dFrom) res = res.filter(x => x.createdAt >= new Date(dFrom).getTime()); if (dTo) { const to = new Date(dTo); to.setHours(23,59,59,999); res = res.filter(x => x.createdAt <= to.getTime()); } return res; };
 const copy=t=>navigator.clipboard.writeText(t).then(()=>ok('تم النسخ'));
 const dev=ua=>{ua=ua||'';const os=(/Android[ \d.]*/.exec(ua)||/iPhone|iPad/.exec(ua)||/Windows[^;)]*/.exec(ua)||/Mac OS X[^;)]*/.exec(ua)||[])[0]||'—',m=(/;\s*([^;)]+)\sBuild/.exec(ua)||[])[1],b=(/(Edg|Firefox|Chrome|Safari)\//.exec(ua)||[])[1];return [os,m,b].filter(Boolean).join(' · ')||'—'};
-const sendNote=async uid=>{const r=await Swal.fire({title:'إشعار للمستخدم',html:'<input id="x_t" class="swal2-input" placeholder="العنوان"><textarea id="x_b" class="swal2-textarea" placeholder="النص"></textarea><label style="display:block;margin-top:8px;font-size:12px;font-weight:700"><input type="checkbox" id="x_p" style="width:auto"> نافذة منبثقة</label>',showCancelButton:true,confirmButtonText:'إرسال',cancelButtonText:'إلغاء',preConfirm:()=>{const t=$('x_t').value.trim(),b=$('x_b').value.trim();if(!t||!b){Swal.showValidationMessage('مطلوب');return false}return {t,b,p:$('x_p').checked}}});if(!r.isConfirmed)return;await set(push(R('notifications/'+uid)),{title:r.value.t.slice(0,100),body:r.value.b.slice(0,500),type:'info',popup:r.value.p,read:false,createdAt:Date.now()});await log('إشعار',uid);ok('تم')};
 
 window.toggleSelect = (type, id) => {
     const set = type === 'post' ? selectedPosts : selectedUsers;
@@ -408,71 +267,40 @@ window.updateBulkBar = (type) => {
         $('bulk-count').textContent = `${set.size} عنصر محدد`;
         if (type === 'post') {
             $('bulk-actions').innerHTML = `
-                <button class="bulk-btn danger" onclick="bulkDeletePosts()"><i class="fa-solid fa-trash"></i> حذف المحدد</button>
-                <button class="bulk-btn" onclick="bulkApprovePosts()"><i class="fa-solid fa-check"></i> قبول المحدد</button>
+                <button class="bulk-btn danger" onclick="bulkDeletePosts()"><i class="fa-solid fa-trash"></i> حذف</button>
+                <button class="bulk-btn" onclick="bulkApprovePosts()"><i class="fa-solid fa-check"></i> قبول</button>
             `;
         } else {
             $('bulk-actions').innerHTML = `
-                <button class="bulk-btn danger" onclick="bulkBanUsers()"><i class="fa-solid fa-ban"></i> حظر المحدد</button>
-                <button class="bulk-btn" onclick="bulkNotifyUsers()"><i class="fa-solid fa-bell"></i> إشعار المحدد</button>
+                <button class="bulk-btn danger" onclick="bulkBanUsers()"><i class="fa-solid fa-ban"></i> حظر</button>
+                <button class="bulk-btn" onclick="bulkNotifyUsers()"><i class="fa-solid fa-bell"></i> إشعار</button>
             `;
         }
         bar.classList.add('show');
-    } else {
-        bar.classList.remove('show');
-    }
+    } else { bar.classList.remove('show'); }
 };
 
-window.bulkDeletePosts = async () => {
-    if (!await ask(`هل أنت متأكد من حذف ${selectedPosts.size} إعلان؟`)) return;
-    Swal.fire({title:'جاري الحذف...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-    try {
-        const updates = {};
-        selectedPosts.forEach(id => updates[`posts/${id}/status`] = 'deleted');
-        await update(ref(db), updates);
-        await log('حذف جماعي', `تم حذف ${selectedPosts.size} إعلان`);
-        selectedPosts.clear(); updateBulkBar('post'); Swal.close(); ok('تم الحذف'); show('posts');
-    } catch(e) { Swal.close(); bad(e); }
-};
+window.bulkDeletePosts = async () => { if (!await ask(`حذف ${selectedPosts.size} إعلان؟`)) return; Swal.fire({title:'جاري الحذف...', didOpen:()=>Swal.showLoading()}); try { const updates = {}; selectedPosts.forEach(id => updates[`posts/${id}/status`] = 'deleted'); await update(ref(db), updates); await log('حذف جماعي', `تم حذف ${selectedPosts.size} إعلان`); selectedPosts.clear(); updateBulkBar('post'); Swal.close(); ok('تم'); show('posts'); } catch(e) { Swal.close(); bad(e); } };
+window.bulkApprovePosts = async () => { if (!await ask(`قبول ${selectedPosts.size} إعلان؟`)) return; Swal.fire({title:'جاري القبول...', didOpen:()=>Swal.showLoading()}); try { const updates = {}; selectedPosts.forEach(id => updates[`posts/${id}/status`] = 'active'); await update(ref(db), updates); await log('قبول جماعي', `تم قبول ${selectedPosts.size} إعلان`); selectedPosts.clear(); updateBulkBar('post'); Swal.close(); ok('تم'); show('posts'); } catch(e) { Swal.close(); bad(e); } };
+window.bulkBanUsers = async () => { if (!await ask(`حظر ${selectedUsers.size} مستخدم؟`)) return; const r = await reason('سبب الحظر الجماعي'); Swal.fire({title:'جاري الحظر...', didOpen:()=>Swal.showLoading()}); try { const updates = {}; selectedUsers.forEach(id => { updates[`users/${id}/suspended`] = true; updates[`users/${id}/banReason`] = r; }); await update(ref(db), updates); await log('حظر جماعي', `حظر ${selectedUsers.size} - ${r}`); selectedUsers.clear(); updateBulkBar('user'); Swal.close(); ok('تم'); show('users'); } catch(e) { Swal.close(); bad(e); } };
+window.bulkNotifyUsers = async () => { const {value: txt} = await Swal.fire({title:'إشعار جماعي', input:'textarea', placeholder:'نص الإشعار...'}); if(!txt) return; Swal.fire({title:'جاري الإرسال...', didOpen:()=>Swal.showLoading()}); try { for (let id of selectedUsers) { await set(push(R('notifications/'+id)), {title:'إشعار إداري', body:txt, type:'info', popup:true, read:false, createdAt:Date.now()}); } await log('إشعار جماعي', `لـ ${selectedUsers.size} مستخدم`); selectedUsers.clear(); updateBulkBar('user'); Swal.close(); ok('تم'); show('users'); } catch(e) { Swal.close(); bad(e); } };
 
-window.bulkApprovePosts = async () => {
-    if (!await ask(`هل أنت متأكد من قبول ${selectedPosts.size} إعلان؟`)) return;
-    Swal.fire({title:'جاري القبول...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+window.globalSearch = async (val) => {
+    if(!val || val.length < 3) return bad(new Error('أدخل 3 أحرف على الأقل للبحث'));
+    Swal.fire({title:'جاري البحث...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
     try {
-        const updates = {};
-        selectedPosts.forEach(id => updates[`posts/${id}/status`] = 'active');
-        await update(ref(db), updates);
-        await log('قبول جماعي', `تم قبول ${selectedPosts.size} إعلان`);
-        selectedPosts.clear(); updateBulkBar('post'); Swal.close(); ok('تم القبول'); show('posts');
-    } catch(e) { Swal.close(); bad(e); }
-};
+        const usersSnap = await get(query(R('users'), orderByChild('email'), equalTo(val)));
+        if(usersSnap.exists()) { Swal.close(); const uid = Object.keys(usersSnap.val())[0]; return userInfo(uid); }
+        
+        // Fallback search by ID if email not found
+        const userSnap = await get(R('users/'+val));
+        if(userSnap.exists()) { Swal.close(); return userInfo(val); }
 
-window.bulkBanUsers = async () => {
-    if (!await ask(`هل أنت متأكد من حظر ${selectedUsers.size} مستخدم؟`)) return;
-    const reasonTxt = await reason('سبب الحظر الجماعي');
-    Swal.fire({title:'جاري الحظر...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-    try {
-        const updates = {};
-        selectedUsers.forEach(id => {
-            updates[`users/${id}/suspended`] = true;
-            updates[`users/${id}/banReason`] = reasonTxt;
-        });
-        await update(ref(db), updates);
-        await log('حظر جماعي', `تم حظر ${selectedUsers.size} مستخدم - السبب: ${reasonTxt}`);
-        selectedUsers.clear(); updateBulkBar('user'); Swal.close(); ok('تم الحظر'); show('users');
-    } catch(e) { Swal.close(); bad(e); }
-};
+        // Search posts
+        const postsSnap = await get(R('posts/'+val));
+        if(postsSnap.exists()) { Swal.close(); return postInfo(val); }
 
-window.bulkNotifyUsers = async () => {
-    const {value: txt} = await Swal.fire({title:'إشعار جماعي', input:'textarea', placeholder:'نص الإشعار...'});
-    if(!txt) return;
-    Swal.fire({title:'جاري الإرسال...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-    try {
-        for (let id of selectedUsers) {
-            await set(push(R('notifications/'+id)), {title:'إشعار إداري', body:txt, type:'info', popup:true, read:false, createdAt:Date.now()});
-        }
-        await log('إشعار جماعي', `تم إرسال إشعار لـ ${selectedUsers.size} مستخدم`);
-        selectedUsers.clear(); updateBulkBar('user'); Swal.close(); ok('تم الإرسال'); show('users');
+        Swal.close(); bad(new Error('لم يتم العثور على نتائج مطابقة.'));
     } catch(e) { Swal.close(); bad(e); }
 };
 
@@ -487,6 +315,10 @@ window.userInfo=async uid=>{try{
   const isPro = u.isPro && (u.proUntil||0) > Date.now();
   const lvl = isPro ? {n:'بائع ذهبي', c:'var(--gold-tx)', b:'var(--gold-bg)', i:'fa-crown'} : (u.completedDeals>=50 ? {n:'خبير', c:'var(--warn-tx)', b:'var(--warn-bg)', i:'fa-star'} : (u.completedDeals>=10 ? {n:'محترف', c:'var(--info-tx)', b:'var(--info-bg)', i:'fa-medal'} : {n:'مبتدئ', c:'var(--text-3)', b:'var(--surface-2)', i:'fa-seedling'}));
   
+  // Feature 7: Timeline Tab
+  const recentDealsHtml = md.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5).map(d=>`<div style="padding:6px; border-bottom:1px solid var(--border); font-size:11px;"><span style="color:var(--text-4)">${timeAgo(d.createdAt)}</span> - صفقة <b>${d.amount} ج</b> ${statusBadge(d.status)}</div>`).join('') || '<p style="font-size:11px;color:var(--text-4)">لا يوجد</p>';
+  const recentDepsHtml = mp.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5).map(d=>`<div style="padding:6px; border-bottom:1px solid var(--border); font-size:11px;"><span style="color:var(--text-4)">${timeAgo(d.createdAt)}</span> - شحن <b>${d.amount} ج</b> ${statusBadge(d.status)}</div>`).join('') || '<p style="font-size:11px;color:var(--text-4)">لا يوجد</p>';
+
   const avatarHtml = `<div style="width:50px;height:50px;border-radius:12px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:18px;overflow:hidden;flex-shrink:0">${u.photo ? `<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">` : E(u.name?.charAt(0)||'?')}</div>`;
   
   const overviewTab = `
@@ -501,47 +333,42 @@ window.userInfo=async uid=>{try{
               </div>
               <p style="font-size:10.5px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p>
               <p style="font-size:8.5px;color:var(--text-4);" dir="ltr">${E(uid)}</p>
-              <span class="badge" style="background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c}; width:fit-content; font-size:8px; padding:1px 5px; margin-top:2px;"><i class="fa-solid ${lvl.i}"></i> ${lvl.n} (${u.completedDeals||0} صفقة)</span>
+              <span class="badge" style="background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c}; width:fit-content; font-size:8px; padding:1px 5px; margin-top:2px;"><i class="fa-solid ${lvl.i}"></i> ${lvl.n}</span>
           </div>
       </div>
-      
       <div class="info-grid">
           <div class="info-cell"><span class="info-label">الرصيد</span><span class="info-value" style="color:var(--success-tx)">${u.balance||0} ج</span></div>
           <div class="info-cell"><span class="info-label">التقييم</span><span class="info-value" style="color:var(--warn-tx)">${avg!=='—'?'⭐ '+avg:'—'}</span></div>
-          <div class="info-cell"><span class="info-label">التسجيل</span><span class="info-value" style="font-size:10px">${ago(u.createdAt||Date.now())}</span></div>
-          <div class="info-cell"><span class="info-label">آخر ظهور</span><span class="info-value" style="font-size:10px">${ago(u.lastSeen||Date.now())}</span></div>
-          <div class="info-cell" style="grid-column:1/-1"><span class="info-label">الجهاز</span><span class="info-value" style="font-size:10px;font-weight:700">${E(dev(u.deviceInfo))}</span></div>
+          <div class="info-cell" style="grid-column:1/-1"><span class="info-label">الجهاز (Device Info)</span><span class="info-value" style="font-size:10px;font-weight:700">${E(dev(u.deviceInfo))}</span></div>
           ${u.banReason?`<div class="info-cell" style="grid-column:1/-1;background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">سبب الحظر</span><span class="info-value" style="color:var(--danger-tx);font-size:10px">${E(u.banReason)}</span></div>`:''}
       </div>
+  </div>`;
+
+  const timelineTab = `
+  <div style="margin-bottom:10px;">
+      <b style="font-size:12px; display:block; margin-bottom:6px; color:var(--info-tx)"><i class="fa-solid fa-handshake"></i> آخر الصفقات:</b>
+      <div style="background:var(--surface-2); border-radius:8px; padding:4px;">${recentDealsHtml}</div>
+  </div>
+  <div>
+      <b style="font-size:12px; display:block; margin-bottom:6px; color:var(--success-tx)"><i class="fa-solid fa-wallet"></i> آخر عمليات الشحن:</b>
+      <div style="background:var(--surface-2); border-radius:8px; padding:4px;">${recentDepsHtml}</div>
   </div>`;
 
   const financialTab = `
   <div class="info-grid">
       <div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd)"><span class="info-label" style="color:var(--success-tx)">إجمالي الشحن</span><span class="info-value" style="color:var(--success-tx)">${sum(mp,'approved')} ج</span></div>
       <div class="info-cell" style="background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">إجمالي السحب</span><span class="info-value" style="color:var(--danger-tx)">${sum(mw,'approved')} ج</span></div>
-      <div class="info-cell"><span class="info-label">صفقات مكتملة</span><span class="info-value" style="color:var(--success-tx)">${md.filter(d=>d.status==='completed').length}</span></div>
-      <div class="info-cell"><span class="info-label">نزاعات</span><span class="info-value" style="color:var(--danger-tx)">${md.filter(d=>d.status==='disputed').length}</span></div>
-      <div class="info-cell"><span class="info-label">أرباح الإحالات</span><span class="info-value" style="color:var(--purple-tx)">${u.refEarnings||0} ج</span></div>
-      <div class="info-cell"><span class="info-label">عدد الإحالات</span><span class="info-value" style="color:var(--purple-tx)">${u.refCount||0}</span></div>
   </div>`;
 
   const postsTab = ps.length === 0 ? '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد إعلانات</p>' : ps.slice(0,10).map(p=>`
   <div style="display:flex;justify-content:space-between;align-items:center;padding:7px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;margin-bottom:5px">
-      <div style="flex:1;min-width:0">
-          <b style="font-size:11.5px;color:var(--text);display:block">${E(p.game)} ${p.isAutoBuy ? '<i class="fa-solid fa-bolt" style="color:var(--gold-solid);font-size:10px;" title="شراء فوري"></i>' : ''}</b>
-          <span style="font-size:9px;color:var(--text-3)">${timeAgo(p.createdAt)}</span>
-      </div>
-      <div style="text-align:left;display:flex;flex-direction:column;align-items:flex-end;gap:3px">
-          <b style="font-size:11.5px;color:var(--text);display:block">${p.price} ج</b>
-          ${statusBadge(p.status)}
-      </div>
+      <div style="flex:1;min-width:0"><b style="font-size:11.5px;color:var(--text);display:block">${E(p.game)}</b><span style="font-size:9px;color:var(--text-3)">${timeAgo(p.createdAt)}</span></div>
+      <div style="text-align:left;display:flex;flex-direction:column;align-items:flex-end;gap:3px"><b style="font-size:11.5px;color:var(--text);display:block">${p.price} ج</b>${statusBadge(p.status)}</div>
   </div>`).join('');
 
   const verificationTab = vf ? `
   <div class="info-cell" style="margin-bottom:8px"><span class="info-label">الحالة</span><span class="info-value">${statusBadge(vf.status)}</span></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-      ${imgs([vf.idUrl,vf.selfieUrl]).map(x=>`<img src="${x}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="zoom('${x}')">`).join('')}
-  </div>` : '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد توثيق</p>';
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${imgs([vf.idUrl,vf.selfieUrl]).map(x=>`<img src="${x}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="zoom('${x}')">`).join('')}</div>` : '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد توثيق</p>';
 
   Swal.fire({ 
       title: '<span style="font-size:14px;font-weight:900;color:var(--text);">معلومات المستخدم</span>', 
@@ -549,36 +376,27 @@ window.userInfo=async uid=>{try{
       <div style="text-align:right;max-height:65vh;overflow-y:auto;padding:2px" dir="rtl">
           <div class="modal-tabs">
               <button class="modal-tab active" onclick="switchUserTab('overview',this)">نظرة عامة</button>
+              <button class="modal-tab" onclick="switchUserTab('timeline',this)">السجل</button>
               <button class="modal-tab" onclick="switchUserTab('financial',this)">المالية</button>
               <button class="modal-tab" onclick="switchUserTab('posts',this)">الإعلانات (${ps.length})</button>
               <button class="modal-tab" onclick="switchUserTab('verify',this)">التوثيق</button>
           </div>
           <div id="utab-overview">${overviewTab}</div>
+          <div id="utab-timeline" style="display:none">${timelineTab}</div>
           <div id="utab-financial" style="display:none">${financialTab}</div>
           <div id="utab-posts" style="display:none">${postsTab}</div>
           <div id="utab-verify" style="display:none">${verificationTab}</div>
       </div>`, 
-      width: '95%', 
-      maxWidth: '500px', 
-      showCloseButton: true, 
-      showConfirmButton: false, 
-      padding: '14px',
+      width: '95%', maxWidth: '500px', showCloseButton: true, showConfirmButton: false, padding: '14px',
       customClass: { popup: 'user-info-modal' }
   });
   
   window.switchUserTab = (tab, btn) => { 
       document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active')); 
       btn.classList.add('active'); 
-      ['overview','financial','posts','verify'].forEach(t => { 
-          $('utab-'+t).style.display = t === tab ? 'block' : 'none'; 
-      }); 
+      ['overview','timeline','financial','posts','verify'].forEach(t => { $('utab-'+t).style.display = t === tab ? 'block' : 'none'; }); 
   };
 }catch(e){Swal.close();bad(e)}};
-
-window.postInfo=async id=>{try{
-  const p=(await get(R('posts/'+id))).val();
-  Swal.fire({title:E(p.game),width:'92%',showCloseButton:true,showConfirmButton:false,padding:'14px',html:`<div style="text-align:right" dir="rtl">${thumbs(imgs(p.photos))}<p style="margin:8px 0;color:var(--text-2);font-weight:600;font-size:12px">${E(p.desc)}</p><div class="info-grid"><div class="info-cell"><span class="info-label">السيرفر</span><span class="info-value" style="font-size:11px">${E(p.server)}</span></div><div class="info-cell"><span class="info-label">الربط</span><span class="info-value" style="font-size:11px">${E(p.linkType)}</span></div><div class="info-cell"><span class="info-label">السعر</span><span class="info-value" style="color:var(--success-tx)">${p.price} ج</span></div><div class="info-cell"><span class="info-label">الحالة</span><span class="info-value">${statusBadge(p.status)}</span></div></div><div class="info-cell" style="margin-top:6px"><span class="info-label">البائع</span><span class="info-value">${ulink(p.sellerId,p.sellerName)}</span></div><div style="margin-top:8px">${op('عرض بيانات الحساب',()=>viewPrivateInfo(id),'btn-warning')}</div></div>`});
-}catch(e){bad(e)}};
 
 window.viewPrivateInfo = async (pid) => {
   if(!pid) return bad(new Error('غير موجود'));
@@ -603,99 +421,21 @@ const checkPending = async () => {
     } catch (e) {}
 };
 
-// التنبيهات المباشرة (Live Alerts)
-const setupLiveAlerts = () => {
-    const playAlert = () => {
-        const now = Date.now();
-        if (now - lastPlayedSound > 5000) {
-            document.getElementById('alertSound').play().catch(e=>{});
-            lastPlayedSound = now;
-        }
-    };
-    const alertNewItem = (title) => {
-        if (!isFirstLoad) {
-            playAlert();
-            Swal.fire({title: 'تنبيه جديد!', text: title, icon: 'info', toast: true, position: 'top-end', showConfirmButton: false, timer: 4000});
-        }
-    };
-    onChildAdded(R('deposits'), (snap) => { if(snap.val().status === 'pending') alertNewItem('طلب شحن جديد'); });
-    onChildAdded(R('withdrawals'), (snap) => { if(snap.val().status === 'pending') alertNewItem('طلب سحب جديد'); });
-    onChildAdded(R('posts'), (snap) => { if(snap.val().status === 'pending') alertNewItem('إعلان جديد بحاجة لمراجعة'); });
-    setTimeout(() => { isFirstLoad = false; }, 3000);
-};
-
-const checkNewChats = async () => {
-  try {
-    const chats = Object.values((await get(R('chats'))).val() || {});
-    const unreadCount = chats.filter(c => c.adminRead === false).length;
-    if (unreadCount > 0 && view !== 'chats' && view !== 'chat') {
-      const now = Date.now();
-      if (now - lastPlayedSound > 10000) {
-        document.getElementById('chatSound').play().catch(e => console.log('Audio blocked'));
-        lastPlayedSound = now;
-        Swal.fire({title: 'رسالة جديدة!', text: 'لديك رسائل دردشة غير مقروءة', icon: 'info', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000});
-      }
-    }
-  } catch(e) {}
-};
-
 window.deleteUserAccount = async (uid) => {
     if (!uid || uid === 'admin_support') return;
-    if (!await ask('هل أنت متأكد من حذف هذا الحساب نهائياً؟ سيتم مسح بياناته ولا يمكن استرجاعه!')) return;
-    Swal.fire({title:'جاري مسح بيانات المستخدم...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+    if (!await ask('حذف هذا الحساب نهائياً؟ سيتم مسح بياناته!')) return;
+    Swal.fire({title:'جاري مسح البيانات...', didOpen:()=>Swal.showLoading()});
     try {
-        const updates = {};
-        updates[`users/${uid}`] = null; updates[`notifications/${uid}`] = null; updates[`user_chats/${uid}`] = null; updates[`user_verifications/${uid}`] = null;
+        const updates = {}; updates[`users/${uid}`] = null; updates[`notifications/${uid}`] = null;
         const userPosts = await get(query(R('posts'), orderByChild('sellerId'), equalTo(uid)));
         if(userPosts.exists()) { Object.keys(userPosts.val()).forEach(pid => { updates[`posts/${pid}`] = null; updates[`post_private/${pid}`] = null; }); }
-        await update(ref(db), updates);
-        Swal.close(); ok('تم حذف الحساب وكل بياناته بنجاح.'); show('users');
+        await update(ref(db), updates); Swal.close(); ok('تم الحذف.'); show('users');
     } catch(e) { Swal.close(); bad(e); }
 };
 
-window.openDatabaseManager = async () => {
-    if(me.role !== 'owner') return bad(new Error('خاص بالمالك فقط'));
-    const { value: node } = await Swal.fire({ title: 'اختر القسم', input: 'select', inputOptions: { 'users': '👥 المستخدمون', 'posts': '📦 الإعلانات', 'deposits': '💳 طلبات الشحن', 'withdrawals': '💸 طلبات السحب', 'chats': '💬 الدردشات', 'settings': '⚙️ الإعدادات' }, inputPlaceholder: 'اختر', showCancelButton: true, confirmButtonText: 'فتح', cancelButtonText: 'إلغاء' });
-    if (!node) return;
-    Swal.fire({title: 'جاري التحميل...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
-    let data = {};
-    try { data = (await get(R(node))).val() || {}; } catch(e) { return bad(new Error('فشل الاتصال بقاعدة البيانات')); }
-    Swal.close();
-    let currentData = JSON.parse(JSON.stringify(data)); let historyStack = []; let searchQuery = ''; let isRawMode = false; let fontSize = 12; let hasUnsavedChanges = false;
-    const saveHistory = () => { historyStack.push(JSON.stringify(currentData)); if (historyStack.length > 20) historyStack.shift(); hasUnsavedChanges = true; };
-    const style = document.createElement('style');
-    style.innerHTML = `.pro-ide-overlay { position: fixed; inset: 0; z-index: 9999; background: #09090b; display: flex; flex-direction: column; font-family: 'Cairo', sans-serif; color: #e4e4e7; } .pro-ide-header { background: #121214; border-bottom: 1px solid #27272a; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; z-index: 10; } .pro-ide-top { display: flex; justify-content: space-between; align-items: center; } .pro-ide-title { font-weight: 900; font-size: 13px; color: #fafafa; display: flex; align-items: center; gap: 6px; } .unsaved-dot { width: 8px; height: 8px; background: #f59e0b; border-radius: 50%; display: none; margin-left: 5px; box-shadow: 0 0 8px #f59e0b; } .pro-ide-search { width: 100%; background: #18181b; border: 1px solid #27272a; color: #fafafa; padding: 6px 10px; border-radius: 6px; font-family: Cairo; font-size: 11px; outline: none; transition: 0.2s; } .pro-ide-search:focus { border-color: #3b82f6; background: rgba(59,130,246,0.05); } .pro-ide-toolbar { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; } .pro-btn { background: #18181b; color: #a1a1aa; border: 1px solid #27272a; padding: 5px 8px; border-radius: 6px; font-size: 10.5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s; } .pro-btn:hover { background: #27272a; color: #fafafa; } .pro-btn.primary { background: #2563eb; color: #fff; border: 1px solid #3b82f6; } .pro-btn.primary:hover { background: #1d4ed8; } .pro-ide-body { flex: 1; overflow-y: auto; padding: 10px; background: #09090b; } .json-node { margin-bottom: 2px; } .json-node-header { display: flex; align-items: center; padding: 4px 6px; border-radius: 4px; cursor: pointer; transition: 0.1s; font-family: monospace; direction: ltr; border: 1px solid transparent; } .json-node-header:hover { background: #18181b; border-color: #27272a; } .json-toggle { width: 14px; color: #52525b; text-align: center; font-size: 9px; transition: 0.2s; } .json-node.open > .json-node-header .json-toggle { transform: rotate(90deg); color: #a1a1aa; } .json-node.open > .json-node-header { background: #18181b; border-color: #27272a; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; } .json-children { display: none; margin-left: 12px; border-left: 1px solid #27272a; padding-left: 6px; direction: ltr; padding-top: 2px; padding-bottom: 2px; background: #0f0f11; border-bottom-left-radius: 4px; } .json-node.open > .json-children { display: block; } .json-key { color: #93c5fd; margin-right: 4px; font-weight: bold; } .json-badge { color: #71717a; font-size: 10px; margin-left: 4px; font-style: italic; background: #18181b; padding: 0px 4px; border-radius: 3px; border: 1px solid #27272a; } .json-row { display: flex; align-items: flex-start; padding: 3px 6px; border-radius: 4px; font-family: monospace; direction: ltr; transition: 0.1s; border: 1px solid transparent; } .json-row:hover { background: #18181b; border-color: #27272a; } .json-row-key { color: #93c5fd; margin-right: 6px; white-space: nowrap; } .json-val-string { color: #a78bfa; word-break: break-all; cursor: text; padding: 1px 3px; border-radius: 3px; border: 1px solid transparent; } .json-val-number { color: #34d399; cursor: text; padding: 1px 3px; border-radius: 3px; border: 1px solid transparent; } .json-val-boolean { color: #fbbf24; cursor: pointer; padding: 1px 3px; border-radius: 3px; border: 1px solid transparent; font-weight: bold;} .json-val-null { color: #71717a; font-style: italic; padding: 1px 3px; border-radius: 3px; } .json-actions { display: flex; gap: 4px; margin-left: auto; opacity: 0.1; transition: 0.2s; } .json-row:hover .json-actions, .json-node-header:hover .json-actions { opacity: 1; } .json-icon-btn { background: none; border: none; cursor: pointer; color: #71717a; font-size: 10px; transition: 0.2s; padding: 2px 4px; border-radius: 3px; } .json-icon-btn:hover { background: #27272a; color: #fafafa; } .json-icon-btn:hover.delete { color: #ef4444; } .inline-input { background: rgba(15, 15, 17, 0.9) !important; color: #fafafa !important; border: 1px solid #3b82f6 !important; font-family: monospace; padding: 2px 6px; border-radius: 4px; outline: none; width: 100%; direction: ltr; margin: -2px 0; } .raw-textarea { flex: 1; width: 100%; padding: 12px; background: #09090b; color: #e4e4e7; font-family: monospace; font-size: 12px; border: none; border-top: 1px solid #27272a; resize: none; outline: none; direction: ltr; line-height: 1.5; } .add-btn { background: rgba(52,211,153,0.05); border: 1px dashed rgba(52,211,153,0.3); color: #34d399; padding: 4px; width: 100%; border-radius: 4px; font-size: 10px; margin-top: 4px; cursor: pointer; font-family: Cairo; direction: rtl; transition: 0.2s; }`;
-    document.head.appendChild(style);
-    const overlay = document.createElement('div'); overlay.className = 'pro-ide-overlay';
-    const setNestedValue = (obj, path, value) => { const keys = path.split('.'); let current = obj; for (let i = 0; i < keys.length - 1; i++) { current = current[keys[i]]; } current[keys[keys.length - 1]] = value; };
-    const deleteNestedValue = (obj, path) => { const keys = path.split('.'); let current = obj; for (let i = 0; i < keys.length - 1; i++) { current = current[keys[i]]; } delete current[keys[keys.length - 1]]; };
-    const getNestedValue = (obj, path) => { return path.split('.').reduce((o, k) => o && o[k], obj); };
-    const buildTree = (obj, path = '') => { if (typeof obj !== 'object' || obj === null) { if (searchQuery && !String(obj).toLowerCase().includes(searchQuery.toLowerCase()) && !path.toLowerCase().includes(searchQuery.toLowerCase())) return ''; let valText = obj === null ? 'null' : (typeof obj === 'string' ? `"${E(obj)}"` : obj); return `<div class="json-row"><span class="json-row-key">"${path.split('.').pop()}":</span><span class="json-val-${typeof obj}" onclick="window._inlineEdit(this, '${path}', '${typeof obj}')">${valText}</span><div class="json-actions"><button onclick="window._delVal('${path}')" class="json-icon-btn delete"><i class="fa-solid fa-trash-can"></i></button></div></div>`; } let entries = Object.entries(obj); let isArray = Array.isArray(obj); if (searchQuery) { const hasMatch = entries.some(([k, v]) => k.toLowerCase().includes(searchQuery.toLowerCase()) || (typeof v === 'object' && JSON.stringify(v).toLowerCase().includes(searchQuery.toLowerCase()))); if (!hasMatch) return ''; } let html = `<div class="json-node ${path === '' || searchQuery ? 'open' : ''}" id="node-${path.replace(/\./g, '-')}">`; html += `<div class="json-node-header" onclick="window._toggleNode(this)"><span class="json-toggle">▶</span><span class="json-key">"${path.split('.').pop() || 'Root'}":</span><span class="json-badge">${isArray ? '[' : '{'} ${entries.length} ${isArray ? ']' : '}'}</span><div class="json-actions" style="margin-left:10px;"><button onclick="event.stopPropagation(); window._addKey('${path}')" class="json-icon-btn edit"><i class="fa-solid fa-plus"></i></button></div></div>`; html += `<div class="json-children">`; for (let [k, v] of entries) { let newPath = path ? `${path}.${k}` : k; html += buildTree(v, newPath); } html += `<button onclick="window._addKey('${path}')" class="add-btn"><i class="fa-solid fa-plus"></i> إضافة مفتاح</button></div></div>`; return html; };
-    const renderUI = () => { const header = `<div class="pro-ide-header"><div class="pro-ide-top"><div class="pro-ide-title"><i class="fa-solid fa-database" style="color:#3b82f6;"></i> ${node}<span class="unsaved-dot" style="display:${hasUnsavedChanges ? 'block' : 'none'};"></span></div><div style="display:flex; gap:6px;"><button onclick="window._undo()" class="json-icon-btn" style="font-size:14px;color:${historyStack.length ? '#fafafa' : '#52525b'};" ${!historyStack.length ? 'disabled' : ''}><i class="fa-solid fa-rotate-left"></i></button><button onclick="window._closeDB()" class="json-icon-btn" style="font-size:16px;color:#fafafa;"><i class="fa-solid fa-xmark"></i></button></div></div><input type="text" class="pro-ide-search" placeholder="🔍 بحث..." value="${searchQuery}" oninput="window._handleSearch(this.value)"><div class="pro-ide-toolbar"><button onclick="window._toggleMode()" class="pro-btn"><i class="fa-solid ${isRawMode ? 'fa-eye' : 'fa-code'}"></i> ${isRawMode ? 'الشجرة' : 'JSON'}</button><button onclick="window._saveDB()" class="pro-btn primary" style="flex:1;"><i class="fa-solid fa-cloud-arrow-up"></i> حفظ التعديلات</button></div></div>`; const body = isRawMode ? `<textarea id="raw-json" class="raw-textarea" style="font-size:${fontSize}px;">${E(JSON.stringify(currentData, null, 2))}</textarea>` : `<div class="pro-ide-body" style="font-size:${fontSize}px;">${Object.keys(currentData).length ? buildTree(currentData) : '<p style="text-align:center;color:#71717a;margin-top:50px;">لا توجد بيانات.</p>'}</div>`; overlay.innerHTML = header + body; };
-    window._closeDB = () => { if(hasUnsavedChanges && !confirm('لديك تغييرات لم تحفظ. هل تريد الخروج؟')) return; overlay.remove(); style.remove(); };
-    window._handleSearch = (val) => { searchQuery = val; if(!isRawMode) renderUI(); };
-    window._toggleNode = (el) => { el.parentElement.classList.toggle('open'); };
-    window._undo = () => { if (historyStack.length === 0) return; currentData = JSON.parse(historyStack.pop()); hasUnsavedChanges = true; if(isRawMode) document.getElementById('raw-json').value = JSON.stringify(currentData, null, 2); else renderUI(); };
-    window._toggleMode = () => { if (isRawMode) { try { currentData = JSON.parse(document.getElementById('raw-json').value); saveHistory(); } catch(e) { return bad(new Error('صيغة JSON غير صحيحة.')); } } isRawMode = !isRawMode; renderUI(); };
-    window._inlineEdit = (el, path, type) => { if (el.querySelector('input')) return; const currentVal = getNestedValue(currentData, path); if (type === 'boolean') { saveHistory(); setNestedValue(currentData, path, !currentVal); renderUI(); return; } const input = document.createElement('input'); input.className = 'inline-input'; input.value = currentVal === null ? 'null' : currentVal; input.onkeydown = (e) => { if (e.key === 'Enter') { saveHistory(); let newVal = input.value.trim(); let parsedVal = newVal; if (type === 'number') parsedVal = Number(newVal); if (newVal === 'null') parsedVal = null; setNestedValue(currentData, path, parsedVal); renderUI(); } else if (e.key === 'Escape') { renderUI(); } }; input.onblur = () => { setTimeout(() => { if (document.body.contains(input)) renderUI(); }, 150); }; el.innerHTML = ''; el.appendChild(input); input.focus(); input.select(); };
-    window._delVal = (path) => { Swal.fire({ title: 'حذف؟', text: `سيتم حذف (${path.split('.').pop()})`, icon: 'warning', showCancelButton: true, confirmButtonText: 'حذف', confirmButtonColor: '#ef4444' }).then(r => { if (r.isConfirmed) { saveHistory(); deleteNestedValue(currentData, path); renderUI(); } }); };
-    window._saveDB = async () => { if (isRawMode) { try { currentData = JSON.parse(document.getElementById('raw-json').value); } catch(e) { return bad(new Error('صيغة JSON غير صحيحة!')); } } if(!await ask('حفظ التعديلات في قاعدة البيانات الحية؟')) return; Swal.fire({title:'جاري الحفظ...', didOpen: () => Swal.showLoading(), showConfirmButton: false}); try { await set(R(node), currentData); hasUnsavedChanges = false; Swal.close(); ok('تم الحفظ بنجاح'); window._closeDB(); show('dash'); } catch(e) { Swal.close(); bad(e); } };
-    renderUI(); document.body.appendChild(overlay);
-};
-
-window.createPromoCode = async () => {
-    const { value: formValues } = await Swal.fire({ title: 'إنشاء كوبون جديد', html: `<p style="font-size:11px; color:var(--text-3); margin-bottom:10px;">اترك حقل UID فارغاً لإنشاء كوبون عام يمكن لأي شخص استخدامه.</p><input id="swal-uid" class="swal2-input" placeholder="UID المستخدم (اختياري)" dir="ltr" style="text-align:left"><input id="swal-amount" class="swal2-input" placeholder="قيمة الكوبون (ج)" type="number">`, showCancelButton: true, confirmButtonText: 'إنشاء الكوبون', cancelButtonText: 'إلغاء', preConfirm: () => { const uid = document.getElementById('swal-uid').value.trim(); const amount = document.getElementById('swal-amount').value.trim(); if (!amount || amount < 1) { Swal.showValidationMessage('أدخل مبلغاً صالحاً'); return false; } return { uid, amount: Number(amount) }; } });
-    if (!formValues) return;
-    const code = 'BLCK-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    try {
-        Swal.fire({title: 'جاري الإنشاء...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        await set(R('promo_codes/' + code), { amount: formValues.amount, status: 'active', createdAt: Date.now(), targetUser: formValues.uid || null });
-        Swal.close();
-        Swal.fire({ title: 'تم إنشاء الكوبون بنجاح!', html: `<p style="font-size:13px;margin-bottom:10px;">أعط هذا الكود للمستخدم ليقوم بإدخاله في المحفظة:</p><b style="font-size:24px; color:var(--success-tx); letter-spacing:2px; background:var(--surface-2); padding:5px 15px; border-radius:8px; display:inline-block;">${code}</b><p style="font-size:12px;margin-top:10px;">القيمة: ${formValues.amount} ج</p>`, confirmButtonText: 'نسخ الكود' }).then(r => { if(r.isConfirmed) navigator.clipboard.writeText(code); });
-        show('cpn');
-    } catch(e) { Swal.close(); bad(e); }
-};
-
+// =========================================
+// Views
+// =========================================
 const V = {
 async dash(){
   const roleTitle = me?.role === 'owner' ? 'المالك 👑' : me?.role === 'accountant' ? 'المحاسب 💼' : me?.role === 'support' ? 'الدعم الفني 🎧' : 'المدير 🛡️';
@@ -705,7 +445,6 @@ async dash(){
   const [u,p,d,w,v,y,f,dl]=await Promise.all(['users','posts','deposits','withdrawals','user_verifications','pending_payouts','refund_queue','deals'].map(g));
   
   const activeUsersCount = u.filter(x => x.lastSeen && (Date.now() - x.lastSeen < 300000)).length;
-
   const pc=a=>a.filter(x=>x.status==='pending').length,earn=y.filter(x=>x.status==='processed').reduce((a,x)=>a+(x.commission||0),0),bal=u.reduce((a,x)=>a+(x.balance||0),0);
   const pendingTotal = pc(p) + pc(d) + pc(w) + pc(v) + pc(f);
   
@@ -717,73 +456,20 @@ async dash(){
     {l:'سحب معلق', n:pc(w), k:'wd', icon:'fa-money-bill-transfer', bg:'var(--warn-bg)', clr:'var(--warn-tx)', bd:'var(--warn-bd)'}, 
     {l:'توثيق معلق', n:pc(v), k:'ver', icon:'fa-id-card', bg:'var(--purple-bg)', clr:'var(--purple-tx)', bd:'var(--purple-bd)'}, 
     {l:'أرباح معلقة', n:pc(y), k:'pay', icon:'fa-sack-dollar', bg:'var(--success-bg)', clr:'var(--success-tx)', bd:'var(--success-bd)'}, 
-    {l:'نزاعات', n:pc(f), k:'ref', icon:'fa-scale-balanced', bg:'var(--danger-bg)', clr:'var(--danger-tx)', bd:'var(--danger-bd)'}, 
-    {l:'صفقات جارية', n:dl.filter(x=>x.status==='held'||x.status==='delivered').length, k:'deals', icon:'fa-handshake', bg:'var(--info-bg)', clr:'var(--info-tx)', bd:'var(--info-bd)'} 
+    {l:'نزاعات', n:pc(f), k:'ref', icon:'fa-scale-balanced', bg:'var(--danger-bg)', clr:'var(--danger-tx)', bd:'var(--danger-bd)'} 
   ];
 
-  const heldFunds = dl.filter(d => d.status === 'held' || d.status === 'delivered').reduce((a,b) => a + b.amount, 0);
-  const pendingWds = w.filter(w => w.status === 'pending').reduce((a,b) => a + b.amount, 0);
-  const pendingDepsList = d.filter(d => d.status === 'pending').slice(0, 3);
-  const pendingWdsList = w.filter(w => w.status === 'pending').slice(0, 3);
-
-  const healthHtml = `<div class="card" style="margin-bottom:14px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div style="display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-server" style="color:var(--text-3)"></i> <span style="font-size:11px; font-weight:800; color:var(--text-2)">حالة النظام:</span></div><div style="display:flex; gap:10px; font-size:10px; font-weight:900;"><span style="color:${sysHealth.fb ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.fb ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> قاعدة البيانات</span><span style="color:${sysHealth.cf ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.cf ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> السيرفر (Worker)</span></div></div>`;
-
-  const ledgerHtml = `
-  <div class="card" style="background:linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%); border-color:var(--border);">
-      <div class="sec-title" style="color:var(--info-tx);border-bottom-color:var(--info-bd);"><i class="fa-solid fa-scale-balanced"></i> السجل المالي للمنصة</div>
-      <div class="grid-2" style="gap:8px;">
-          <div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd);"><span class="info-label" style="color:var(--success-tx)">أرباح المنصة (العمولات)</span><b class="info-value" style="color:var(--success-tx);font-size:16px;">${earn} ج</b></div>
-          <div class="info-cell" style="background:var(--warn-bg);border-color:var(--warn-bd);"><span class="info-label" style="color:var(--warn-tx)">أموال محجوزة (صفقات)</span><b class="info-value" style="color:var(--warn-tx);font-size:16px;">${heldFunds} ج</b></div>
-          <div class="info-cell" style="background:var(--danger-bg);border-color:var(--danger-bd);"><span class="info-label" style="color:var(--danger-tx)">سحب معلق (مطلوب دفعه)</span><b class="info-value" style="color:var(--danger-tx);font-size:16px;">${pendingWds} ج</b></div>
-          <div class="info-cell" style="background:var(--info-bg);border-color:var(--info-bd);"><span class="info-label" style="color:var(--info-tx)">إجمالي أرصدة المستخدمين</span><b class="info-value" style="color:var(--info-tx);font-size:16px;">${bal} ج</b></div>
-      </div>
-  </div>`;
-
-  const quickActionsHtml = `
-  <div class="grid-2" style="margin-bottom:14px;">
-      <div class="card" style="margin:0;">
-          <div class="sec-title" style="font-size:11px;"><i class="fa-solid fa-bolt" style="color:var(--success-solid)"></i> شحن معلق (سريع)</div>
-          ${pendingDepsList.length === 0 ? '<p style="font-size:10px;color:var(--text-4);text-align:center;">لا يوجد</p>' : pendingDepsList.map(d => `
-              <div class="quick-action-item">
-                  <div style="font-size:11px; font-weight:800;">${E(d.userName)} <span style="color:var(--success-tx)">(${d.amount} ج)</span></div>
-                  <button class="btn btn-success" style="padding:3px 8px; min-height:24px; font-size:10px;" onclick="quickApproveDep('${d.id}', '${d.userId}', ${d.amount})">قبول</button>
-              </div>
-          `).join('')}
-      </div>
-      <div class="card" style="margin:0;">
-          <div class="sec-title" style="font-size:11px;"><i class="fa-solid fa-money-bill-transfer" style="color:var(--danger-solid)"></i> سحب معلق (سريع)</div>
-          ${pendingWdsList.length === 0 ? '<p style="font-size:10px;color:var(--text-4);text-align:center;">لا يوجد</p>' : pendingWdsList.map(w => `
-              <div class="quick-action-item">
-                  <div style="font-size:11px; font-weight:800;">${E(w.userName)} <span style="color:var(--danger-tx)">(${w.amount} ج)</span></div>
-                  <button class="btn btn-danger" style="padding:3px 8px; min-height:24px; font-size:10px;" onclick="quickApproveWd('${w.id}', '${w.userId}', ${w.amount})">تحويل</button>
-              </div>
-          `).join('')}
-      </div>
-  </div>`;
-
-  // الرسم البياني (الإحصائيات المتقدمة)
-  setTimeout(() => {
-    const ctx = document.getElementById('dealsChart');
-    if (!ctx) return;
-    if (window.dealsChart) { window.dealsChart.destroy(); window.dealsChart = null; }
-    const isDark = document.documentElement.classList.contains('dark');
-    const counts = [dl.filter(x=>x.status==='completed').length, dl.filter(x=>x.status==='held'||x.status==='delivered').length, dl.filter(x=>x.status==='cancelled'||x.status==='refunded').length];
-    window.dealsChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['مكتملة', 'جارية', 'ملغية/مستردة'], datasets: [{ data: counts, backgroundColor: [isDark ? '#10b981' : '#059669', isDark ? '#f59e0b' : '#d97706', isDark ? '#ef4444' : '#dc2626'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Cairo', size: 10 }, color: isDark ? '#fafafa' : '#18181b' } } }, cutout: '70%' } });
-  }, 120);
+  const healthHtml = `<div class="card" style="margin-bottom:14px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div style="display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-server" style="color:var(--text-3)"></i> <span style="font-size:11px; font-weight:800; color:var(--text-2)">حالة النظام:</span></div><div style="display:flex; gap:10px; font-size:10px; font-weight:900;"><span style="color:${sysHealth.fb ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.fb ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> قاعدة البيانات</span><span style="color:${sysHealth.cf ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.cf ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> السيرفر</span></div></div>`;
 
   const lg = (await fetchLogs(5));
 
   return `${healthHtml}
   ${pendingTotal > 0 ? `<div class="card" style="background:var(--warn-bg);border-color:var(--warn-bd);padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warn-tx);font-size:14px"></i><span style="color:var(--warn-tx);font-weight:900;font-size:11px">${pendingTotal} طلبات معلقة</span></div>` : ''}
-  <div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:900;color:var(--text);letter-spacing:-0.02em">مرحباً ${roleTitle}</h1><p style="color:var(--text-3);font-size:11px;font-weight:700;margin-top:2px">${new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
+  <div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:900;color:var(--text);">مرحباً ${roleTitle}</h1><p style="color:var(--text-3);font-size:11px;font-weight:700;">${new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
   
   <div class="stats-grid">${stats.map((s)=>`<div onclick="go('${s.k}')" class="stat-card"><div class="stat-icon" style="background:${s.bg};border-color:${s.bd};color:${s.clr}"><i class="fa-solid ${s.icon}"></i></div><span class="stat-label">${s.l}</span><span class="stat-value">${s.n}</span></div>`).join('')}</div>
   
-  ${ledgerHtml}
-  ${quickActionsHtml}
-
   <div class="grid-2" style="margin-bottom:8px">
-    <div class="card"><h3 style="font-size:12px;font-weight:900;color:var(--text);margin-bottom:10px">حالة الصفقات</h3><div class="chart-container"><canvas id="dealsChart"></canvas></div></div>
     <div class="card"><h3 style="font-size:12px;font-weight:900;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-clock-rotate-left" style="color:var(--text-3);font-size:10px"></i> آخر الإجراءات</h3><div style="max-height:160px;overflow-y:auto">${lg.map(l=>`<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border)"><div style="width:22px;height:22px;border-radius:6px;background:var(--neutral-bg);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0"><i class="fa-solid fa-circle-dot" style="font-size:7px"></i></div><div style="flex:1;min-width:0"><p style="font-size:10.5px;font-weight:800;color:var(--text);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(l.action)}</p><p style="font-size:9px;color:var(--text-3);margin:1px 0 0">${E((l.email||'').split('@')[0])} · ${timeAgo(l.at)}</p></div></div>`).join('') || '<p style="font-size:10px;color:var(--text-4);text-align:center;padding:8px">لا يوجد</p>'}</div></div>
   </div>`;
 },
@@ -791,7 +477,7 @@ async posts(){
     const limit = pageState[view] ? pageState[view]*30 : 30;
     const all=(await fetchList('posts', limit)).filter(p=> (st('pending')==='all'||p.status===st('pending')) && hit(p,['game','sellerName','desc'])); 
     const a = all.slice(0, limit); 
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:10px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'game',label:'اللعبة'},{key:'sellerName',label:'البائع'},{key:'price',label:'السعر'},{key:'status',label:'الحالة'}], 'posts')"><i class="fa-solid fa-file-excel"></i> تصدير الإعلانات الحالية</button>`; 
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:10px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'game',label:'اللعبة'},{key:'sellerName',label:'البائع'},{key:'price',label:'السعر'},{key:'status',label:'الحالة'}], 'posts')"><i class="fa-solid fa-file-excel"></i> تصدير إلى Excel</button>`; 
     
     return bar([['pending','قيد المراجعة'],['active','منشورة'],['sold','مباعة'],['deleted','محذوفة'],['all','الكل']], false) + exportBtn + (a.map(p=>card(`
     <div style="display:flex;align-items:flex-start;gap:8px;">
@@ -800,7 +486,7 @@ async posts(){
             <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div><b style="font-size:12.5px;font-weight:900;color:var(--text);display:block">${E(p.game)} ${p.isAutoBuy ? '<i class="fa-solid fa-bolt" style="color:var(--gold-solid);" title="شراء فوري"></i>' : ''}</b><span style="font-size:12px;font-weight:900;color:var(--success-tx)">${p.price} ج</span></div>${statusBadge(p.status)}</div>
             <p style="font-size:10px;color:var(--text-3);margin-bottom:6px">${ulink(p.sellerId,p.sellerName)} · ${timeAgo(p.createdAt)}</p>
             ${thumbs(imgs(p.photos))}
-            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${op('تفاصيل',()=>postInfo(p.id))}${op('البائع',()=>userInfo(p.sellerId))}${p.status==='pending'?btn('قبول',()=>update(R('posts/'+p.id),{status:'active'}).then(()=>notify(p.sellerId,'تم قبول إعلانك','إعلانك منشور.')),'btn-success','قبول')+op('رفض',async()=>{const r=await reason('سبب الرفض');await update(R('posts/'+p.id),{status:'deleted'});await notify(p.sellerId,'رفض إعلان','السبب: '+r);await log('رفض إعلان '+p.id,r,'pending','deleted');ok('تم');show(view)},'btn-danger'):''}${p.status==='active'?btn(p.featured?'إلغاء':'تمييز',()=>update(R('posts/'+p.id),{featured:!p.featured}),'btn-ghost','تمييز')+btn('حذف',()=>update(R('posts/'+p.id),{status:'deleted'}),'btn-danger','حذف'):''}</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${op('تفاصيل',()=>postInfo(p.id))}${op('البائع',()=>userInfo(p.sellerId))}${p.status==='pending'?btn('قبول',()=>update(R('posts/'+p.id),{status:'active'}).then(()=>notify(p.sellerId,'تم قبول إعلانك','إعلانك منشور.')),'btn-success','قبول')+op('رفض',async()=>{const r=await reason('سبب الرفض');await update(R('posts/'+p.id),{status:'deleted'});await notify(p.sellerId,'رفض إعلان','السبب: '+r);await log('رفض إعلان '+p.id,r,'pending','deleted');ok('تم');show(view)},'btn-danger'):''}${p.status==='active'?btn(p.featured?'إلغاء تمييز':'تمييز',()=>update(R('posts/'+p.id),{featured:!p.featured}),'btn-ghost','تمييز')+btn('حذف',()=>update(R('posts/'+p.id),{status:'deleted'}),'btn-danger','حذف'):''}</div>
         </div>
     </div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
@@ -808,13 +494,15 @@ async dep(){
     const limit = pageState[view] ? pageState[view]*30 : 30;
     let all=(await fetchList('deposits', limit)).filter(d=>(st('pending')==='all'||d.status===st('pending'))&&hit(d,['userName'])); 
     all = filterByDate(all); const a = all.slice(0, limit); 
-    return bar([['pending','معلقة'],['approved','مقبولة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div>${ulink(d.userId,d.userName)}<br><span style="font-size:10px;color:var(--text-3)">${ago(d.createdAt)}</span></div><span style="color:var(--success-tx);font-weight:900;font-size:15px">${d.amount} ج</span></div>${d.receiptUrl ? thumbs([d.receiptUrl]) : ''}<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${op('المستخدم',()=>userInfo(d.userId))}${d.status==='pending'?btn('قبول',async()=>{await confirmPIN('قبول شحن '+d.amount);await claim('deposits/'+d.id,'pending','approved');await credit(d.userId,d.amount);await notify(d.userId,'تم شحن رصيدك',`+${d.amount} ج`);},'btn-success','قبول شحن')+op('رفض',async()=>{const r=await reason('سبب الرفض');await claim('deposits/'+d.id,'pending','rejected');await notify(d.userId,'رفض شحن','السبب: '+r);await log('رفض شحن '+d.id,r,'pending','rejected');ok('تم');show(view)},'btn-danger'):statusBadge(d.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:10px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'status',label:'الحالة'},{key:'createdAt',label:'التاريخ'}], 'deposits')"><i class="fa-solid fa-file-excel"></i> تصدير إلى Excel</button>`; 
+    return exportBtn + bar([['pending','معلقة'],['approved','مقبولة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div>${ulink(d.userId,d.userName)}<br><span style="font-size:10px;color:var(--text-3)">${ago(d.createdAt)}</span></div><span style="color:var(--success-tx);font-weight:900;font-size:15px">${d.amount} ج</span></div>${d.receiptUrl ? thumbs([d.receiptUrl]) : ''}<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${op('المستخدم',()=>userInfo(d.userId))}${d.status==='pending'?btn('قبول',async()=>{await confirmPIN('قبول شحن '+d.amount);await claim('deposits/'+d.id,'pending','approved');await credit(d.userId,d.amount);await notify(d.userId,'تم شحن رصيدك',`+${d.amount} ج`);},'btn-success','قبول شحن')+op('رفض',async()=>{const r=await reason('سبب الرفض');await claim('deposits/'+d.id,'pending','rejected');await notify(d.userId,'رفض شحن','السبب: '+r);await log('رفض شحن '+d.id,r,'pending','rejected');ok('تم');show(view)},'btn-danger'):statusBadge(d.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async wd(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
     let all=(await fetchList('withdrawals', limit)).filter(w=>(st('pending')==='all'||w.status===st('pending'))&&hit(w,['userName','account'])); 
     all = filterByDate(all); const a = all.slice(0, limit); 
-    return bar([['pending','معلقة'],['approved','منفذة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(w=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div>${ulink(w.userId,w.userName)}<br><span style="font-size:10px;color:var(--text-3)">${ago(w.createdAt)}</span></div><span style="color:var(--danger-tx);font-weight:900;font-size:15px">${w.amount} ج</span></div><div style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;margin-bottom:8px"><p style="margin:2px 0"><b>الطريقة:</b> ${E(w.method)}</p><p style="margin:2px 0" dir="ltr"><b>الحساب:</b> ${E(w.account)}</p><p style="margin:2px 0"><b>الاسم:</b> ${E(w.accountName)}</p>${op('نسخ',()=>copy(w.account),'btn-ghost')}</div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('المستخدم',()=>userInfo(w.userId))}${w.status==='pending'?btn('تم التحويل',async()=>{await confirmPIN('تنفيذ سحب '+w.amount);await claim('withdrawals/'+w.id,'pending','approved');await notify(w.userId,'تم السحب',`${w.amount} ج`);},'btn-success','تنفيذ سحب')+op('رفض وإرجاع',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض سحب');await claim('withdrawals/'+w.id,'pending','rejected');await credit(w.userId,w.amount);await notify(w.userId,'رفض سحب','السبب: '+r);await log('رفض سحب '+w.id,r);ok('تم');show(view)},'btn-danger'):statusBadge(w.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:10px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'method',label:'الطريقة'},{key:'account',label:'الحساب'},{key:'status',label:'الحالة'}], 'withdrawals')"><i class="fa-solid fa-file-excel"></i> تصدير إلى Excel</button>`; 
+    return exportBtn + bar([['pending','معلقة'],['approved','منفذة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(w=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div>${ulink(w.userId,w.userName)}<br><span style="font-size:10px;color:var(--text-3)">${ago(w.createdAt)}</span></div><span style="color:var(--danger-tx);font-weight:900;font-size:15px">${w.amount} ج</span></div><div style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;margin-bottom:8px"><p style="margin:2px 0"><b>الطريقة:</b> ${E(w.method)}</p><p style="margin:2px 0" dir="ltr"><b>الحساب:</b> ${E(w.account)}</p><p style="margin:2px 0"><b>الاسم:</b> ${E(w.accountName)}</p>${op('نسخ',()=>copy(w.account),'btn-ghost')}</div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('المستخدم',()=>userInfo(w.userId))}${w.status==='pending'?btn('تم التحويل',async()=>{await confirmPIN('تنفيذ سحب '+w.amount);await claim('withdrawals/'+w.id,'pending','approved');await notify(w.userId,'تم السحب',`${w.amount} ج`);},'btn-success','تنفيذ سحب')+op('رفض وإرجاع',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض سحب');await claim('withdrawals/'+w.id,'pending','rejected');await credit(w.userId,w.amount);await notify(w.userId,'رفض سحب','السبب: '+r);await log('رفض سحب '+w.id,r);ok('تم');show(view)},'btn-danger'):statusBadge(w.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async ver(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
@@ -822,7 +510,7 @@ async ver(){
     return bar([['pending','معلقة'],['approved','موثقة'],['rejected','مرفوضة'],['all','الكل']], false) + ((await Promise.all(a.map(async v=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">${ulink(v.id,await uname(v.id))}</b>${statusBadge(v.status)}</div><p style="font-size:10px;color:var(--text-3);margin-bottom:6px">${ago(v.createdAt)}</p>${thumbs(imgs([v.idUrl,v.selfieUrl]))}<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${op('معلومات',()=>userInfo(v.id))}${v.status==='pending'?btn('توثيق',async()=>{await confirmPIN('توثيق');await claim('user_verifications/'+v.id,'pending','approved');await update(R('users/'+v.id),{verified:true});await notify(v.id,'تم التوثيق','يمكنك النشر الآن')},'btn-success','توثيق')+op('رفض',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض توثيق');await claim('user_verifications/'+v.id,'pending','rejected');await notify(v.id,'رفض توثيق','السبب: '+r);await log('رفض توثيق',r);ok('تم');show(view)},'btn-danger'):''}</div>`)))).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async pay(){ const p=(await fetchList('pending_payouts',50)).filter(x=>x.status==='pending'); return p.map(x=>card(`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><b style="color:var(--text);display:block;margin-bottom:3px;font-size:12.5px">أرباح صفقة <span style="font-size:10px;color:var(--text-4)">#${E(x.id).slice(0,6)}</span></b><span style="color:var(--success-tx);font-weight:900;font-size:15px">${x.amount} ج</span></div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('البائع',()=>userInfo(x.sellerId))}${btn('صرف',async()=>{await confirmPIN('صرف '+x.amount);await claim('pending_payouts/'+x.id,'pending','processed');await credit(x.sellerId,x.amount);await notify(x.sellerId,'تم الصرف',`+${x.amount} ج`)},'btn-success','صرف أرباح')}</div></div><div style="font-size:10px;color:var(--text-3);margin-top:6px">عمولة: ${x.commission} من ${x.grossAmount}</div>`)).join('')||empty; },
-async ref(){ const all = await fetchList('refund_queue',50); const pending = all.filter(x=>x.status==='pending'); if(pending.length === 0) return empty; const html = await Promise.all(pending.map(async f => { const deal = (await get(R('deals/'+f.id))).val() || {}; return card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">نزاع <span style="font-size:10px;color:var(--text-4)" dir="ltr">#${E(f.id).slice(0,8)}</span></b><span style="color:var(--danger-tx);font-weight:900;font-size:13px">${f.amount} ج</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;font-size:11px"><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">المشتري</span>${ulink(f.buyerId,await uname(f.buyerId))}</div><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">البائع</span>${ulink(f.sellerId,await uname(f.sellerId))}</div></div><div style="background:var(--danger-bg);border:1px solid var(--danger-bd);color:var(--danger-tx);font-size:11px;padding:8px;border-radius:8px;margin-bottom:8px"><b>مقدم النزاع:</b> ${f.raisedByRole || '—'}<br><b>السبب:</b> ${E(f.reason)}</div><div style="display:flex;gap:5px;flex-wrap:wrap">${btn('استرداد',async()=>{await confirmPIN('استرداد '+f.amount);await claim('refund_queue/'+f.id,'pending','approved');await credit(f.buyerId,f.amount);const updates={};updates['deals/'+f.id+'/status']='refunded';if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='refunded'}await update(ref(db),updates);await notify(f.buyerId,'تم الاسترداد',`+${f.amount} ج`);await notify(f.sellerId,'استرداد صفقة','');if(deal.chatId)await set(push(R(`chats/${deal.chatId}/messages`)),{senderId:me.uid,type:'admin',text:'تم استرداد المبلغ',createdAt:Date.now()});await log('استرداد '+f.id,'')},'btn-success','استرداد')}${btn('رفض النزاع',async()=>{await confirmPIN('رفض');await claim('refund_queue/'+f.id,'pending','rejected');const com=Math.round(deal.amount*(Number(S.commission)||0)/100);const updates={};updates['deals/'+f.id+'/status']='completed';updates['pending_payouts/'+f.id]={sellerId:f.sellerId,buyerId:f.buyerId,amount:deal.amount-com,grossAmount:deal.amount,commission:com,status:'pending',createdAt:Date.now()};if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='completed'}await update(ref(db),updates);await notify(f.sellerId,'رفض النزاع','تم تحويل أرباحك');await notify(f.buyerId,'رفض النزاع','');await log('رفض نزاع '+f.id,'')},'btn-danger','رفض نزاع')}${op('بيانات',()=>viewPrivateInfo(deal.postId))}</div>`); })); return html.join(''); },
+async ref(){ const all = await fetchList('refund_queue',50); const pending = all.filter(x=>x.status==='pending'); if(pending.length === 0) return empty; const html = await Promise.all(pending.map(async f => { const deal = (await get(R('deals/'+f.id))).val() || {}; return card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">نزاع <span style="font-size:10px;color:var(--text-4)" dir="ltr">#${E(f.id).slice(0,8)}</span></b><span style="color:var(--danger-tx);font-weight:900;font-size:13px">${f.amount} ج</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;font-size:11px"><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">المشتري</span>${ulink(f.buyerId,await uname(f.buyerId))}</div><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">البائع</span>${ulink(f.sellerId,await uname(f.sellerId))}</div></div><div style="background:var(--danger-bg);border:1px solid var(--danger-bd);color:var(--danger-tx);font-size:11px;padding:8px;border-radius:8px;margin-bottom:8px"><b>مقدم النزاع:</b> ${f.raisedByRole || '—'}<br><b>السبب:</b> ${E(f.reason)}</div><div style="display:flex;gap:5px;flex-wrap:wrap">${btn('استرداد',async()=>{await confirmPIN('استرداد '+f.amount);await claim('refund_queue/'+f.id,'pending','approved');await credit(f.buyerId,f.amount);const updates={};updates['deals/'+f.id+'/status']='refunded';if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='refunded'}await update(ref(db),updates);await notify(f.buyerId,'تم الاسترداد',`+${f.amount} ج`);await notify(f.sellerId,'استرداد صفقة','');if(deal.chatId)await set(push(R(`chats/${deal.chatId}/messages`)),{senderId:me.uid,type:'admin',text:'تم استرداد المبلغ',createdAt:Date.now()});await log('استرداد '+f.id,'')},'btn-success','استرداد')}${btn('رفض النزاع',async()=>{await confirmPIN('رفض');await claim('refund_queue/'+f.id,'pending','rejected');const com=Math.round(deal.amount*(Number(S.commission)||0)/100);const updates={};updates['deals/'+f.id+'/status']='completed';updates['pending_payouts/'+f.id]={sellerId:f.sellerId,buyerId:f.buyerId,amount:deal.amount-com,grossAmount:deal.amount,commission:com,status:'pending',createdAt:Date.now()};if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='completed'}await update(ref(db),updates);await notify(f.sellerId,'رفض النزاع','تم تحويل أرباحك');await notify(f.buyerId,'رفض النزاع','');await log('رفض نزاع '+f.id,'')},'btn-danger','رفض نزاع')}${op('بيانات',()=>viewPrivateInfo(deal.postId))}${op('الدردشة',()=>adminChat(deal.chatId),'btn-info')}</div>`); })); return html.join(''); },
 async deals(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
     let all=(await fetchList('deals', limit)).filter(d=>st('all')==='all'||d.status===st('all')); 
@@ -859,17 +547,36 @@ async users(){
 },
 async chats(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
-    const all=(await fetchList('chats', limit)).sort((a,b)=>b.updatedAt-a.updatedAt); const openCount = all.filter(c => c.status !== 'closed').length; const chatTab = document.querySelector(`.nav-icon[onclick="go('chats')"]`); if(chatTab) { let badge = chatTab.querySelector('.chat-tab-badge'); if(!badge && openCount > 0) { badge = document.createElement('span'); badge.className = 'chat-tab-badge'; badge.style.cssText = 'background:var(--danger-solid);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px;margin-right:5px;'; chatTab.appendChild(badge); } if(badge) { badge.textContent = openCount > 99 ? '+99' : openCount; if(openCount === 0) badge.remove(); } } 
-    const a = all.slice(0, limit); 
-    const headerStats = `<div class="card" style="padding:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx);font-weight:900;font-size:12px"><span><i class="fa-solid fa-comments"></i> الدردشات المفتوحة:</span><span>${openCount}</span></div>`; 
+    const all=(await fetchList('chats', limit)).sort((a,b)=>b.updatedAt-a.updatedAt); 
+    
+    // Chat Filters (Feature 9)
+    const filtered = all.filter(c => {
+        if (chatFilter === 'open') return c.status !== 'closed' && !c.frozen;
+        if (chatFilter === 'frozen') return c.frozen === true;
+        if (chatFilter === 'closed') return c.status === 'closed';
+        return true;
+    });
+
+    const openCount = all.filter(c => c.status !== 'closed').length; 
+    const chatTab = document.querySelector(`.nav-icon[onclick="go('chats')"]`); if(chatTab) { let badge = chatTab.querySelector('.chat-tab-badge'); if(!badge && openCount > 0) { badge = document.createElement('span'); badge.className = 'chat-tab-badge'; badge.style.cssText = 'background:var(--danger-solid);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px;margin-right:5px;'; chatTab.appendChild(badge); } if(badge) { badge.textContent = openCount > 99 ? '+99' : openCount; if(openCount === 0) badge.remove(); } } 
+    const a = filtered.slice(0, limit); 
+    
+    const filterHtml = `
+    <div style="display:flex; gap:6px; overflow-x:auto; margin-bottom:10px;" class="hide-scroll">
+        <button class="chip ${chatFilter==='all'?'active':''}" onclick="window.setChatFilter('all')" style="padding:6px 12px; font-size:11px;">الكل</button>
+        <button class="chip ${chatFilter==='open'?'active':''}" onclick="window.setChatFilter('open')" style="padding:6px 12px; font-size:11px;">نشطة</button>
+        <button class="chip ${chatFilter==='frozen'?'active':''}" onclick="window.setChatFilter('frozen')" style="padding:6px 12px; font-size:11px;">مجمدة (نزاعات)</button>
+        <button class="chip ${chatFilter==='closed'?'active':''}" onclick="window.setChatFilter('closed')" style="padding:6px 12px; font-size:11px;">مغلقة</button>
+    </div>`;
+
     const closeIdleBtn = `<button class="btn btn-warning" style="width:100%; margin-bottom:10px; font-size:11px;" onclick="autoCloseIdleChats()"><i class="fa-solid fa-broom"></i> إغلاق الدردشات الخاملة (أكثر من 24 ساعة)</button>`; 
     
-    return headerStats + closeIdleBtn + (a.map(c=>{ 
+    return filterHtml + closeIdleBtn + (a.map(c=>{ 
         const k='h'+(hc++);H[k]=()=>adminChat(c.id); 
         const isNew = c.adminRead === false && c.status !== 'closed'; 
         const assigned = c.assignedTo ? `<span class="badge badge-purple" style="font-size:8px;"><i class="fa-solid fa-user-tie"></i> ${E(c.assignedTo.split('@')[0])}</span>` : ''; 
         return card(`<div style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px" onclick="A('${k}')"><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0"><div style="width:34px;height:34px;border-radius:9px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:13px;flex-shrink:0">${E((c.buyerName||'?').charAt(0))}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap"><b style="font-size:11.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${E(c.buyerName)} ↔ ${E(c.sellerName)}</b>${c.status === 'closed' ? '<span class="badge badge-danger" style="padding:1px 5px;font-size:8px">مغلقة</span>' : ''}${c.frozen ? '<span class="badge badge-info" style="padding:1px 5px;font-size:8px">مجمدة</span>' : ''}${isNew ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--danger-solid);display:inline-block;margin-right:5px" title="رسائل جديدة"></span>' : ''}${assigned}</div><p style="font-size:10px;color:var(--text-3);margin:1px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(c.lastMessage||'—')}</p></div></div><button class="btn btn-danger" style="padding:4px 7px;font-size:10px;min-height:28px" onclick="event.stopPropagation(); window.deleteChat('${c.id}', '${c.buyerId}', '${c.sellerId}')"><i class="fa-solid fa-trash"></i></button></div>`); 
-    }).join('')||empty) + moreBtn(view, all.length, limit); 
+    }).join('')||empty) + moreBtn(view, filtered.length, limit); 
 },
 async note(){ 
     const recentLogs = (await fetchLogs(5)).filter(l => l.action === 'إشعار');
@@ -886,14 +593,7 @@ async set(){
     const currentGames = s.games ? s.games.join(', ') : defaultGames; 
     const currentServers = s.servers ? s.servers.join(', ') : defaultServers; 
     
-    const f=[
-        ['siteName','اسم الموقع'],['supportEmail','بريد الدعم'],['bankName','اسم البنك'],
-        ['accountName','اسم الحساب'],['walletNumber','رقم المحفظة'],['commission','العمولة %'],
-        ['tickerText','الشريط'],['depositWarning','تنبيه الشحن'],['maintenanceMessage','رسالة الصيانة'],
-        ['autoReplyText','الرد التلقائي للدعم'],['proPrice','سعر الباقة المميزة (ج)'],
-        ['proDays','مدة الباقة المميزة (أيام)'],['maxAdsFree','حد الإعلانات المجانية'],
-        ['maxAdsPro','حد الإعلانات للباقة المميزة'],['refBonus','مكافأة الإحالة (ج)']
-    ]; 
+    const f=[ ['siteName','اسم الموقع'],['supportEmail','بريد الدعم'],['bankName','اسم البنك'], ['accountName','اسم الحساب'],['walletNumber','رقم المحفظة'],['commission','العمولة %'], ['tickerText','الشريط'],['depositWarning','تنبيه الشحن'],['maintenanceMessage','رسالة الصيانة'], ['autoReplyText','الرد التلقائي للدعم'],['proPrice','سعر الباقة المميزة (ج)'], ['proDays','مدة الباقة المميزة (أيام)'],['maxAdsFree','حد الإعلانات المجانية'], ['maxAdsPro','حد الإعلانات للباقة المميزة'],['refBonus','مكافأة الإحالة (ج)'] ]; 
 
     const adminsHtml = me.isOwner ? (admins.map(a => { const k='h'+(hc++);H[k]=()=>Swal.fire({title:'تعديل',input:'select',inputOptions:{'super_admin':'مدير','accountant':'محاسب','support':'دعم'},inputValue:a.role||'super_admin',showCancelButton:true}).then(async r=>{if(r.isConfirmed){await update(R('admins/'+a.id),{role:r.value});ok('تم');show(view)}}); const delK='h'+(hc++);H[delK]=async()=>{if(!await ask('حذف '+a.email+'؟'))return;await remove(R('admins/'+a.id));await log('حذف مشرف',a.email);ok('تم');show(view)}; return `<div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);padding:8px;border-radius:8px;margin-bottom:5px;border:1px solid var(--border);gap:6px"><div style="min-width:0;flex:1"><b style="font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${E(a.email||a.id)}</b><span style="font-size:10px;color:var(--info-tx);font-weight:800">${a.role==='accountant'?'محاسب':a.role==='support'?'دعم':'مدير'}</span></div><div style="display:flex;gap:3px;flex-shrink:0"><button class="btn btn-ghost" style="padding:3px 7px;font-size:10px;min-height:26px" onclick="A('${k}')">تعديل</button><button class="btn btn-danger" style="padding:3px 7px;font-size:10px;min-height:26px" onclick="A('${delK}')">حذف</button></div></div>`; }).join('') || '<p style="font-size:11px;color:var(--text-4)">لا يوجد مشرفين</p>') : '<p style="font-size:11px;color:var(--text-4)">ليس لديك صلاحية</p>'; 
     const addAdminK = 'h'+(hc++); H[addAdminK] = async () => { const r = await Swal.fire({ title: 'إضافة مشرف', html: '<input id="a_email" class="swal2-input" placeholder="البريد"><input id="a_uid" class="swal2-input" placeholder="UID (اختياري)"><select id="a_role" class="swal2-select"><option value="super_admin">مدير</option><option value="accountant">محاسب</option><option value="support">دعم</option></select>', showCancelButton: true, confirmButtonText: 'إضافة', cancelButtonText: 'إلغاء', preConfirm: () => { const email = $('a_email').value.trim(); const uid = $('a_uid').value.trim(); const role = $('a_role').value; if (!uid && !email) { Swal.showValidationMessage('مطلوب'); return false; } return { email, uid, role }; }}); if (!r.isConfirmed) return; if (r.value.uid) { await set(R('admins/'+r.value.uid), {email: r.value.email, role: r.value.role, addedAt: Date.now()}); await log('إضافة مشرف', r.value.email); ok('تم'); show(view); } else { try { Swal.fire({title: 'جاري البحث...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); const usersSnap = await get(R('users')); let targetUid = null; usersSnap.forEach(child => { if (child.val().email && child.val().email.toLowerCase() === r.value.email.toLowerCase()) targetUid = child.key; }); if (!targetUid) throw new Error('لم يتم إيجاد المستخدم'); await set(R('admins/'+targetUid), {email: r.value.email, role: r.value.role, addedAt: Date.now()}); await log('إضافة مشرف', r.value.email); Swal.close(); ok('تم'); show(view); } catch (err) { Swal.close(); bad(err); } } }; 
@@ -901,116 +601,37 @@ async set(){
     return `
     <div class="card">
         <div class="sec-title"><i class="fa-solid fa-gear"></i> إعدادات الموقع</div>
-        <div class="grid-2">
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم الموقع</label><input id="s_siteName" value="${E(s.siteName||'')}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">بريد الدعم</label><input id="s_supportEmail" value="${E(s.supportEmail||'')}"></div>
-        </div>
-        
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم الموقع</label><input id="s_siteName" value="${E(s.siteName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">بريد الدعم</label><input id="s_supportEmail" value="${E(s.supportEmail||'')}"></div></div>
         <div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-wallet"></i> بيانات الدفع والعمولة</div>
-        <div class="grid-2">
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم البنك</label><input id="s_bankName" value="${E(s.bankName||'')}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم الحساب</label><input id="s_accountName" value="${E(s.accountName||'')}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رقم المحفظة</label><input id="s_walletNumber" value="${E(s.walletNumber||'')}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">العمولة (%)</label><input id="s_commission" type="number" value="${E(s.commission||0)}"></div>
-        </div>
-
-        <div class="sec-title" style="margin-top:14px; color:var(--gold-tx); border-bottom-color:var(--gold-bd);"><i class="fa-solid fa-crown"></i> الباقات والإحالات (مهم)</div>
-        <div class="grid-2">
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">سعر الباقة المميزة (ج)</label><input id="s_proPrice" type="number" value="${E(s.proPrice||50)}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">مدة الباقة (أيام)</label><input id="s_proDays" type="number" value="${E(s.proDays||30)}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">حد الإعلانات المجانية</label><input id="s_maxAdsFree" type="number" value="${E(s.maxAdsFree||5)}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">حد الإعلانات المميزة (برو)</label><input id="s_maxAdsPro" type="number" value="${E(s.maxAdsPro||50)}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">مكافأة الإحالة (ج)</label><input id="s_refBonus" type="number" value="${E(s.refBonus||10)}"></div>
-        </div>
-
-        <div class="grid-2">
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الشريط المتحرك</label><input id="s_tickerText" value="${E(s.tickerText||'')}"></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تنبيه الشحن</label><input id="s_depositWarning" value="${E(s.depositWarning||'')}"></div>
-            <div style="grid-column:1/-1"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الرد التلقائي للدعم</label><input id="s_autoReplyText" value="${E(s.autoReplyText||'')}"></div>
-        </div>
-        
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم البنك</label><input id="s_bankName" value="${E(s.bankName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم الحساب</label><input id="s_accountName" value="${E(s.accountName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رقم المحفظة</label><input id="s_walletNumber" value="${E(s.walletNumber||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">العمولة (%)</label><input id="s_commission" type="number" value="${E(s.commission||0)}"></div></div>
+        <div class="sec-title" style="margin-top:14px; color:var(--gold-tx); border-bottom-color:var(--gold-bd);"><i class="fa-solid fa-crown"></i> الباقات والإحالات</div>
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">سعر الباقة المميزة (ج)</label><input id="s_proPrice" type="number" value="${E(s.proPrice||50)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">مدة الباقة (أيام)</label><input id="s_proDays" type="number" value="${E(s.proDays||30)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">حد الإعلانات المجانية</label><input id="s_maxAdsFree" type="number" value="${E(s.maxAdsFree||5)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">حد الإعلانات المميزة (برو)</label><input id="s_maxAdsPro" type="number" value="${E(s.maxAdsPro||50)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">مكافأة الإحالة (ج)</label><input id="s_refBonus" type="number" value="${E(s.refBonus||10)}"></div></div>
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الشريط المتحرك</label><input id="s_tickerText" value="${E(s.tickerText||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تنبيه الشحن</label><input id="s_depositWarning" value="${E(s.depositWarning||'')}"></div><div style="grid-column:1/-1"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الرد التلقائي للدعم</label><input id="s_autoReplyText" value="${E(s.autoReplyText||'')}"></div></div>
         <div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-gamepad"></i> قوائم الألعاب والسيرفرات</div>
         <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الألعاب (مفصولة بفاصلة)</label><textarea id="s_games" rows="2">${E(currentGames)}</textarea>
         <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">السيرفرات (مفصولة بفاصلة)</label><textarea id="s_servers" rows="2">${E(currentServers)}</textarea>
-        
         <div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-shield-halved"></i> الأمان والصيانة</div>
-        <div class="grid-2">
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تأمين العمليات الحساسة</label><div style="padding:10px 12px;background:var(--success-bg);border:1px solid var(--success-bd);border-radius:9px;font-size:11px;font-weight:800;color:var(--success-tx);margin-bottom:9px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-shield-halved"></i> محمي عبر Google</div></div>
-            <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رسالة الصيانة</label><input id="s_maintenanceMessage" value="${E(s.maintenanceMessage||'')}"></div>
-        </div>
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تأمين العمليات</label><div style="padding:10px 12px;background:var(--success-bg);border:1px solid var(--success-bd);border-radius:9px;font-size:11px;font-weight:800;color:var(--success-tx);margin-bottom:9px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-shield-halved"></i> محمي عبر Google</div></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رسالة الصيانة</label><input id="s_maintenanceMessage" value="${E(s.maintenanceMessage||'')}"></div></div>
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin:10px 0 6px;color:var(--text-2)"><input type="checkbox" id="s_maintenanceMode" style="width:auto;margin:0" ${s.maintenanceMode?'checked':''}> تفعيل وضع الصيانة</label>
-        
-        ${btn('حفظ جميع الإعدادات',async()=>{
-            const o={}; 
-            f.forEach(([k])=>o[k]=$('s_'+k).value.trim()); 
-            o.commission=Math.min(50,Math.max(0,Number(o.commission)||0)); 
-            o.proPrice = Number(o.proPrice) || 50;
-            o.proDays = Number(o.proDays) || 30;
-            o.maxAdsFree = Number(o.maxAdsFree) || 5;
-            o.maxAdsPro = Number(o.maxAdsPro) || 50;
-            o.refBonus = Number(o.refBonus) || 10;
-            o.maintenanceMode=$('s_maintenanceMode').checked; 
-            o.games = $('s_games').value.split(',').map(x=>x.trim()).filter(Boolean); 
-            o.servers = $('s_servers').value.split(',').map(x=>x.trim()).filter(Boolean); 
-            await update(R('settings'),o); 
-            $('maintenance-banner').classList.toggle('hidden', !o.maintenanceMode); 
-        },'btn-primary','تعديل الإعدادات')}
+        ${btn('حفظ جميع الإعدادات',async()=>{const o={}; f.forEach(([k])=>o[k]=$('s_'+k).value.trim()); o.commission=Math.min(50,Math.max(0,Number(o.commission)||0)); o.proPrice = Number(o.proPrice) || 50; o.proDays = Number(o.proDays) || 30; o.maxAdsFree = Number(o.maxAdsFree) || 5; o.maxAdsPro = Number(o.maxAdsPro) || 50; o.refBonus = Number(o.refBonus) || 10; o.maintenanceMode=$('s_maintenanceMode').checked; o.games = $('s_games').value.split(',').map(x=>x.trim()).filter(Boolean); o.servers = $('s_servers').value.split(',').map(x=>x.trim()).filter(Boolean); await update(R('settings'),o); $('maintenance-banner').classList.toggle('hidden', !o.maintenanceMode); },'btn-primary','تعديل الإعدادات')}
     </div>
     <div class="card"><div class="sec-title" style="justify-content:space-between"><span><i class="fa-solid fa-users-gear"></i> إدارة المشرفين</span>${me.isOwner ? `<button class="btn btn-primary" style="padding:3px 9px;font-size:10px;min-height:26px" onclick="A('${addAdminK}')"><i class="fa-solid fa-plus"></i> إضافة</button>` : ''}</div>${adminsHtml}</div>
-    ${me.isOwner ? `<div class="card" style="border-color:var(--danger-bd);"><div class="sec-title" style="color:var(--danger-tx);border-bottom-color:var(--danger-bd);"><i class="fa-solid fa-skull-crossbones"></i> منطقة الخطر (للمالك فقط)</div><p style="font-size:11px;color:var(--text-3);margin-bottom:10px;">أدوات متقدمة للتحكم الكامل بقاعدة البيانات (مسح أو تعديل يدوي).</p><button class="btn btn-danger" style="width:100%;" onclick="window.openDatabaseManager()"><i class="fa-solid fa-database"></i> فتح شجرة قاعدة البيانات (JSON)</button></div>` : ''}`; 
+    ${me.isOwner ? `<div class="card" style="border-color:var(--danger-bd);"><div class="sec-title" style="color:var(--danger-tx);border-bottom-color:var(--danger-bd);"><i class="fa-solid fa-skull-crossbones"></i> منطقة الخطر (للمالك فقط)</div><p style="font-size:11px;color:var(--text-3);margin-bottom:10px;">أدوات متقدمة للتحكم الكامل بقاعدة البيانات.</p><button class="btn btn-danger" style="width:100%;" onclick="window.openDatabaseManager()"><i class="fa-solid fa-database"></i> فتح شجرة قاعدة البيانات (JSON)</button></div>` : ''}`; 
 },
 async log(){ 
     const limit = pageState[view] ? pageState[view]*30 : 50;
     let all=(await fetchLogs(limit)); 
-    
     const adminFilter = fl().adminFilter || '';
     const uniqueAdmins = [...new Set(all.map(l => l.email))].filter(Boolean);
-
     const q = (fl().q || '').toLowerCase();
-    const filtered = all.filter(l => {
-        const matchQ = !q || (l.action||'').toLowerCase().includes(q) || (l.detail||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q);
-        const matchAdmin = !adminFilter || l.email === adminFilter;
-        return matchQ && matchAdmin;
-    });
+    const filtered = all.filter(l => { const matchQ = !q || (l.action||'').toLowerCase().includes(q) || (l.detail||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q); const matchAdmin = !adminFilter || l.email === adminFilter; return matchQ && matchAdmin; });
     const a = filtered.slice(0, limit);
-
-    return `
-    <div style="display:flex; gap:8px; margin-bottom:14px;">
-        <select onchange="setF('adminFilter',this.value)" style="margin:0; flex:1;">
-            <option value="">كل المشرفين</option>
-            ${uniqueAdmins.map(e => `<option value="${e}" ${adminFilter===e?'selected':''}>${E(e.split('@')[0])}</option>`).join('')}
-        </select>
-        <div style="position:relative; flex:2;">
-            <i class="fa-solid fa-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px;pointer-events:none"></i>
-            <input placeholder="بحث في السجل..." value="${E(fl().q||'')}" onchange="setF('q',this.value)" style="margin:0;padding-right:34px">
-        </div>
-    </div>
-    ` + (a.map(l=>card(`<div style="display:flex;align-items:start;gap:6px"><div style="width:26px;height:26px;border-radius:7px;background:var(--neutral-bg);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0;margin-top:2px"><i class="fa-solid fa-clipboard-list" style="font-size:9px"></i></div><div style="flex:1;min-width:0"><b style="font-size:11.5px;color:var(--text)">${E(l.action)}</b><p style="font-size:9px;color:var(--text-3);margin:1px 0 0">${E(l.email)} · ${timeAgo(l.at)} · IP: ${E(l.ip||'—')}</p><p style="font-size:10.5px;color:var(--text-2);margin-top:4px;background:var(--neutral-bg);padding:5px 7px;border-radius:6px;font-weight:600">${E(l.detail)}</p>
-    ${l.oldVal || l.newVal ? `<div style="display:flex; gap:6px; margin-top:4px; font-size:9px;"><span style="background:var(--danger-bg); color:var(--danger-tx); padding:2px 6px; border-radius:4px; border:1px solid var(--danger-bd);">قبل: ${E(l.oldVal)}</span><span style="background:var(--success-bg); color:var(--success-tx); padding:2px 6px; border-radius:4px; border:1px solid var(--success-bd);">بعد: ${E(l.newVal)}</span></div>` : ''}
-    </div></div>`)).join('')||empty) + moreBtn(view, filtered.length, limit); 
+    return `<div style="display:flex; gap:8px; margin-bottom:14px;"><select onchange="setF('adminFilter',this.value)" style="margin:0; flex:1;"><option value="">كل المشرفين</option>${uniqueAdmins.map(e => `<option value="${e}" ${adminFilter===e?'selected':''}>${E(e.split('@')[0])}</option>`).join('')}</select><div style="position:relative; flex:2;"><i class="fa-solid fa-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px;pointer-events:none"></i><input placeholder="بحث في السجل..." value="${E(fl().q||'')}" onchange="setF('q',this.value)" style="margin:0;padding-right:34px"></div></div>` + (a.map(l=>card(`<div style="display:flex;align-items:start;gap:6px"><div style="width:26px;height:26px;border-radius:7px;background:var(--neutral-bg);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0;margin-top:2px"><i class="fa-solid fa-clipboard-list" style="font-size:9px"></i></div><div style="flex:1;min-width:0"><b style="font-size:11.5px;color:var(--text)">${E(l.action)}</b><p style="font-size:9px;color:var(--text-3);margin:1px 0 0">${E(l.email)} · ${timeAgo(l.at)} · IP: ${E(l.ip||'—')}</p><p style="font-size:10.5px;color:var(--text-2);margin-top:4px;background:var(--neutral-bg);padding:5px 7px;border-radius:6px;font-weight:600">${E(l.detail)}</p>${l.oldVal || l.newVal ? `<div style="display:flex; gap:6px; margin-top:4px; font-size:9px;"><span style="background:var(--danger-bg); color:var(--danger-tx); padding:2px 6px; border-radius:4px; border:1px solid var(--danger-bd);">قبل: ${E(l.oldVal)}</span><span style="background:var(--success-bg); color:var(--success-tx); padding:2px 6px; border-radius:4px; border:1px solid var(--success-bd);">بعد: ${E(l.newVal)}</span></div>` : ''}</div></div>`)).join('')||empty) + moreBtn(view, filtered.length, limit); 
 }
 };
 
-window.quickApproveDep = async (id, uid, amount) => {
-    if (!await ask(`هل أنت متأكد من قبول شحن ${amount} ج؟`)) return;
-    try {
-        Swal.fire({title:'جاري المعالجة...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        await claim('deposits/'+id,'pending','approved');
-        await credit(uid, amount);
-        await notify(uid,'تم شحن رصيدك',`+${amount} ج`);
-        Swal.close(); ok('تم القبول'); show('dash');
-    } catch(e) { Swal.close(); bad(e); }
-};
-
-window.quickApproveWd = async (id, uid, amount) => {
-    if (!await ask(`هل قمت بتحويل مبلغ ${amount} ج للمستخدم وتريد تأكيد العملية؟`)) return;
-    try {
-        Swal.fire({title:'جاري المعالجة...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        await claim('withdrawals/'+id,'pending','approved');
-        await notify(uid,'تم السحب',`${amount} ج`);
-        Swal.close(); ok('تم التحويل'); show('dash');
-    } catch(e) { Swal.close(); bad(e); }
-};
+window.setChatFilter = (f) => { chatFilter = f; show('chats'); };
+window.sendNote=async uid=>{const r=await Swal.fire({title:'إشعار للمستخدم',html:'<input id="x_t" class="swal2-input" placeholder="العنوان"><textarea id="x_b" class="swal2-textarea" placeholder="النص"></textarea><label style="display:block;margin-top:8px;font-size:12px;font-weight:700"><input type="checkbox" id="x_p" style="width:auto"> نافذة منبثقة</label>',showCancelButton:true,confirmButtonText:'إرسال',cancelButtonText:'إلغاء',preConfirm:()=>{const t=$('x_t').value.trim(),b=$('x_b').value.trim();if(!t||!b){Swal.showValidationMessage('مطلوب');return false}return {t,b,p:$('x_p').checked}}});if(!r.isConfirmed)return;await set(push(R('notifications/'+uid)),{title:r.value.t.slice(0,100),body:r.value.b.slice(0,500),type:'info',popup:r.value.p,read:false,createdAt:Date.now()});await log('إشعار',uid);ok('تم')};
 
 window.deleteChat = async (cid, buyerId, sellerId) => { if(!await ask('حذف الدردشة نهائياً؟')) return; try { Swal.fire({title:'جاري الحذف...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); await remove(R('chats/' + cid)); if(buyerId) await remove(R(`user_chats/${buyerId}/${cid}`)); if(sellerId && sellerId !== 'admin_support') await remove(R(`user_chats/${sellerId}/${cid}`)); Swal.close(); ok('تم'); show('chats'); } catch(e) { Swal.close(); bad(e); } };
 
@@ -1030,12 +651,15 @@ async function show(v){
 window.go=(v)=>{ pageState[v]=1; show(v); };
 window.out=()=>signOut(auth);
 
-window.autoCloseIdleChats = async () => { if(!await ask('سيتم إغلاق كل الدردشات التي مر عليها أكثر من 24 ساعة دون تحديث. هل أنت متأكد؟')) return; try { Swal.fire({title:'جاري إغلاق الدردشات الخاملة...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); const chatsSnap = await get(R('chats')); const chats = chatsSnap.val() || {}; let closedCount = 0; const updates = {}; const dayAgo = Date.now() - 86400000; Object.entries(chats).forEach(([cid, c]) => { if (c.status !== 'closed' && (c.updatedAt || 0) < dayAgo) { updates[`chats/${cid}/status`] = 'closed'; closedCount++; } }); if(closedCount > 0) { await update(ref(db), updates); ok(`تم إغلاق ${closedCount} دردشة خاملة بنجاح.`); } else { Swal.close(); Swal.fire({icon:'info', title:'لا يوجد دردشات خاملة', text:'كل الدردشات حديثة ونشطة.'}); } show('chats'); } catch(e) { Swal.close(); bad(e); } };
+window.autoCloseIdleChats = async () => { if(!await ask('سيتم إغلاق كل الدردشات التي مر عليها أكثر من 24 ساعة دون تحديث. متأكد؟')) return; try { Swal.fire({title:'جاري إغلاق الدردشات...', didOpen:()=>Swal.showLoading()}); const chatsSnap = await get(R('chats')); const chats = chatsSnap.val() || {}; let closedCount = 0; const updates = {}; const dayAgo = Date.now() - 86400000; Object.entries(chats).forEach(([cid, c]) => { if (c.status !== 'closed' && (c.updatedAt || 0) < dayAgo) { updates[`chats/${cid}/status`] = 'closed'; closedCount++; } }); if(closedCount > 0) { await update(ref(db), updates); ok(`تم إغلاق ${closedCount} دردشة خاملة.`); } else { Swal.close(); Swal.fire({icon:'info', title:'لا يوجد دردشات خاملة', text:'كل الدردشات حديثة ونشطة.'}); } show('chats'); } catch(e) { Swal.close(); bad(e); } };
 
-window.banDevice = async (uid) => { if (!uid) return; try { const u = (await get(R('users/'+uid))).val() || {}; if(!u.deviceInfo) return bad(new Error('لا توجد بيانات جهاز لهذا المستخدم')); if(!await ask('سيتم حظر جميع الحسابات التي تستخدم نفس الجهاز/المتصفح. متأكد؟')) return; Swal.fire({title:'جاري الحظر الشامل...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); const usersSnap = await get(R('users')); const users = usersSnap.val() || {}; let count = 0; const updates = {}; Object.entries(users).forEach(([id, user]) => { if(user.deviceInfo === u.deviceInfo) { updates[`users/${id}/suspended`] = true; updates[`users/${id}/banReason`] = 'حظر الجهاز (تلاعب)'; updates[`users/${id}/banUntil`] = null; count++; } }); await update(ref(db), updates); Swal.close(); await log('حظر جهاز', `تم حظر ${count} حسابات مرتبطة بنفس الجهاز`); ok(`تم حظر ${count} حسابات بنجاح`); } catch(e) { Swal.close(); bad(e); } };
+window.banDevice = async (uid) => { if (!uid) return; try { const u = (await get(R('users/'+uid))).val() || {}; if(!u.deviceInfo) return bad(new Error('لا توجد بيانات جهاز لهذا المستخدم')); if(!await ask('سيتم حظر جميع الحسابات التي تستخدم نفس الجهاز/المتصفح. متأكد؟')) return; Swal.fire({title:'جاري الحظر الشامل...', didOpen:()=>Swal.showLoading()}); const usersSnap = await get(R('users')); const users = usersSnap.val() || {}; let count = 0; const updates = {}; Object.entries(users).forEach(([id, user]) => { if(user.deviceInfo === u.deviceInfo) { updates[`users/${id}/suspended`] = true; updates[`users/${id}/banReason`] = 'حظر الجهاز (تلاعب)'; updates[`users/${id}/banUntil`] = null; count++; } }); await update(ref(db), updates); Swal.close(); await log('حظر جهاز', `تم حظر ${count} حسابات مرتبطة بنفس الجهاز`); ok(`تم حظر ${count} حسابات بنجاح`); } catch(e) { Swal.close(); bad(e); } };
 
 window.adminAddStrike = async (uid) => { if (!uid) return; try { const u = (await get(R('users/'+uid))).val() || {}; const currentStrikes = (u.strikes || 0) + 1; const why = await reason('سبب إعطاء التحذير'); await update(R('users/'+uid), { strikes: currentStrikes }); await log('إعطاء تحذير', `${uid} - التحذير رقم ${currentStrikes} - السبب: ${why}`); await notify(uid, 'تحذير إداري', `لقد تلقيت تحذيراً (${currentStrikes}/3). السبب: ${why}`); if(currentStrikes >= 3) { await update(R('users/'+uid), { suspended: true, banReason: 'تجاوز 3 تحذيرات' }); await notify(uid, 'تم حظر حسابك', 'نظراً لتجاوزك 3 تحذيرات، تم حظر حسابك.'); ok('تم إعطاء التحذير وتم الحظر التلقائي لتجاوز 3 تحذيرات!'); } else { ok(`تم إعطاء التحذير (${currentStrikes}/3)`); } show(view); } catch(e) { bad(e); } };
 
+// =========================================
+// Admin Chat & Dispute Resolution
+// =========================================
 function adminChat(cid){
   clearLive();H={};hc=0;let c={}, currentUserData = null;
   window._chatCtx = { cid: cid, uid: null, postId: null };
@@ -1062,6 +686,7 @@ function adminChat(cid){
                   <button class="btn btn-success" style="width:100%; font-size:11px; justify-content:flex-start;" onclick="window.adminResolveDispute('${cid}', 'release')"><i class="fa-solid fa-check"></i> تحرير المبلغ للبائع (إنهاء النزاع)</button>
                   <button class="btn btn-danger" style="width:100%; font-size:11px; justify-content:flex-start;" onclick="window.adminResolveDispute('${cid}', 'refund')"><i class="fa-solid fa-rotate-left"></i> استرداد المبلغ للمشتري (إلغاء الصفقة)</button>
                   <button class="btn btn-info" style="width:100%; font-size:11px; justify-content:flex-start;" onclick="window.sendDealInfoToChat('${cid}')"><i class="fa-solid fa-file-invoice"></i> إرفاق بطاقة تفاصيل الصفقة</button>
+                  <button class="btn btn-warning" style="width:100%; font-size:11px; justify-content:flex-start;" onclick="window.requestEvidence('${cid}')"><i class="fa-solid fa-camera"></i> طلب أدلة وإثباتات</button>
               </div>
           </div>
 
@@ -1106,7 +731,7 @@ function adminChat(cid){
           </div>
           
           <div class="internal-notes" id="notes-container" style="display:none;">
-              <b style="font-size:11px; color:var(--warn-tx); display:block; margin-bottom:5px;"><i class="fa-solid fa-pen-nib"></i> ملاحظات داخلية</b>
+              <b style="font-size:11px; color:var(--warn-tx); display:block; margin-bottom:5px;"><i class="fa-solid fa-pen-nib"></i> ملاحظات النزاع الداخلية (سرية)</b>
               <textarea id="admin-note-input" style="font-size:11px; height:60px; margin-bottom:5px; padding:6px;" placeholder="اكتب ملاحظة..."></textarea>
               <button class="btn btn-warning" style="width:100%; font-size:10px; min-height:28px;" onclick="window.saveAdminNote(window._chatCtx.uid)">حفظ</button>
           </div>
@@ -1166,12 +791,12 @@ function adminChat(cid){
         $('buyer-tools').style.display = 'block';
         $('seller-tools').style.display = 'block';
         $('support-tools').style.display = 'none';
-        $('notes-container').style.display = 'none';
+        $('notes-container').style.display = 'block';
     } else {
         $('dispute-admin-tools').style.display = 'none';
         $('buyer-tools').style.display = 'none';
         $('seller-tools').style.display = 'none';
-        $('support-tools').style.display = 'grid'; // استخدم grid لأن action-grid يعتمد عليها
+        $('support-tools').style.display = 'grid';
         $('notes-container').style.display = 'block';
         window._chatCtx.uid = c.buyerId !== 'admin_support' ? c.buyerId : c.sellerId;
     }
@@ -1232,88 +857,83 @@ function adminChat(cid){
         if(m.type === 'image' && m.imageUrl) { const isMe = m.senderId === me.uid; return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}" style="padding:3px"><img src="${m.imageUrl}" style="max-height:180px;border-radius:10px;display:block;cursor:pointer" onclick="zoom(this.src)"><span class="msg-time">${time}</span></div></div>`; }
         else if(m.type === 'transaction') { return `<div class="msg-system"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:280px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span>${statusBadge(m.status)}</div></div></div>`; }
         else if(m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
-        else if(m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble" style="white-space:pre-line;text-align:right;direction:rtl;"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
+        else if(m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
         const isMe = m.senderId === me.uid;
         return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}">${E(m.text)}<span class="msg-time">${time}</span></div></div>`;
     }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-4);font-size:12px">لا توجد رسائل</div>';
     $('ms').scrollTop=1e9;
   }));
 }
+
+window.adminResolveDispute = async (cid, action) => {
+    const chat = (await get(R('chats/' + cid))).val();
+    if (!chat || !chat.dealId) return bad(new Error('لم يتم العثور على الصفقة'));
+    const deal = (await get(R('deals/' + chat.dealId))).val();
     
-    const displayName = c.buyerId === 'admin_support' ? c.sellerName : c.buyerName;
-    $('chat-title').innerHTML = displayName + (c.buyerId !== 'admin_support' && c.sellerId !== 'admin_support' ? ' ↔ ' + c.sellerName : '') + ' <i class="fa-solid fa-circle-info" style="font-size:10px;color:var(--text-4)"></i>';
-    $('chat-avatar-wrap').textContent = (displayName || '?').charAt(0);
-    const statusEl = $('chat-status');
-    if(c.status === 'closed') { statusEl.innerHTML = '<span class="status-dot closed"></span><span>مغلقة</span>'; }
-    else if(c.frozen) { statusEl.innerHTML = '<span class="status-dot frozen"></span><span>مجمدة</span>'; }
-    else { statusEl.innerHTML = '<span class="status-dot"></span><span>نشطة</span>'; }
-    
-    const assignBtn = $('assign-btn');
-    if (c.assignedTo === me.email) {
-        assignBtn.innerHTML = `<span class="badge badge-purple" style="font-size:9px;"><i class="fa-solid fa-check"></i> مسند لك</span>`;
-    } else if (c.assignedTo) {
-        assignBtn.innerHTML = `<span class="badge badge-neutral" style="font-size:9px;"><i class="fa-solid fa-user-tie"></i> ${E(c.assignedTo.split('@')[0])}</span>`;
-    } else {
-        const kAssign = 'h'+(hc++); H[kAssign] = async () => {
-            await update(R('chats/'+cid), {assignedTo: me.email});
-            ok('تم التعيين لك');
-        };
-        assignBtn.innerHTML = `<button class="btn btn-ghost" style="padding:4px 8px;font-size:10px;min-height:24px" onclick="A('${kAssign}')"><i class="fa-solid fa-hand"></i> تعيين لي</button>`;
+    if (action === 'release') {
+        if (!await ask('تأكيد تحرير المبلغ للبائع وإنهاء النزاع؟')) return;
+        Swal.fire({title:'جاري المعالجة...', didOpen:()=>Swal.showLoading()});
+        try {
+            const com = Math.round(deal.amount * (Number(S.commission) || 0) / 100);
+            const sellerPayout = deal.amount - com;
+            await credit(deal.sellerId, sellerPayout);
+            const updates = {};
+            updates[`deals/${chat.dealId}/status`] = 'completed';
+            updates[`refund_queue/${chat.dealId}/status`] = 'rejected';
+            updates[`chats/${cid}/frozen`] = false;
+            updates[`chats/${cid}/dealStatus`] = 'completed';
+            await update(ref(db), updates);
+            await set(push(R(`chats/${cid}/messages`)), {senderId: me.uid, type: 'admin', text: `✅ قرار الإدارة: تم رفض النزاع وتحرير مبلغ ${sellerPayout} ج لصالح البائع.`, createdAt: Date.now()});
+            await notify(deal.sellerId, 'تم حل النزاع لصالحك', `تم إيداع ${sellerPayout} ج في محفظتك.`);
+            await notify(deal.buyerId, 'تم رفض النزاع', 'تم تحويل المبلغ للبائع.');
+            Swal.close(); ok('تم تحرير المبلغ'); show('chats');
+        } catch(e) { Swal.close(); bad(e); }
+    } 
+    else if (action === 'refund') {
+        if (!await ask('تأكيد استرداد المبلغ للمشتري وإلغاء الصفقة؟')) return;
+        Swal.fire({title:'جاري المعالجة...', didOpen:()=>Swal.showLoading()});
+        try {
+            await credit(deal.buyerId, deal.amount);
+            const updates = {};
+            updates[`deals/${chat.dealId}/status`] = 'refunded';
+            updates[`refund_queue/${chat.dealId}/status`] = 'approved';
+            updates[`chats/${cid}/frozen`] = false;
+            updates[`chats/${cid}/dealStatus`] = 'refunded';
+            await update(ref(db), updates);
+            await set(push(R(`chats/${cid}/messages`)), {senderId: me.uid, type: 'admin', text: `⚠️ قرار الإدارة: تم قبول النزاع واسترداد مبلغ ${deal.amount} ج لصالح المشتري.`, createdAt: Date.now()});
+            await notify(deal.buyerId, 'تم قبول النزاع', `تم إرجاع ${deal.amount} ج إلى محفظتك.`);
+            await notify(deal.sellerId, 'تم استرداد المبلغ للمشتري', 'تم إلغاء الصفقة.');
+            Swal.close(); ok('تم الاسترداد'); show('chats');
+        } catch(e) { Swal.close(); bad(e); }
     }
-
-    const kFreeze='h'+(hc++);H[kFreeze]=async()=>{await update(R('chats/'+cid),{frozen:!c.frozen});await log(c.frozen?'رفع تجميد':'تجميد',cid)};
-    $('fz').innerHTML=`<button class="icon-btn" style="width:30px;height:30px;${c.frozen?'background:var(--info-bg);color:var(--info-tx);border-color:var(--info-bd)':'background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn-bd)'}" onclick="event.stopPropagation(); A('${kFreeze}')" title="${c.frozen?'إلغاء':'تجميد'}"><i class="fa-solid fa-${c.frozen?'lock-open':'snowflake'}" style="font-size:10px"></i></button>`;
-    const kClose='h'+(hc++);H[kClose]=async()=>{if(!await ask('إغلاق؟'))return;await update(R('chats/'+cid),{status:'closed'});await log('إغلاق',cid);ok('تم');show('chats')};
-    if(c.status !== 'closed') { $('cl').innerHTML=`<button class="icon-btn" style="width:30px;height:30px;background:var(--danger-bg);color:var(--danger-tx);border-color:var(--danger-bd)" onclick="event.stopPropagation(); A('${kClose}')" title="إغلاق"><i class="fa-solid fa-xmark" style="font-size:11px"></i></button>`; }
-    else { $('cl').innerHTML=''; $('mi').disabled = true; $('mb').disabled = true; $('mb').style.opacity=0.5; }
-    
-    if(c.dealId && typeof c.dealId === 'string' && c.dealId.trim() !== '') {
-        const dp = $('dp');
-        live.push(onValue(R('deals/'+c.dealId),x=>{ const d = x.val(); if(!d) return; const steps = ['held','delivered','completed']; const idx = steps.indexOf(d.status); dp.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${d.amount} ج</b>${statusBadge(d.status)}</div><div class="deal-steps"><div class="deal-step"><div class="deal-step-circle done"><i class="fa-solid fa-check"></i></div><span class="deal-step-label done">الدفع</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=1?'done':''}"><i class="fa-solid fa-box"></i></div><span class="deal-step-label ${idx>=1?'done':''}">التسليم</span></div><div class="deal-step"><div class="deal-step-circle ${idx>=2?'done':''}"><i class="fa-solid fa-flag-checkered"></i></div><span class="deal-step-label ${idx>=2?'done':''}">الاكتمال</span></div></div></div>`; }));
-    } else { $('dp').innerHTML = ''; }
-  }));
-  live.push(onValue(query(R(`chats/${cid}/messages`),limitToLast(200)),s=>{
-    const a=Object.values(s.val()||{}).sort((x,y)=>x.createdAt-y.createdAt);
-    $('ms').innerHTML=a.map(m=>{
-        const time = new Date(m.createdAt).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-        if(m.type === 'image' && m.imageUrl) { const isMe = m.senderId === me.uid; return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}" style="padding:3px"><img src="${m.imageUrl}" style="max-height:180px;border-radius:10px;display:block;cursor:pointer" onclick="zoom(this.src)"><span class="msg-time">${time}</span></div></div>`; }
-        else if(m.type === 'transaction') { return `<div class="msg-system"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:280px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span>${statusBadge(m.status)}</div></div></div>`; }
-        else if(m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
-        else if(m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble" style="white-space:pre-line;text-align:right;direction:rtl;"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
-        const isMe = m.senderId === me.uid;
-        return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}">${E(m.text)}<span class="msg-time">${time}</span></div></div>`;
-    }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-4);font-size:12px">لا توجد رسائل</div>';
-    $('ms').scrollTop=1e9;
-  }));
-}
-
-window.saveAdminNote = async (uid) => { if (!uid) return; const note = $('admin-note-input').value.trim().slice(0, 300); try { await update(R('users/' + uid), { adminNote: note }); ok('تم حفظ الملاحظة بنجاح'); } catch(e) { bad(e); } };
-window.sendQuickNote = async (uid) => { if (!uid) return; const { value: text } = await Swal.fire({ title: 'إرسال إشعار سريع', input: 'textarea', inputPlaceholder: 'اكتب نص الإشعار الذي سيصل للمستخدم في جواله...', showCancelButton: true, confirmButtonText: 'إرسال', cancelButtonText: 'إلغاء' }); if (!text) return; try { await set(push(R('notifications/' + uid)), { title: 'إشعار من الإدارة', body: text.slice(0, 200), type: 'info', popup: true, read: false, createdAt: Date.now() }); ok('تم إرسال الإشعار للمستخدم'); } catch(e) { bad(e); } };
-window.sendUserInfoCard = async () => { const uid = window._chatCtx.uid; const cid = window._chatCtx.cid; if (!uid || uid === 'undefined') return bad(new Error('لم يتم التعرف على المستخدم بعد. انتظر ثانية.')); try { Swal.fire({title:'جاري جلب البيانات...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); const u = (await get(R('users/'+uid))).val(); Swal.close(); if(!u) return bad(new Error('المستخدم غير موجود')); const infoText = `📋 بطاقة المستخدم\n--------------------\nالاسم: ${u.name||'غير معروف'}\nالإيميل: ${u.email||'لا يوجد'}\nالرصيد: ${u.balance||0} ج\nالحالة: ${u.suspended ? 'محظور 🚫' : 'نشط ✅'}\nUID: ${uid}`; await set(push(R(`chats/${cid}/messages`)), { senderId: me.uid, type: 'admin', text: infoText, createdAt: Date.now(), read: false }); await update(R('chats/'+cid), {lastMessage: '📋 بطاقة المستخدم', updatedAt: Date.now(), adminRead: true}); ok('تم إرسال البطاقة'); } catch(e) { Swal.close(); bad(e); } };
-window.openUserTransactions = async (uid, cid) => { try { Swal.fire({title:'جاري جلب المعاملات...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); const [depsSnap, wdsSnap, dealsSnap, userSnap] = await Promise.all([get(R('deposits')), get(R('withdrawals')), get(R('deals')), get(R('users/'+uid))]); const user = userSnap.val() || {}; const deps = Object.entries(depsSnap.val()||{}).filter(([id,d]) => d.userId === uid).map(([id,d])=>({id, ...d, type:'dep'})).sort((a,b)=>b.createdAt-a.createdAt); const wds = Object.entries(wdsSnap.val()||{}).filter(([id,w]) => w.userId === uid).map(([id,w])=>({id, ...w, type:'wd'})).sort((a,b)=>b.createdAt-a.createdAt); const deals = Object.entries(dealsSnap.val()||{}).filter(([id,d]) => d.buyerId === uid || d.sellerId === uid).map(([id,d])=>({id, ...d, type:'deal'})).sort((a,b)=>b.createdAt-a.createdAt); const allTxs = [...deps, ...wds, ...deals].sort((a,b) => b.createdAt - a.createdAt); let rows = allTxs.map(tx => { let typeLabel = '', color = ''; if(tx.type === 'dep') { typeLabel = 'شحن'; color = 'var(--success-tx)'; } if(tx.type === 'wd') { typeLabel = 'سحب'; color = 'var(--danger-tx)'; } if(tx.type === 'deal') { typeLabel = 'صفقة'; color = 'var(--info-tx)'; } const editBtn = (tx.type === 'dep' || tx.type === 'wd') ? `<span style="font-size:9px;color:var(--text-4)">من قسم ${tx.type==='dep'?'الشحن':'السحب'}</span>` : `<button class="btn btn-ghost" style="padding:4px 8px;font-size:10px;min-height:26px" onclick="editTransaction('${tx.type}','${tx.id}',${tx.amount},'${tx.status}','${uid}','${cid}')">تعديل</button>`; return `<tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;text-align:center;"><input type="checkbox" class="tx-cb" value="${tx.type}_${tx.id}" style="width:18px;height:18px;margin:0;cursor:pointer;"></td><td style="padding:8px;font-size:12px;font-weight:800;color:${color};">${typeLabel}</td><td style="padding:8px;font-size:12px;font-weight:900;color:var(--text);">${tx.amount} ج</td><td style="padding:8px;">${statusBadge(tx.status)}</td><td style="padding:8px;font-size:10px;color:var(--text-3);">${new Date(tx.createdAt).toLocaleDateString('ar-EG')}</td><td style="padding:8px;text-align:left;">${editBtn}</td></tr>`; }).join(''); if(allTxs.length === 0) rows = `<tr><td colspan="6" style="padding:20px;text-align:center;font-size:12px;color:var(--text-4);">لا توجد معاملات لهذا المستخدم</td></tr>`; const html = `<div style="text-align:right;direction:rtl;font-family:'Cairo',sans-serif;"><div style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:800;color:var(--text-2);">المستخدم: <b>${E(user.name||'غير معروف')}</b></span><span style="font-size:11px;font-weight:800;color:var(--success-tx);background:var(--success-bg);padding:4px 8px;border-radius:6px;">الرصيد الحالي: ${user.balance||0} ج</span></div><div style="max-height:350px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;"><table style="width:100%;border-collapse:collapse;"><thead style="background:var(--surface-2);position:sticky;top:0;z-index:10;"><tr><th style="padding:8px;font-size:10px;color:var(--text-3);text-align:center;">تحديد</th><th style="padding:8px;font-size:10px;color:var(--text-3);">النوع</th><th style="padding:8px;font-size:10px;color:var(--text-3);">المبلغ</th><th style="padding:8px;font-size:10px;color:var(--text-3);">الحالة</th><th style="padding:8px;font-size:10px;color:var(--text-3);">التاريخ</th><th style="padding:8px;font-size:10px;color:var(--text-3);">إجراء</th></tr></thead><tbody>${rows}</tbody></table></div></div>`; Swal.fire({ title: 'سجل المعاملات', html: html, width: '95%', showCancelButton: true, confirmButtonText: 'إرفاق المحدد', cancelButtonText: 'إغلاق', preConfirm: () => { const selected = Array.from(document.querySelectorAll('.tx-cb:checked')).map(cb => cb.value); if(selected.length === 0) { Swal.showValidationMessage('الرجاء تحديد معاملة واحدة على الأقل'); return false; } return selected; } }).then(async (result) => { if(result.isConfirmed && result.value) { Swal.fire({title:'جاري الإرفاق...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); for(const sel of result.value) { const [type, txId] = sel.split('_'); let amount, status, txTypeLabel; if(type === 'dep') { const d = deps.find(x=>x.id===txId); amount=d.amount; status=d.status; txTypeLabel='شحن رصيد'; } if(type === 'wd') { const w = wds.find(x=>x.id===txId); amount=w.amount; status=w.status; txTypeLabel='سحب'; } if(type === 'deal') { const d = deals.find(x=>x.id===txId); amount=d.amount; status=d.status; txTypeLabel='صفقة'; } await set(push(R(`chats/${cid}/messages`)), { senderId: me.uid, type: 'transaction', txType: txTypeLabel, txId, amount, status, text: '🧾', createdAt: Date.now(), read: false }); } await update(R('chats/'+cid), {lastMessage: '🧾 سجل معاملات', updatedAt: Date.now()}); Swal.close(); ok('تم إرفاق المعاملات بنجاح'); } }); } catch(e) { Swal.close(); bad(e); } };
-window.editTransaction = async (type, id, currentAmount, currentStatus, uid, cid) => { if (type === 'dep' || type === 'wd') { return Swal.fire({ icon: 'info', title: 'غير مسموح', html: 'يجب تعديل طلبات الشحن/السحب من قسم <b>الشحن</b> أو <b>السحب</b> لضمان تحديث رصيد المستخدم تلقائيًا.', confirmButtonText: 'حسنًا' }); } const { value: newStatus } = await Swal.fire({ title: 'تعديل حالة الصفقة', input: 'select', inputOptions: { held: 'محجوزة', delivered: 'مسلّمة', completed: 'مكتملة', disputed: 'نزاع', refunded: 'مستردة', cancelled: 'ملغاة' }, inputValue: currentStatus, showCancelButton: true, confirmButtonText: 'حفظ', cancelButtonText: 'إلغاء' }); if (!newStatus) return; try { await update(R('deals/' + id), { status: newStatus }); await log('تعديل صفقة', `${id}: ${currentStatus} ➔ ${newStatus}`); ok('تم'); setTimeout(() => window.openUserTransactions(uid, cid), 400); } catch(e) { bad(e); } };
-window.adminToggleBan = async (uid) => { if (!uid || uid === 'admin_support') return; try { const u = (await get(R('users/'+uid))).val() || {}; if(u.suspended) { await update(R('users/'+uid), {suspended:false, banReason:null, banUntil:null}); return ok('تم رفع الحظر'); } const {value: duration} = await Swal.fire({ title: 'حظر', text: 'المدة', input: 'select', inputOptions: {'1': 'يوم','7': '7 أيام','30': '30 يوماً','permanent': 'دائم'}, inputPlaceholder: 'اختر', showCancelButton: true, confirmButtonText: 'التالي', cancelButtonText: 'إلغاء' }); if(!duration) return; const r = await reason('السبب (سيظهر للمستخدم)'); let banUntil = null; if(duration !== 'permanent') banUntil = Date.now() + (parseInt(duration) * 86400000); await update(R('users/'+uid), { suspended: true, banReason: r, banUntil, bannedAt: Date.now() }); await log('حظر مستخدم', `${uid} - ${duration} - ${r}`); ok(`تم الحظر ${duration === 'permanent' ? 'الدائم' : 'لمدة '+duration+' يوم'}`); } catch(e) { bad(e); } };
-window.adminAdjustBalance = async (uid) => { 
-    if (!uid || uid === 'admin_support') return; 
-    try { 
-        const userSnap = await get(R('users/'+uid));
-        const currentBalance = Number(userSnap.val().balance) || 0;
-        const {value: opType} = await Swal.fire({ title: 'نوع العملية', html: `<p style="margin-bottom:10px; font-size:14px; font-weight:bold;">الرصيد الحالي للمستخدم: <span style="color:green;">${currentBalance} ج</span></p>`, input: 'select', inputOptions: { 'add': 'إضافة رصيد (+)', 'deduct': 'خصم رصيد (-)' }, showCancelButton: true, confirmButtonText: 'متابعة', cancelButtonText: 'إلغاء' });
-        if (!opType) return;
-        const r = await Swal.fire({ title: opType === 'add' ? 'المبلغ المراد إضافته' : 'المبلغ المراد خصمه', input:'number', inputAttributes: { min: 1, max: opType === 'deduct' ? currentBalance : 10000000 }, showCancelButton:true, confirmButtonText:'متابعة', cancelButtonText:'إلغاء' });
-        if(!r.isConfirmed || !r.value) return;
-        let n = Math.abs(Math.round(+r.value));
-        if(!n || n <= 0) throw new Error('مبلغ غير صالح');
-        if (opType === 'deduct') n = -n;
-        if ((currentBalance + n) < 0) { throw new Error(`لا يمكن الخصم. الرصيد الحالي ${currentBalance} ج فقط.`); }
-        const why = await reason('سبب التعديل');
-        await confirmPIN('تعديل رصيد '+n);
-        await credit(uid, n);
-        await log('تعديل رصيد',`${uid}: ${n} (${why})`);
-        await notify(uid,'تعديل رصيد',`${n>0?'+':''}${n} ج — ${why}`);
-        ok('تم');
-    } catch(e) { bad(e); } 
 };
+
+window.sendDealInfoToChat = async (cid) => {
+    try {
+        const chat = (await get(R('chats/' + cid))).val();
+        const deal = (await get(R('deals/' + chat.dealId))).val();
+        const post = (await get(R('posts/' + deal.postId))).val();
+        const infoText = `🧾 تفاصيل الصفقة المتنازع عليها\n--------------------\nرقم الصفقة: #${deal.id ? deal.id.slice(0,8) : chat.dealId.slice(0,8)}\nاللعبة: ${post ? post.game : 'غير معروف'}\nالمبلغ: ${deal.amount} ج\nالمشتري: ${chat.buyerName}\nالبائع: ${chat.sellerName}\nحالة الدفع: تم الحجز`;
+        await set(push(R(`chats/${cid}/messages`)), { senderId: me.uid, type: 'admin', text: infoText, createdAt: Date.now(), read: false });
+        await update(R('chats/'+cid), {lastMessage: '🧾 تفاصيل الصفقة', updatedAt: Date.now(), adminRead: true});
+        ok('تم إرفاق التفاصيل');
+    } catch(e) { bad(e); }
+};
+
+window.requestEvidence = async (cid) => {
+    const {value: msg} = await Swal.fire({title:'طلب أدلة', input:'textarea', inputValue:'يرجى من الطرفين إرفاق صور إثبات (لقطات شاشة للمحادثات أو الحساب) لتسهيل حل النزاع.', showCancelButton:true, confirmButtonText:'إرسال'});
+    if(!msg) return;
+    try {
+        await set(push(R(`chats/${cid}/messages`)), { senderId: me.uid, type: 'admin', text: `📸 طلب إثباتات:\n${msg}`, createdAt: Date.now(), read: false });
+        ok('تم إرسال الطلب');
+    } catch(e) { bad(e); }
+};
+
+window.saveAdminNote = async (uid) => { if (!uid) return; const note = $('admin-note-input').value.trim().slice(0, 300); try { await update(R('users/' + uid), { adminNote: note }); ok('تم الحفظ'); } catch(e) { bad(e); } };
+window.sendQuickNote = async (uid) => { if (!uid) return; const { value: text } = await Swal.fire({ title: 'إرسال إشعار سريع', input: 'textarea', inputPlaceholder: 'اكتب نص الإشعار...', showCancelButton: true, confirmButtonText: 'إرسال', cancelButtonText: 'إلغاء' }); if (!text) return; try { await set(push(R('notifications/' + uid)), { title: 'إشعار من الإدارة', body: text.slice(0, 200), type: 'info', popup: true, read: false, createdAt: Date.now() }); ok('تم الإرسال'); } catch(e) { bad(e); } };
+window.sendUserInfoCard = async () => { const uid = window._chatCtx.uid; const cid = window._chatCtx.cid; if (!uid || uid === 'undefined') return bad(new Error('لم يتم التعرف على المستخدم')); try { Swal.fire({title:'جاري جلب البيانات...', didOpen:()=>Swal.showLoading()}); const u = (await get(R('users/'+uid))).val(); Swal.close(); if(!u) return bad(new Error('المستخدم غير موجود')); const infoText = `📋 بطاقة المستخدم\n--------------------\nالاسم: ${u.name||'غير معروف'}\nالإيميل: ${u.email||'لا يوجد'}\nالرصيد: ${u.balance||0} ج\nالحالة: ${u.suspended ? 'محظور 🚫' : 'نشط ✅'}\nUID: ${uid}`; await set(push(R(`chats/${cid}/messages`)), { senderId: me.uid, type: 'admin', text: infoText, createdAt: Date.now(), read: false }); await update(R('chats/'+cid), {lastMessage: '📋 بطاقة المستخدم', updatedAt: Date.now(), adminRead: true}); ok('تم الإرسال'); } catch(e) { Swal.close(); bad(e); } };
+window.adminToggleBan = async (uid) => { if (!uid || uid === 'admin_support') return; try { const u = (await get(R('users/'+uid))).val() || {}; if(u.suspended) { await update(R('users/'+uid), {suspended:false, banReason:null, banUntil:null}); return ok('تم رفع الحظر'); } const {value: duration} = await Swal.fire({ title: 'حظر', text: 'المدة', input: 'select', inputOptions: {'1': 'يوم','7': '7 أيام','30': '30 يوماً','permanent': 'دائم'}, inputPlaceholder: 'اختر', showCancelButton: true, confirmButtonText: 'التالي', cancelButtonText: 'إلغاء' }); if(!duration) return; const r = await reason('السبب (سيظهر للمستخدم)'); let banUntil = null; if(duration !== 'permanent') banUntil = Date.now() + (parseInt(duration) * 86400000); await update(R('users/'+uid), { suspended: true, banReason: r, banUntil, bannedAt: Date.now() }); await log('حظر مستخدم', `${uid} - ${duration} - ${r}`); ok(`تم الحظر`); } catch(e) { bad(e); } };
+window.adminAdjustBalance = async (uid) => { if (!uid || uid === 'admin_support') return; try { const userSnap = await get(R('users/'+uid)); const currentBalance = Number(userSnap.val().balance) || 0; const {value: opType} = await Swal.fire({ title: 'نوع العملية', html: `<p style="margin-bottom:10px; font-size:14px; font-weight:bold;">الرصيد الحالي: <span style="color:green;">${currentBalance} ج</span></p>`, input: 'select', inputOptions: { 'add': 'إضافة رصيد (+)', 'deduct': 'خصم رصيد (-)' }, showCancelButton: true, confirmButtonText: 'متابعة', cancelButtonText: 'إلغاء' }); if (!opType) return; const r = await Swal.fire({ title: opType === 'add' ? 'المبلغ' : 'المبلغ', input:'number', inputAttributes: { min: 1 }, showCancelButton:true, confirmButtonText:'متابعة', cancelButtonText:'إلغاء' }); if(!r.isConfirmed || !r.value) return; let n = Math.abs(Math.round(+r.value)); if(!n || n <= 0) throw new Error('مبلغ غير صالح'); if (opType === 'deduct') n = -n; if ((currentBalance + n) < 0) throw new Error(`الرصيد لا يكفي.`); const why = await reason('سبب التعديل'); await confirmPIN('تعديل رصيد '+n); await credit(uid, n); await log('تعديل رصيد',`${uid}: ${n} (${why})`); await notify(uid,'تعديل رصيد',`${n>0?'+':''}${n} ج — ${why}`); ok('تم'); } catch(e) { bad(e); } };
 
 window.exportTable = (data, headers, name) => downloadExcel(data, headers, name);
 
@@ -1345,84 +965,18 @@ onAuthStateChanged(auth,async u=>{
     if(!adminSnap.exists()){await signOut(auth);return Swal.fire({icon:'error',title:'غير مصرّح',text:'هذا الحساب ليس مشرفاً.'})}
     const adminData = adminSnap.val();
     const validRoles = ['owner', 'accountant', 'support', 'super_admin'];
-    if (!validRoles.includes(adminData.role)) {
-      await signOut(auth);
-      return Swal.fire({icon:'error',title:'صلاحية غير صالحة',text:'دور هذا الحساب غير معروف. راجع المالك.'});
-    }
+    if (!validRoles.includes(adminData.role)) { await signOut(auth); return Swal.fire({icon:'error',title:'صلاحية غير صالحة',text:'دور هذا الحساب غير معروف. راجع المالك.'}); }
     me = { uid: u.uid, email: u.email, role: adminData.role, isOwner: adminData.role === 'owner' };
     $('who').innerHTML = u.email.charAt(0).toUpperCase();
     $('user-email').innerHTML = E(u.email.split('@')[0]);
     const roleLabel = me.isOwner ? 'المالك 👑' : me.role === 'accountant' ? 'محاسب' : me.role === 'support' ? 'دعم فني' : 'مدير عام';
     $('role-badge').innerText = roleLabel;
     onValue(R('settings'),s=>{ S=s.val()||{}; $('maintenance-banner').classList.toggle('hidden', !S.maintenanceMode); });
-    resetIdleTimer(); checkPending(); setupLiveAlerts(); setInterval(checkPending, 60000);
-    setInterval(checkNewChats, 15000);
+    resetIdleTimer(); checkPending(); 
+    setInterval(checkPending, 60000);
     show('dash');
   }catch(e){await signOut(auth);bad(e)}
 });
-  window.adminResolveDispute = async (cid, action) => {
-    const chat = (await get(R('chats/' + cid))).val();
-    if (!chat || !chat.dealId) return bad(new Error('لم يتم العثور على الصفقة'));
-    const deal = (await get(R('deals/' + chat.dealId))).val();
-    
-    if (action === 'release') {
-        if (!await ask('تأكيد تحرير المبلغ للبائع وإنهاء النزاع؟')) return;
-        Swal.fire({title:'جاري المعالجة...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        try {
-            const com = Math.round(deal.amount * (Number(S.commission) || 0) / 100);
-            const sellerPayout = deal.amount - com;
-            
-            // إضافة الرصيد للبائع
-            await credit(deal.sellerId, sellerPayout);
-            
-            const updates = {};
-            updates[`deals/${chat.dealId}/status`] = 'completed';
-            updates[`refund_queue/${chat.dealId}/status`] = 'rejected';
-            updates[`chats/${cid}/frozen`] = false;
-            updates[`chats/${cid}/dealStatus`] = 'completed';
-            await update(ref(db), updates);
-            
-            await set(push(R(`chats/${cid}/messages`)), {senderId: me.uid, type: 'admin', text: `✅ قرار الإدارة: تم رفض النزاع وتحرير مبلغ ${sellerPayout} ج لصالح البائع.`, createdAt: Date.now()});
-            await notify(deal.sellerId, 'تم حل النزاع لصالحك', `تم إيداع ${sellerPayout} ج في محفظتك.`);
-            await notify(deal.buyerId, 'تم رفض النزاع', 'تم تحويل المبلغ للبائع.');
-            Swal.close(); ok('تم تحرير المبلغ بنجاح'); show('chats');
-        } catch(e) { Swal.close(); bad(e); }
-    } 
-    else if (action === 'refund') {
-        if (!await ask('تأكيد استرداد المبلغ للمشتري وإلغاء الصفقة؟')) return;
-        Swal.fire({title:'جاري المعالجة...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        try {
-            // إرجاع الرصيد للمشتري
-            await credit(deal.buyerId, deal.amount);
-            
-            const updates = {};
-            updates[`deals/${chat.dealId}/status`] = 'refunded';
-            updates[`refund_queue/${chat.dealId}/status`] = 'approved';
-            updates[`chats/${cid}/frozen`] = false;
-            updates[`chats/${cid}/dealStatus`] = 'refunded';
-            await update(ref(db), updates);
-            
-            await set(push(R(`chats/${cid}/messages`)), {senderId: me.uid, type: 'admin', text: `⚠️ قرار الإدارة: تم قبول النزاع واسترداد مبلغ ${deal.amount} ج لصالح المشتري.`, createdAt: Date.now()});
-            await notify(deal.buyerId, 'تم قبول النزاع', `تم إرجاع ${deal.amount} ج إلى محفظتك.`);
-            await notify(deal.sellerId, 'تم استرداد المبلغ للمشتري', 'تم إلغاء الصفقة.');
-            Swal.close(); ok('تم الاسترداد بنجاح'); show('chats');
-        } catch(e) { Swal.close(); bad(e); }
-    }
-};
-
-window.sendDealInfoToChat = async (cid) => {
-    try {
-        const chat = (await get(R('chats/' + cid))).val();
-        const deal = (await get(R('deals/' + chat.dealId))).val();
-        const post = (await get(R('posts/' + deal.postId))).val();
-        
-        const infoText = `🧾 تفاصيل الصفقة المتنازع عليها\n--------------------\nرقم الصفقة: #${deal.id ? deal.id.slice(0,8) : chat.dealId.slice(0,8)}\nاللعبة: ${post ? post.game : 'غير معروف'}\nالمبلغ: ${deal.amount} ج\nالمشتري: ${chat.buyerName}\nالبائع: ${chat.sellerName}\nحالة الدفع: تم الحجز`;
-        
-        await set(push(R(`chats/${cid}/messages`)), { senderId: me.uid, type: 'admin', text: infoText, createdAt: Date.now(), read: false });
-        await update(R('chats/'+cid), {lastMessage: '🧾 تفاصيل الصفقة', updatedAt: Date.now(), adminRead: true});
-        ok('تم إرفاق التفاصيل في الشات');
-    } catch(e) { bad(e); }
-};
 window.signInAdmin=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(bad);
 </script>
 </body>
