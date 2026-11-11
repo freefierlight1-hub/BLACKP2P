@@ -1107,7 +1107,7 @@ window.closeChatUser = async cid => {
     const chat = (await get(R('chats/' + cid))).val();
     if (!chat || (chat.buyerId !== me.uid && chat.sellerId !== me.uid)) throw new Error('غير مصرح');
     if (chat.dealId) { const d = (await get(R('deals/' + chat.dealId))).val(); if (!d || !['completed','refunded','cancelled'].includes(d.status)) throw new Error('لا يمكن إغلاق دردشة صفقة جارية'); }
-    await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: 'تم إغلاق الدردشة. تجد سجل الصفقة في "طلباتي".', createdAt: Date.now()});
+    try { await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: 'تم إغلاق الدردشة. تجد سجل الصفقة في "طلباتي".', createdAt: Date.now()}); } catch(_) {}
     await update(ref(db), {[`chats/${cid}/status`]: 'closed', [`chats/${cid}/closedBy`]: me.uid, [`chats/${cid}/closedAt`]: Date.now()});
     ok('تم إغلاق الدردشة');
     go('chats');
