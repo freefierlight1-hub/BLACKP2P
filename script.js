@@ -101,7 +101,7 @@ let refCode = new URLSearchParams(window.location.search).get('ref');
 let feedLimit = 20;
 
 const clearU = () => { U.forEach(f => f()); U = []; };
-const clearGU = () => { GU.forEach(f => f()); GU = []; };
+const CHW = new Map(), CHD = new Map(), CHWsub = new Set(), shownDeal = new Set(); const clearGU = () => { GU.forEach(f => f()); GU = []; CHW.clear(); CHD.clear(); CHWsub.clear(); shownDeal.clear(); };
 
 document.getElementById('theme-toggle')?.addEventListener('click', () => {
     const isDark = document.documentElement.classList.toggle('dark');
@@ -403,6 +403,8 @@ onAuthStateChanged(auth, async u => {
       });
       if (view === 'notes') notes();
     }));
+    
+    GU.push(onValue(R('user_chats/' + u.uid), s => watchChats(Object.keys(s.val() || {})), () => {}));
     
     GU.push(onValue(R('user_verifications/' + u.uid), s => { 
         VS = (s.val() || {}).status || ''; 
@@ -973,7 +975,7 @@ async function chats() {
   $('app').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"><button class="btn btn-primary" onclick="supportChat()" style="padding:12px"><i class="fa-solid fa-headset"></i> الدعم الفني</button><button class="btn btn-ghost" onclick="go('orders')" style="padding:12px"><i class="fa-solid fa-receipt"></i> طلباتي</button></div><div id="cl" style="display:grid;gap:8px"></div>`;
   U.push(onValue(R('user_chats/' + me.uid), async s => {
     const ids = Object.keys(s.val() || {});
-    const cs = (await Promise.all(ids.map(async i => { try { const c = (await get(R('chats/' + i))).val(); if (!c) return null; if (i.startsWith('support_') && c.status === 'closed') return null; return [i, c]; } catch { return null; } }))).filter(x => x && x[1]).sort((a,b) => b[1].updatedAt - a[1].updatedAt);
+    const cs = (await Promise.all(ids.map(async i => { try { const c = (await get(R('chats/' + i))).val(); if (!c) return null; if (c.status === 'closed') return null; return [i, c]; } catch { return null; } }))).filter(x => x && x[1]).sort((a,b) => b[1].updatedAt - a[1].updatedAt);
     if ($('cl')) {
       if (cs.length === 0) { $('cl').innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-4);font-size:12px;font-weight:700">لا توجد محادثات</div>`; } 
       else {
@@ -1081,7 +1083,7 @@ window.openChat = cid => {
     else statusEl.innerHTML = '<span class="status-dot"></span><span>نشطة</span>';
     const t = c.typing || {}; $('ty').textContent = Object.entries(t).some(([u,v]) => u !== me.uid && Date.now() - v < 4000) ? 'يكتب الآن...' : '';
     if (c.dealId && typeof c.dealId === 'string' && c.dealId.trim() !== '' && !d) { U.push(onValue(R('deals/' + c.dealId), x => { d = x.val(); if (d) dealPanel(cid, c, d); })); }
-    const isClosed = c.status === 'closed'; const isFrozen = c.frozen;
+    if (d) dealPanel(cid, c, d); const isClosed = c.status === 'closed'; const isFrozen = c.frozen;
     if (isClosed || isFrozen) { $('mi').disabled = true; $('mb').disabled = true; $('mf').disabled = true; $('mi').placeholder = isClosed ? 'تم إغلاق التذكرة' : 'الدردشة مجمدة'; $('mb').style.opacity = 0.5; } 
     else { $('mi').disabled = false; $('mb').disabled = false; $('mf').disabled = false; $('mi').placeholder = 'اكتب رسالة...'; $('mb').style.opacity = 1; }
   }));
@@ -1097,6 +1099,53 @@ window.openChat = cid => {
     $('ms').scrollTop = 1e9;
   }));
 };
+
+window.closeChatUser = async cid => {
+  if(!requireAuth()) return;
+  try {
+    if (!await ask('إغلاق الدردشة؟ ستختفي من الدردشات وتبقى في "طلباتي".')) return;
+    const chat = (await get(R('chats/' + cid))).val();
+    if (!chat || (chat.buyerId !== me.uid && chat.sellerId !== me.uid)) throw new Error('غير مصرح');
+    if (chat.dealId) { const d = (await get(R('deals/' + chat.dealId))).val(); if (!d || !['completed','refunded','cancelled'].includes(d.status)) throw new Error('لا يمكن إغلاق دردشة صفقة جارية'); }
+    await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: 'تم إغلاق الدردشة. تجد سجل الصفقة في "طلباتي".', createdAt: Date.now()});
+    await update(ref(db), {[`chats/${cid}/status`]: 'closed', [`chats/${cid}/closedBy`]: me.uid, [`chats/${cid}/closedAt`]: Date.now()});
+    ok('تم إغلاق الدردشة');
+    go('chats');
+  } catch(e) { bad(e); }
+};
+
+// مراقبة الدردشات: شارة على تبويب الدردشة + نافذة منبثقة للبائع عند وجود صفقة جارية
+function refreshChatAlerts() {
+  if (!me) return;
+  let n = 0; const pops = [];
+  CHW.forEach((c, cid) => {
+    if (c.status === 'closed' || !c.dealId) return;
+    const st = CHD.get(cid);
+    if (c.sellerId === me.uid && st === 'held') { n++; pops.push([cid, c]); }
+    else if (c.buyerId === me.uid && st === 'delivered') n++;
+  });
+  const b = $('cb'); if (b) { b.textContent = n; b.style.display = n ? 'flex' : 'none'; }
+  pops.forEach(([cid, c]) => {
+    if (shownDeal.has(cid)) return; shownDeal.add(cid);
+    Swal.fire({ icon: 'info', title: 'لديك صفقة جارية', html: `<div style="font-size:13px;line-height:1.8">تم حجز مبلغ صفقة جديدة مع <b>${E(c.buyerName || 'المشتري')}</b>.<br>الدردشة مفتوحة الآن، قم بالتسليم ثم اضغط "تأكيد التسليم".</div>`, confirmButtonText: 'فتح الدردشة', showCancelButton: true, cancelButtonText: 'لاحقاً' }).then(r => { if (r.isConfirmed) openChat(cid); });
+  });
+}
+function watchChats(ids) {
+  ids.forEach(cid => {
+    if (cid.startsWith('support_') || CHWsub.has(cid)) return;
+    CHWsub.add(cid);
+    GU.push(onValue(R('chats/' + cid), s => {
+      const c = s.val();
+      if (!c) { CHW.delete(cid); CHD.delete(cid); refreshChatAlerts(); return; }
+      CHW.set(cid, c);
+      if (c.dealId && typeof c.dealId === 'string' && !CHWsub.has('d_' + cid)) {
+        CHWsub.add('d_' + cid);
+        GU.push(onValue(R('deals/' + c.dealId), x => { const d = x.val(); if (d) CHD.set(cid, d.status); refreshChatAlerts(); }, () => {}));
+      }
+      refreshChatAlerts();
+    }, () => {}));
+  });
+}
 
 function dealPanel(cid, c, d) {
   const el = $('dp'); if (!el || !d) return;
@@ -1120,6 +1169,8 @@ function dealPanel(cid, c, d) {
                  <button class="btn btn-ghost" style="padding:5px 10px;font-size:10px;margin-right:4px" onclick="rate('${d.sellerId}')">تقييم</button>`;
     }
   } else if (d.status === 'refunded') { btns = `<span class="badge badge-danger"><i class="fa-solid fa-rotate-left"></i> مسترد</span>`; }
+  if (['completed','refunded','cancelled'].includes(d.status) && c && c.status !== 'closed') btns += `<button class="btn btn-danger" style="padding:5px 10px;font-size:10px;margin-right:4px" onclick="closeChatUser('${cid}')"><i class="fa-solid fa-xmark"></i> إغلاق الدردشة</button>`;
+  else if (c && c.status === 'closed') btns += `<span class="badge badge-neutral" style="margin-right:4px"><i class="fa-solid fa-lock"></i> مغلقة</span>`;
   const steps = ['held', 'delivered', 'completed']; const idx = steps.indexOf(d.status);
   const step = (label, done, icon) => `<div class="deal-step"><div class="deal-step-circle ${done ? 'done' : ''}"><i class="fa-solid ${icon}"></i></div><span class="deal-step-label ${done ? 'done' : ''}">${label}</span></div>`;
   el.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${d.amount} ج</b><div class="deal-actions">${btns}</div></div><div class="deal-steps">${step('الدفع', true, 'fa-check')}${step('التسليم', idx >= 1, 'fa-box')}${step('الاكتمال', idx >= 2, 'fa-flag-checkered')}</div></div>`;
