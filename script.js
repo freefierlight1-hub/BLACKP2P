@@ -1180,7 +1180,32 @@ window.reveal = async (pid, cid) => {
 };
 
 window.confirmRx = async cid => { if(!requireAuth()) return; try { if (!await ask('هل قمت بضغط زر (عرض البيانات) وتغيير بيانات الحساب لضمان عدم سرقته؟ لا يمكن التراجع بعد التأكيد.')) return; const chat = (await get(R('chats/' + cid))).val(); if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); const d = (await get(R('deals/' + chat.dealId))).val(); if (!d) throw new Error('لم يتم العثور على بيانات الصفقة'); const com = Math.round(d.amount * (Number(S.commission) || 0) / 100); const updates = {}; updates[`deals/${chat.dealId}/status`] = 'completed'; updates[`chats/${cid}/dealStatus`] = 'completed'; updates[`pending_payouts/${chat.dealId}`] = { sellerId: d.sellerId, buyerId: me.uid, amount: d.amount - com, grossAmount: d.amount, commission: com, status: 'pending', createdAt: Date.now() }; await update(ref(db), updates); notify(d.sellerId, 'اكتملت الصفقة', `أُضيف ${d.amount - com} ج لأرباحك المعلقة.`, 'deal'); ok('تم تأكيد الاستلام'); } catch(e) { bad(e); } };
-window.dispute = async cid => { if(!requireAuth()) return; const {value: r} = await Swal.fire({ title:'سبب النزاع / الإبلاغ', input:'textarea', placeholder:'اكتب تفاصيل المشكلة بوضوح...', showCancelButton:true, confirmButtonText:'إرسال للإدارة', cancelButtonText:'إلغاء' }); if (!r) return; try { const chat = (await get(R('chats/' + cid))).val(); if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); const d = (await get(R('deals/' + chat.dealId))).val(); const exist = await get(R('refund_queue/' + chat.dealId)); if (exist.exists() && exist.val().status === 'pending') throw new Error('يوجد نزاع مفتوح بالفعل.'); if (me.uid !== d.buyerId && me.uid !== d.sellerId) throw new Error('غير مصرح'); const updates = {}; updates['refund_queue/' + chat.dealId] = { buyerId: d.buyerId, sellerId: d.sellerId, amount: d.amount, status: 'pending', reason: Security.text(r, 5, 500), createdAt: Date.now(), raisedBy: me.uid, raisedByRole: me.uid === d.buyerId ? 'المشتري' : 'البائع' }; updates[`deals/${chat.dealId}/status`] = 'disputed'; updates[`chats/${cid}/frozen`] = true; updates[`chats/${cid}/dealStatus`] = 'disputed'; await update(ref(db), updates); await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: '⚠️ تم فتح نزاع. يرجى الانتظار.', createdAt: Date.now()}); ok('تم فتح النزاع وسيراجعه الدعم'); } catch(e) { bad(e); } };
+window.dispute = async cid => { 
+    if(!requireAuth()) return; 
+    const {value: r} = await Swal.fire({ title:'سبب النزاع / الإبلاغ', input:'textarea', placeholder:'اكتب تفاصيل المشكلة بوضوح...', showCancelButton:true, confirmButtonText:'إرسال للإدارة', cancelButtonText:'إلغاء' }); 
+    if (!r) return; 
+    try { 
+        const chat = (await get(R('chats/' + cid))).val(); 
+        if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); 
+        const d = (await get(R('deals/' + chat.dealId))).val(); 
+        const exist = await get(R('refund_queue/' + chat.dealId)); 
+        if (exist.exists() && exist.val().status === 'pending') throw new Error('يوجد نزاع مفتوح بالفعل.'); 
+        if (me.uid !== d.buyerId && me.uid !== d.sellerId) throw new Error('غير مصرح'); 
+
+        // 1. إرسال رسالة النظام أولاً (قبل التجميد)
+        await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: '⚠️ تم فتح نزاع. يرجى الانتظار.', createdAt: Date.now()});
+
+        // 2. ثم تحديث حالة النزاع وتجميد الدردشة
+        const updates = {}; 
+        updates['refund_queue/' + chat.dealId] = { buyerId: d.buyerId, sellerId: d.sellerId, amount: d.amount, status: 'pending', reason: Security.text(r, 5, 500), createdAt: Date.now(), raisedBy: me.uid, raisedByRole: me.uid === d.buyerId ? 'المشتري' : 'البائع' }; 
+        updates[`deals/${chat.dealId}/status`] = 'disputed'; 
+        updates[`chats/${cid}/frozen`] = true; 
+        updates[`chats/${cid}/dealStatus`] = 'disputed'; 
+        await update(ref(db), updates); 
+
+        ok('تم فتح النزاع وسيراجعه الدعم'); 
+    } catch(e) { bad(e); } 
+};
 window.rate = async sid => { if(!requireAuth()) return; if (!sid) return bad(new Error('معرف غير صالح')); const {value: v} = await Swal.fire({title:'تقييم البائع', input:'select', inputOptions:{5:'⭐⭐⭐⭐⭐',4:'⭐⭐⭐⭐',3:'⭐⭐⭐',2:'⭐⭐',1:'⭐'}, showCancelButton:true}); if (!v) return; try { await set(R(`ratings/${sid}/${me.uid}`), {rating: +v, createdAt: Date.now()}); ok('شكراً لتقييمك'); } catch(e) { bad(e); } };
 
 async function wallet() {
