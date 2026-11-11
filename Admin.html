@@ -16,96 +16,145 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
 <style>
-:root{ --bg:#f1f3f7; --surface:#ffffff; --surface-2:#f8f9fc; --surface-3:#eef0f5; --border:#e2e5eb; --border-2:#d4d8e0; --text:#0f172a; --text-2:#334155; --text-3:#64748b; --text-4:#94a3b8; --glass-strong:rgba(255,255,255,0.92); --success-bg:rgba(16,185,129,0.12); --success-bd:rgba(16,185,129,0.3); --success-tx:#047857; --success-solid:#059669; --danger-bg:rgba(239,68,68,0.12); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#b91c1c; --danger-solid:#dc2626; --warn-bg:rgba(245,158,11,0.12); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#b45309; --warn-solid:#d97706; --info-bg:rgba(59,130,246,0.12); --info-bd:rgba(59,130,246,0.3); --info-tx:#1d4ed8; --info-solid:#2563eb; --purple-bg:rgba(168,85,247,0.12); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#7e22ce; --purple-solid:#9333ea; --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); --gold-tx:#854d0e; --gold-solid:#ca8a04; --neutral-bg:rgba(148,163,184,0.1); --neutral-bd:rgba(148,163,184,0.25); --neutral-tx:#475569; --shadow:0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04); --shadow-lg:0 4px 12px rgba(15,23,42,0.08); --r-lg:14px; }
-html.dark{ --bg:#0a0a0a; --surface:#17171a; --surface-2:#1f1f23; --surface-3:#27272c; --border:#2a2a30; --border-2:#3a3a42; --text:#fafafa; --text-2:#e4e4e7; --text-3:#a1a1aa; --text-4:#71717a; --glass-strong:rgba(23,23,26,0.95); --success-bg:rgba(16,185,129,0.15); --success-bd:rgba(16,185,129,0.3); --success-tx:#34d399; --success-solid:#10b981; --danger-bg:rgba(239,68,68,0.15); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#f87171; --danger-solid:#ef4444; --warn-bg:rgba(245,158,11,0.15); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#fbbf24; --warn-solid:#f59e0b; --info-bg:rgba(59,130,246,0.15); --info-bd:rgba(59,130,246,0.3); --info-tx:#60a5fa; --info-solid:#3b82f6; --purple-bg:rgba(168,85,247,0.15); --purple-bd:rgba(168,85,247,0.3); --purple-tx:#c084fc; --purple-solid:#a855f7; --gold-bg:rgba(234,179,8,0.15); --gold-bd:rgba(234,179,8,0.4); --gold-tx:#fde047; --gold-solid:#eab308; --neutral-bg:rgba(255,255,255,0.06); --neutral-bd:rgba(255,255,255,0.1); --neutral-tx:#d4d4d8; --shadow:0 1px 3px rgba(0,0,0,0.4); --shadow-lg:0 4px 12px rgba(0,0,0,0.5); }
+/* ===== الألوان الهادئة والشفافة ===== */
+:root{ 
+    --bg:#f4f6f9; --surface:#ffffff; --surface-2:#f8fafc; --surface-3:#f1f5f9; 
+    --border:#e2e8f0; --border-2:#cbd5e1; --text:#0f172a; --text-2:#334155; --text-3:#64748b; --text-4:#94a3b8; 
+    --glass:rgba(255,255,255,0.7); 
+    --success-bg:rgba(16,185,129,0.1); --success-bd:rgba(16,185,129,0.3); --success-tx:#047857; 
+    --danger-bg:rgba(239,68,68,0.1); --danger-bd:rgba(239,68,68,0.3); --danger-tx:#b91c1c; 
+    --warn-bg:rgba(245,158,11,0.1); --warn-bd:rgba(245,158,11,0.3); --warn-tx:#b45309; 
+    --info-bg:rgba(59,130,246,0.1); --info-bd:rgba(59,130,246,0.3); --info-tx:#1d4ed8; 
+    --gold-bg:rgba(234,179,8,0.1); --gold-bd:rgba(234,179,8,0.3); --gold-tx:#854d0e; 
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.05); --shadow:0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
+    --radius:12px;
+}
+html.dark{ 
+    --bg:#0f1115; --surface:#181a20; --surface-2:#1f2228; --surface-3:#262930; 
+    --border:#2d3139; --border-2:#3f4450; --text:#f8fafc; --text-2:#cbd5e1; --text-3:#94a3b8; --text-4:#64748b; 
+    --glass:rgba(24,26,32,0.7);
+    --success-bg:rgba(16,185,129,0.15); --success-tx:#34d399; 
+    --danger-bg:rgba(239,68,68,0.15); --danger-tx:#f87171; 
+    --warn-bg:rgba(245,158,11,0.15); --warn-tx:#fbbf24; 
+    --info-bg:rgba(59,130,246,0.15); --info-tx:#60a5fa; 
+    --gold-bg:rgba(234,179,8,0.15); --gold-tx:#fde047;
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.3); --shadow:0 4px 6px -1px rgba(0,0,0,0.3);
+}
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;overflow-x:hidden;padding-bottom:70px;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-input,textarea,select{font-family:inherit;color:inherit;width:100%;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;font-weight:600;outline:none;margin-bottom:9px}
-input:focus,textarea:focus,select:focus{border-color:var(--text-3);background:var(--surface)}
-#header{position:sticky;top:0;z-index:50;background:var(--glass-strong);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
-.header-inner{max-width:1400px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:56px}
-.brand-mark{width:34px;height:34px;border-radius:10px;background:#18181b;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}html.dark .brand-mark{background:#fafafa;color:#0a0a0a}
+input,textarea,select{font-family:inherit;color:inherit;width:100%;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-weight:600;outline:none;margin-bottom:10px;transition:0.2s}
+input:focus,textarea:focus,select:focus{border-color:var(--info-tx);background:var(--surface);box-shadow:0 0 0 3px var(--info-bg)}
+
+/* Header & Nav */
+#header{position:sticky;top:0;z-index:50;background:var(--glass);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:1400px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:60px}
+.brand-mark{width:36px;height:36px;border-radius:10px;background:var(--text);color:var(--surface);font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;}
 .global-search{flex:1;max-width:400px;position:relative;margin:0 10px;}
-.global-search input{margin:0;padding-right:35px;border-radius:20px;background:var(--surface-3);border:none;font-size:12px;height:36px;}
+.global-search input{margin:0;padding-right:35px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);font-size:12px;height:38px;}
 .global-search i{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px;}
-#tabs{position:sticky;top:56px;z-index:40;background:var(--glass-strong);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+#tabs{position:sticky;top:60px;z-index:40;background:var(--glass);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 #tabs::-webkit-scrollbar{display:none}
-.tabs-inner{max-width:1400px;margin:0 auto;display:flex;gap:2px;padding:6px 10px;min-width:max-content}
-.nav-icon{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;color:var(--text-3);font-size:11.5px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:0.15s}
-.nav-icon.active{background:var(--text);color:#fff;font-weight:900}html.dark .nav-icon.active{background:#fafafa;color:#0a0a0a}
+.tabs-inner{max-width:1400px;margin:0 auto;display:flex;gap:4px;padding:8px 10px;min-width:max-content}
+.nav-icon{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;color:var(--text-3);font-size:12px;font-weight:800;white-space:nowrap;transition:0.2s}
+.nav-icon:hover{background:var(--surface-2)}
+.nav-icon.active{background:var(--text);color:var(--surface);box-shadow:var(--shadow-sm)}
 .nav-icon.logout{color:var(--danger-tx)}
 #v{max-width:1400px;margin:0 auto;padding:16px 14px 40px;min-height:calc(100vh - 110px)}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;margin-bottom:10px;box-shadow:var(--shadow)}
-.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:900;border:1px solid;white-space:nowrap}
-.badge-success{background:var(--success-bg);border-color:var(--success-bd);color:var(--success-tx)}.badge-danger{background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-tx)}.badge-warning{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}.badge-info{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx)}.badge-neutral{background:var(--neutral-bg);border-color:var(--neutral-bd);color:var(--neutral-tx)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 12px;border-radius:9px;font-size:11.5px;font-weight:800;border:1px solid transparent;min-height:34px;flex-shrink:0}
-.btn-primary{background:var(--text);color:#fff}html.dark .btn-primary{background:#fafafa;color:#0a0a0a}
+
+/* UI Elements */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);transition:0.2s}
+.card:hover{border-color:var(--border-2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:900;border:1px solid transparent;min-height:36px;transition:0.2s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:var(--text);color:var(--surface)}
 .btn-ghost{background:var(--surface-2);color:var(--text-2);border-color:var(--border)}
 .btn-success{background:var(--success-bg);color:var(--success-tx);border-color:var(--success-bd)}
 .btn-danger{background:var(--danger-bg);color:var(--danger-tx);border-color:var(--danger-bd)}
 .btn-warning{background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn-bd)}
 .btn-info{background:var(--info-bg);color:var(--info-tx);border-color:var(--info-bd)}
-.btn-gold{background:var(--gold-solid);color:#fff;border-color:var(--gold-solid)}
-.stats-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-bottom:16px}
+.btn-gold{background:var(--gold-bg);color:var(--gold-tx);border-color:var(--gold-bd)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:900;border:1px solid;white-space:nowrap}
+.badge-success{background:var(--success-bg);border-color:var(--success-bd);color:var(--success-tx)}
+.badge-danger{background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-tx)}
+.badge-warning{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}
+.badge-info{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx)}
+.badge-neutral{background:var(--surface-3);border-color:var(--border);color:var(--text-2)}
+.stats-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;margin-bottom:16px}
 @media (max-width:900px){.stats-grid{grid-template-columns:repeat(3, 1fr)}}
 @media (max-width:640px){.stats-grid{grid-template-columns:repeat(2, 1fr);gap:8px}}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);transition:0.15s}
-.stat-card:hover{border-color:var(--border-2);transform:translateY(-1px)}
-.stat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:5px;border:1px solid}
-.sec-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900;color:var(--text);padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow-sm);transition:0.2s}
+.stat-card:hover{border-color:var(--border-2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;border:1px solid}
+.stat-label{font-size:11px;font-weight:800;color:var(--text-3)}
+.stat-value{font-size:22px;font-weight:900;color:var(--text)}
+.sec-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:900;color:var(--text);padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--border)}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (max-width:640px){.grid-2{grid-template-columns:1fr}}
 .skeleton{background:var(--surface-3);border-radius:8px;animation:skeletonPulse 1.2s ease-in-out infinite}@keyframes skeletonPulse{0%,100%{opacity:0.6}50%{opacity:1}}
-.swal2-popup{border-radius:14px!important;font-family:'Cairo',sans-serif!important;padding:18px!important;background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important;max-width:420px!important}
+.swal2-popup{border-radius:16px!important;font-family:'Cairo',sans-serif!important;padding:20px!important;background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important;}
 .swal2-title{font-weight:900!important;font-size:16px!important;color:var(--text)!important}
-.swal2-confirm{background:var(--text)!important;color:#fff!important;border-radius:9px!important;font-weight:800!important;padding:8px 18px!important}
-html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
-.swal2-cancel{background:var(--surface-2)!important;color:var(--text-2)!important;border-radius:9px!important;font-weight:800!important;padding:8px 18px!important}
+.swal2-confirm{background:var(--text)!important;color:var(--surface)!important;border-radius:10px!important;font-weight:900!important;padding:10px 20px!important}
+.swal2-cancel{background:var(--surface-2)!important;color:var(--text-2)!important;border-radius:10px!important;font-weight:900!important;padding:10px 20px!important}
+
 /* Chat Styles */
-.chat-shell{display:flex;flex-direction:column;height:calc(100dvh - 120px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;max-width:900px;margin:0 auto}
-.chat-header{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);flex-shrink:0}
-.chat-avatar{width:36px;height:36px;border-radius:10px;background:#18181b;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.chat-info{flex:1;min-width:0}.chat-name{font-size:13px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.status-dot{width:6px;height:6px;border-radius:50%;background:var(--success-solid);flex-shrink:0}.status-dot.closed{background:var(--danger-solid)}.status-dot.frozen{background:var(--info-solid)}
-.deal-panel{background:var(--surface-2);border-bottom:1px solid var(--border);padding:10px 12px;flex-shrink:0}
-.deal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px}
-.deal-amount{font-size:15px;font-weight:900;color:var(--success-tx)}
-.deal-steps{display:flex;align-items:center;gap:4px}.deal-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.deal-step-circle{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;border:2px solid var(--border-2);background:var(--surface);color:var(--text-4)}
-.deal-step-circle.done{background:var(--success-solid);border-color:var(--success-solid);color:#fff}
-.deal-step-label{font-size:9px;font-weight:800;color:var(--text-4)}.deal-step-label.done{color:var(--success-tx)}
-.chat-messages{flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--surface-2)}
+.chat-shell{display:flex;flex-direction:column;height:calc(100dvh - 130px);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;max-width:900px;margin:0 auto;box-shadow:var(--shadow)}
+.chat-header{display:flex;align-items:center;gap:10px;padding:12px;background:var(--surface-2);border-bottom:1px solid var(--border);flex-shrink:0}
+.chat-avatar{width:40px;height:40px;border-radius:12px;background:var(--text);color:var(--surface);font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-info{flex:1;min-width:0}
+.chat-name{font-size:14px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-status{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--text-3);margin-top:2px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--success-tx);flex-shrink:0}.status-dot.closed{background:var(--danger-tx)}.status-dot.frozen{background:var(--warn-tx)}
+.deal-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:12px;flex-shrink:0;box-shadow:0 4px 6px -6px rgba(0,0,0,0.1);z-index:10}
+.deal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.deal-amount{font-size:18px;font-weight:900;color:var(--success-tx)}
+.deal-steps{display:flex;align-items:center;gap:6px}.deal-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.deal-step-circle{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid var(--border-2);background:var(--surface);color:var(--text-4)}
+.deal-step-circle.done{background:var(--success-tx);border-color:var(--success-tx);color:#fff}
+.deal-step-label{font-size:10px;font-weight:800;color:var(--text-4)}.deal-step-label.done{color:var(--success-tx)}
+.chat-messages{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--surface-3)}
 .msg-row{display:flex;max-width:100%}.msg-row.me{justify-content:flex-start}.msg-row.other{justify-content:flex-end}
-.msg-bubble{max-width:78%;padding:8px 11px;border-radius:13px;font-size:12.5px;font-weight:600;line-height:1.5;word-break:break-word}
-.msg-bubble.me{background:var(--text);color:#fff;border-bottom-right-radius:4px}html.dark .msg-bubble.me{background:#fafafa;color:#0a0a0a}
+.msg-bubble{max-width:80%;padding:10px 14px;border-radius:16px;font-size:13px;font-weight:600;line-height:1.5;word-break:break-word;box-shadow:var(--shadow-sm)}
+.msg-bubble.me{background:var(--text);color:var(--surface);border-bottom-right-radius:4px}
 .msg-bubble.other{background:var(--surface);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px}
-.msg-time{font-size:9px;font-weight:700;opacity:0.55;margin-top:3px;display:block}
-.msg-system{display:flex;justify-content:center;margin:4px 0}.msg-system-bubble{background:var(--neutral-bg);border:1px solid var(--neutral-bd);padding:4px 11px;border-radius:11px;font-size:10.5px;font-weight:800;color:var(--text-3)}
-.msg-admin{display:flex;justify-content:center;margin:4px 0}.msg-admin-bubble{background:var(--info-bg);border:1px solid var(--info-bd);padding:5px 13px;border-radius:12px;font-size:11.5px;font-weight:900;color:var(--info-tx);white-space:pre-line;text-align:right;}
-.chat-input-bar{display:flex;align-items:center;gap:5px;padding:9px 10px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
-.chat-input-bar input{margin:0;flex:1;background:var(--surface-2);min-height:38px}
-/* Side Panel */
-.side-panel { position: fixed; top: 0; right: -340px; width: 320px; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 1000; transition: right 0.3s; box-shadow: -4px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+.msg-time{font-size:9px;font-weight:800;opacity:0.6;margin-top:4px;display:block}
+.msg-system{display:flex;justify-content:center;margin:6px 0}.msg-system-bubble{background:var(--surface-2);border:1px solid var(--border);padding:6px 14px;border-radius:12px;font-size:11px;font-weight:800;color:var(--text-3)}
+.msg-admin{display:flex;justify-content:center;margin:6px 0}.msg-admin-bubble{background:var(--info-bg);border:1px solid var(--info-bd);padding:8px 16px;border-radius:12px;font-size:12px;font-weight:900;color:var(--info-tx);white-space:pre-line;text-align:right;box-shadow:var(--shadow-sm)}
+.chat-input-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+.chat-input-bar input{margin:0;flex:1;background:var(--surface-2);min-height:42px;border-radius:20px;padding:0 16px}
+.chat-input-bar .icon-btn{width:40px;height:40px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:0.2s}
+.chat-input-bar .icon-btn:hover{background:var(--surface-3);color:var(--text)}
+
+/* Side Panel (Dispute / Support Tools) */
+.side-panel { position: fixed; top: 0; right: -360px; width: 340px; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 1000; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
 .side-panel.open { right: 0; }
-.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; opacity: 0; pointer-events: none; transition: 0.3s; }
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter:blur(2px); z-index: 999; opacity: 0; pointer-events: none; transition: 0.3s; }
 .panel-overlay.open { opacity: 1; pointer-events: auto; }
-.panel-header { padding: 20px; text-align: center; border-bottom: 1px solid var(--border); background: var(--surface-2); }
-.panel-body { flex: 1; overflow-y: auto; padding: 15px; }
+.panel-header { padding: 24px 20px; text-align: center; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+.panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+.tools-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 16px; }
+.tools-title { font-size: 12px; font-weight: 900; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
 .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 8px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); font-size: 11px; font-weight: 800; color: var(--text-2); cursor: pointer; transition: 0.2s; }
-.action-btn:hover { background: var(--surface-3); transform: translateY(-1px); }
-.action-btn i { font-size: 16px; }
+.action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 12px 8px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); font-size: 11px; font-weight: 800; color: var(--text-2); cursor: pointer; transition: 0.2s; box-shadow: var(--shadow-sm); }
+.action-btn:hover { border-color: var(--border-2); transform: translateY(-2px); box-shadow: var(--shadow); }
+.action-btn i { font-size: 18px; }
 .action-btn.danger { color: var(--danger-tx); background: var(--danger-bg); border-color: var(--danger-bd); }
 .action-btn.warning { color: var(--warn-tx); background: var(--warn-bg); border-color: var(--warn-bd); }
 .action-btn.success { color: var(--success-tx); background: var(--success-bg); border-color: var(--success-bd); }
 .action-btn.info { color: var(--info-tx); background: var(--info-bg); border-color: var(--info-bd); }
-.internal-notes { margin-top: 15px; background: var(--warn-bg); border: 1px solid var(--warn-bd); border-radius: 10px; padding: 10px; }
+.internal-notes { background: var(--gold-bg); border: 1px solid var(--gold-bd); border-radius: 12px; padding: 12px; margin-top:16px; }
+
 /* Bulk Bar */
-.bulk-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--text); color: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; transform: translateY(100%); transition: transform 0.3s ease; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
+.bulk-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--text); color: var(--surface); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -4px 15px rgba(0,0,0,0.2); border-top-left-radius: 16px; border-top-right-radius: 16px;}
 .bulk-bar.show { transform: translateY(0); }
 .bulk-count { font-size: 14px; font-weight: 900; }
 .bulk-actions { display: flex; gap: 8px; }
-.bulk-btn { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; }
-.bulk-btn.danger { background: var(--danger-solid); }
+.bulk-btn { background: rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition:0.2s;}
+.bulk-btn:hover{background: rgba(255,255,255,0.25);}
+.bulk-btn.danger { background: var(--danger-tx); }
+
 /* Scrollbars */
 .hide-scroll::-webkit-scrollbar{display:none}.hide-scroll{scrollbar-width:none}
 </style>
@@ -116,36 +165,36 @@ html.dark .swal2-confirm{background:#fafafa!important;color:#0a0a0a!important}
 
 <header id="header">
   <div class="header-inner">
-    <div class="brand" style="display:flex; align-items:center; gap:8px;">
+    <div class="brand" style="display:flex; align-items:center; gap:10px;">
       <div class="brand-mark">B</div>
       <div class="brand-text hidden sm:block">
-        <div class="brand-title" style="font-size:12px; font-weight:900;">لوحة التحكم</div>
-        <div class="brand-sub" style="font-size:9px; color:var(--text-3);">BLACKP2P</div>
+        <div class="brand-title" style="font-size:14px; font-weight:900;">لوحة التحكم</div>
+        <div class="brand-sub" style="font-size:10px; color:var(--text-3); font-weight:700;">BLACKP2P</div>
       </div>
     </div>
     
     <!-- Global Search -->
     <div class="global-search">
         <i class="fa-solid fa-search"></i>
-        <input id="global-search-input" placeholder="بحث عن مستخدم، إعلان (Enter)..." onkeydown="if(event.key==='Enter') window.globalSearch(this.value)">
+        <input id="global-search-input" placeholder="بحث عن مستخدم (بالإيميل أو ID)، إعلان..." onkeydown="if(event.key==='Enter') window.globalSearch(this.value)">
     </div>
 
-    <div class="header-actions" style="display:flex; align-items:center; gap:6px;">
-      <button class="icon-btn" onclick="go('note')" style="width:32px;height:32px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);"><i class="fa-solid fa-bell"></i><b id="notif-badge" class="hidden" style="position:absolute;top:-4px;left:-4px;background:var(--danger-solid);color:#fff;font-size:9px;border-radius:50%;padding:2px 5px;">0</b></button>
-      <button class="icon-btn" id="theme-toggle" style="width:32px;height:32px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);"><i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline"></i></button>
-      <div class="user-chip" style="display:flex; align-items:center; gap:6px; padding:3px 8px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px;">
+    <div class="header-actions" style="display:flex; align-items:center; gap:8px;">
+      <button class="icon-btn" onclick="go('note')" style="width:36px;height:36px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;position:relative;"><i class="fa-solid fa-bell"></i><b id="notif-badge" class="hidden" style="position:absolute;top:-5px;left:-5px;background:var(--danger-tx);color:#fff;font-size:9px;font-weight:900;border-radius:10px;padding:2px 6px;border:2px solid var(--surface);">0</b></button>
+      <button class="icon-btn" id="theme-toggle" style="width:36px;height:36px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline"></i></button>
+      <div class="user-chip" style="display:flex; align-items:center; gap:8px; padding:4px 10px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px;">
         <div class="user-meta hidden sm:flex" style="flex-direction:column; text-align:right;">
-          <div class="user-name" id="user-email" style="font-size:10px; font-weight:800;">—</div>
-          <div class="user-role" id="role-badge" style="font-size:8px; color:var(--text-3);">—</div>
+          <div class="user-name" id="user-email" style="font-size:11px; font-weight:900;">—</div>
+          <div class="user-role" id="role-badge" style="font-size:9px; color:var(--text-3); font-weight:700;">—</div>
         </div>
-        <div id="who" class="user-avatar" style="width:28px;height:28px;border-radius:8px;background:#18181b;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;">?</div>
+        <div id="who" class="user-avatar" style="width:30px;height:30px;border-radius:8px;background:var(--text);color:var(--surface);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;">?</div>
       </div>
     </div>
   </div>
 </header>
 
-<div id="maintenance-banner" class="hidden" style="background:var(--warn-bg);color:var(--warn-tx);padding:8px;text-align:center;font-size:11px;font-weight:900;">
-  <i class="fa-solid fa-triangle-exclamation"></i> وضع الصيانة مفعّل
+<div id="maintenance-banner" class="hidden" style="background:var(--warn-bg);border-bottom:1px solid var(--warn-bd);color:var(--warn-tx);padding:10px;text-align:center;font-size:12px;font-weight:900;">
+  <i class="fa-solid fa-triangle-exclamation"></i> وضع الصيانة مفعّل (الموقع مغلق للمستخدمين)
 </div>
 
 <nav id="tabs"><div class="tabs-inner" id="tabs-inner"></div></nav>
@@ -169,13 +218,13 @@ const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const imgs=a=>Object.values(a||{}).filter(x=>typeof x === 'string' && (x.startsWith('http') || x.startsWith('data:image/')));
 const ok=t=>Swal.fire({icon:'success',title:t,timer:1400,showConfirmButton:false});
 const bad=e=>e&&e.message==='CANCEL'?0:Swal.fire({icon:'error',title:'تعذر التنفيذ',text:e.message||String(e)});
-const ask=t=>Swal.fire({icon:'question',title:t,showCancelButton:true,confirmButtonText:'تأكيد',cancelButtonText:'إلغاء'}).then(r=>r.isConfirmed);
+const ask=t=>Swal.fire({icon:'question',title:t,showCancelButton:true,confirmButtonText:'نعم، متأكد',cancelButtonText:'إلغاء',customClass:{confirmButton:'btn-success',cancelButton:'btn-ghost'}}).then(r=>r.isConfirmed);
 const ago=t=>new Date(t).toLocaleString('ar-EG',{dateStyle:'short',timeStyle:'short'});
 const timeAgo=t=>{const d=(Date.now()-t)/1000;if(d<60)return 'الآن';if(d<3600)return Math.floor(d/60)+'د';if(d<86400)return Math.floor(d/3600)+'س';return Math.floor(d/86400)+'ي'};
 
 let me=null,view='dash',H={},hc=0,live=[],S={},pageState={},adminIP='—',sysHealth={fb:false,cf:false};
 let selectedPosts = new Set(), selectedUsers = new Set();
-let chatFilter = 'all'; // all, open, frozen, closed
+let chatFilter = 'all'; 
 
 try { fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>adminIP=d.ip).catch(()=>{}); } catch(e) {}
 
@@ -220,7 +269,7 @@ window.A=k=>H[k]();
 window.zoom=u=>Swal.fire({imageUrl: u, imageWidth: '100%', showConfirmButton: false, showCloseButton: true, background: '#0a0a0a'});
 const card=h=>`<div class="card">${h}</div>`;
 const empty=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--text-4)"><i class="fa-regular fa-folder-open" style="font-size:32px;margin-bottom:12px;opacity:0.5"></i><p style="font-size:12px;font-weight:700">لا توجد بيانات</p></div>`;
-const thumbs=a=>`<div style="display:flex;gap:6px;overflow-x:auto;margin:8px 0;padding-bottom:4px" class="hide-scroll">${a.map(s=>`<img src="${s}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--border);flex-shrink:0" onclick="zoom(this.src)">`).join('')}</div>`;
+const thumbs=a=>`<div style="display:flex;gap:8px;overflow-x:auto;margin:10px 0;padding-bottom:4px" class="hide-scroll">${a.map(s=>`<img src="${s}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--border);flex-shrink:0" onclick="zoom(this.src)">`).join('')}</div>`;
 const NM={};const uname=async u=>NM[u]||(NM[u]=await get(R('users/'+u+'/name')).then(x=>x.val()||u).catch(()=>u));
 const claim=async(path,from,to)=>{const r=await runTransaction(R(path+'/status'),v=>v===from||v===null?to:undefined);if(!r.committed)throw new Error('تمت المعالجة مسبقاً')};
 const credit=(uid,n)=>runTransaction(R(`users/${uid}/balance`),v=>{const numV = Number(v) || 0; const x = numV + n; return x >= 0 ? x : undefined;}).then(r=>{if(!r.committed)throw new Error('الرصيد لا يكفي')});
@@ -237,7 +286,7 @@ const fetchLogs = async (limit = 50) => {
 
 const op=(label,fn,cls='btn-ghost')=>{const k='h'+(hc++);H[k]=async()=>{try{await fn()}catch(e){bad(e)}};return `<button class="btn ${cls}" onclick="A('${k}')">${label}</button>`};
 const reason=async t=>{const r=await Swal.fire({title:t,input:'text',inputPlaceholder:'اكتب السبب',showCancelButton:true,confirmButtonText:'متابعة',cancelButtonText:'إلغاء'});if(!r.isConfirmed)throw new Error('CANCEL');return (r.value||'غير محدد').slice(0,200)};
-const ulink=(id,n)=>`<a style="font-weight:800;color:var(--text);cursor:pointer;text-decoration:underline" onclick="userInfo('${id}')">${E(n||id)}</a>`;
+const ulink=(id,n)=>`<a style="font-weight:900;color:var(--info-tx);cursor:pointer;text-decoration:none;background:var(--info-bg);padding:2px 6px;border-radius:4px;" onclick="userInfo('${id}')">${E(n||id)}</a>`;
 const F={},fl=()=>F[view]||{},st=(d='all')=>fl().st||d,q=()=>(fl().q||'').toLowerCase(),hit=(o,ks)=>!q()||ks.map(k=>o[k]).join(' ').toLowerCase().includes(q());
 window.setF=(k,v)=>{F[view]=F[view]||{};F[view][k]=v;pageState[view]=1;show(view)};
 const moreBtn=(view,total,limit)=>total>limit?`<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="loadMoreData('${view}')"><i class="fa-solid fa-chevron-down"></i> جلب المزيد</button>`:'';
@@ -249,7 +298,7 @@ const statusBadge = (status) => {
   return `<span class="badge ${cfg.cls}"><i class="fa-solid ${cfg.icon}"></i>${cfg.label}</span>`;
 };
 
-const bar=(statuses, showDate=true)=>{ const dFrom = fl().dFrom || '', dTo = fl().dTo || ''; return `<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"><div style="display:flex;flex-wrap:wrap;gap:8px"><select onchange="setF('st',this.value)" style="width:auto;min-width:110px;margin:0;flex:0 0 auto">${statuses.map(([v,l],i)=>`<option value="${v}" ${(fl().st?fl().st===v:i===0)?'selected':''}>${l}</option>`).join('')}</select><div style="position:relative;flex:1;min-width:150px"><i class="fa-solid fa-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px;pointer-events:none"></i><input placeholder="بحث..." value="${E(fl().q||'')}" onchange="setF('q',this.value)" style="margin:0;padding-right:34px"></div></div>${showDate ? `<div style="display:flex;gap:6px;align-items:center;font-size:11px"><span style="color:var(--text-3);font-weight:800;white-space:nowrap">من:</span><input type="date" value="${dFrom}" onchange="setF('dFrom',this.value)" style="margin:0;padding:6px 8px;font-size:11px"><span style="color:var(--text-3);font-weight:800;white-space:nowrap">إلى:</span><input type="date" value="${dTo}" onchange="setF('dTo',this.value)" style="margin:0;padding:6px 8px;font-size:11px"></div>` : ''}</div>` };
+const bar=(statuses, showDate=true)=>{ const dFrom = fl().dFrom || '', dTo = fl().dTo || ''; return `<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"><div style="display:flex;flex-wrap:wrap;gap:10px"><select onchange="setF('st',this.value)" style="width:auto;min-width:120px;margin:0;flex:0 0 auto">${statuses.map(([v,l],i)=>`<option value="${v}" ${(fl().st?fl().st===v:i===0)?'selected':''}>${l}</option>`).join('')}</select><div style="position:relative;flex:1;min-width:150px"><i class="fa-solid fa-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px;pointer-events:none"></i><input placeholder="بحث..." value="${E(fl().q||'')}" onchange="setF('q',this.value)" style="margin:0;padding-right:34px"></div></div>${showDate ? `<div style="display:flex;gap:8px;align-items:center;font-size:11px"><span style="color:var(--text-3);font-weight:900;white-space:nowrap">من:</span><input type="date" value="${dFrom}" onchange="setF('dFrom',this.value)" style="margin:0;padding:8px;font-size:11px"><span style="color:var(--text-3);font-weight:900;white-space:nowrap">إلى:</span><input type="date" value="${dTo}" onchange="setF('dTo',this.value)" style="margin:0;padding:8px;font-size:11px"></div>` : ''}</div>` };
 const filterByDate = (arr) => { let res = arr; const dFrom = fl().dFrom, dTo = fl().dTo; if (dFrom) res = res.filter(x => x.createdAt >= new Date(dFrom).getTime()); if (dTo) { const to = new Date(dTo); to.setHours(23,59,59,999); res = res.filter(x => x.createdAt <= to.getTime()); } return res; };
 const copy=t=>navigator.clipboard.writeText(t).then(()=>ok('تم النسخ'));
 const dev=ua=>{ua=ua||'';const os=(/Android[ \d.]*/.exec(ua)||/iPhone|iPad/.exec(ua)||/Windows[^;)]*/.exec(ua)||/Mac OS X[^;)]*/.exec(ua)||[])[0]||'—',m=(/;\s*([^;)]+)\sBuild/.exec(ua)||[])[1],b=(/(Edg|Firefox|Chrome|Safari)\//.exec(ua)||[])[1];return [os,m,b].filter(Boolean).join(' · ')||'—'};
@@ -289,14 +338,15 @@ window.globalSearch = async (val) => {
     if(!val || val.length < 3) return bad(new Error('أدخل 3 أحرف على الأقل للبحث'));
     Swal.fire({title:'جاري البحث...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
     try {
+        // Search by Email
         const usersSnap = await get(query(R('users'), orderByChild('email'), equalTo(val)));
         if(usersSnap.exists()) { Swal.close(); const uid = Object.keys(usersSnap.val())[0]; return userInfo(uid); }
         
-        // Fallback search by ID if email not found
+        // Search by User ID
         const userSnap = await get(R('users/'+val));
         if(userSnap.exists()) { Swal.close(); return userInfo(val); }
 
-        // Search posts
+        // Search by Post ID
         const postsSnap = await get(R('posts/'+val));
         if(postsSnap.exists()) { Swal.close(); return postInfo(val); }
 
@@ -304,82 +354,120 @@ window.globalSearch = async (val) => {
     } catch(e) { Swal.close(); bad(e); }
 };
 
+// Feature 3: Post Info (Fixed)
+window.postInfo = async id => {
+    try {
+        const p = (await get(R('posts/' + id))).val();
+        if (!p) return bad(new Error('هذا الإعلان غير موجود أو تم حذفه.'));
+        Swal.fire({
+            title: E(p.game),
+            width: '95%', showCloseButton: true, showConfirmButton: false, padding: '16px',
+            html: `<div style="text-align:right" dir="rtl">
+                ${thumbs(imgs(p.photos))}
+                <p style="margin:12px 0;color:var(--text-2);font-weight:600;font-size:13px;line-height:1.6;background:var(--surface-2);padding:10px;border-radius:8px;">${E(p.desc)}</p>
+                <div class="grid-2" style="margin-bottom:12px;">
+                    <div class="info-cell" style="background:var(--surface-2);padding:10px;border-radius:8px;border:1px solid var(--border)"><span style="font-size:10px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px;">السيرفر</span><b style="font-size:13px;color:var(--text)">${E(p.server)}</b></div>
+                    <div class="info-cell" style="background:var(--surface-2);padding:10px;border-radius:8px;border:1px solid var(--border)"><span style="font-size:10px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px;">الربط</span><b style="font-size:13px;color:var(--text)">${E(p.linkType)}</b></div>
+                    <div class="info-cell" style="background:var(--success-bg);padding:10px;border-radius:8px;border:1px solid var(--success-bd)"><span style="font-size:10px;color:var(--success-tx);font-weight:800;display:block;margin-bottom:4px;">السعر</span><b style="font-size:15px;color:var(--success-tx)">${p.price} ج</b></div>
+                    <div class="info-cell" style="background:var(--surface-2);padding:10px;border-radius:8px;border:1px solid var(--border)"><span style="font-size:10px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px;">الحالة</span>${statusBadge(p.status)}</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-2); padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
+                    <span style="font-size:11px; color:var(--text-3); font-weight:800;">البائع:</span>
+                    <span style="font-size:12px; font-weight:900; color:var(--text)">${ulink(p.sellerId, p.sellerName)}</span>
+                </div>
+                <div style="display:flex; gap:8px;">${op('عرض بيانات الحساب (فك التشفير)',()=>viewPrivateInfo(id),'btn-warning')}</div>
+            </div>`
+        });
+    } catch(e) { bad(e); }
+};
+
+// Feature 1: Full User Info with Timeline and Risk
 window.userInfo=async uid=>{try{
   Swal.fire({title:'جارٍ التحميل...',didOpen:()=>Swal.showLoading(),showConfirmButton:false});
   const g=async p=>(await get(R(p))).val();
   const [u,vf,rt,ps,deals,deps,wds]=await Promise.all([g('users/'+uid),g('user_verifications/'+uid),g('ratings/'+uid),get(query(R('posts'),orderByChild('sellerId'),equalTo(uid))).then(x=>Object.entries(x.val()||{}).map(([id,p])=>({id,...p}))),fetchList('deals',100),fetchList('deposits',100),fetchList('withdrawals',100)]);
   if(!u)throw new Error('المستخدم غير موجود');
-  const md=deals.filter(d=>d.buyerId===uid||d.sellerId===uid),mp=deps.filter(d=>d.userId===uid),mw=wds.filter(d=>d.userId===uid),rs=Object.values(rt||{}).map(o=>o.rating),sum=(a,s)=>a.filter(x=>x.status===s).reduce((n,x)=>n+x.amount,0);
+  
+  const md=deals.filter(d=>d.buyerId===uid||d.sellerId===uid);
+  const mp=deps.filter(d=>d.userId===uid);
+  const mw=wds.filter(d=>d.userId===uid);
+  const rs=Object.values(rt||{}).map(o=>o.rating);
+  const sum=(a,s)=>a.filter(x=>x.status===s).reduce((n,x)=>n+x.amount,0);
   const avg = rs.length ? (rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1) : '—';
   
   const isPro = u.isPro && (u.proUntil||0) > Date.now();
   const lvl = isPro ? {n:'بائع ذهبي', c:'var(--gold-tx)', b:'var(--gold-bg)', i:'fa-crown'} : (u.completedDeals>=50 ? {n:'خبير', c:'var(--warn-tx)', b:'var(--warn-bg)', i:'fa-star'} : (u.completedDeals>=10 ? {n:'محترف', c:'var(--info-tx)', b:'var(--info-bg)', i:'fa-medal'} : {n:'مبتدئ', c:'var(--text-3)', b:'var(--surface-2)', i:'fa-seedling'}));
   
-  // Feature 7: Timeline Tab
-  const recentDealsHtml = md.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5).map(d=>`<div style="padding:6px; border-bottom:1px solid var(--border); font-size:11px;"><span style="color:var(--text-4)">${timeAgo(d.createdAt)}</span> - صفقة <b>${d.amount} ج</b> ${statusBadge(d.status)}</div>`).join('') || '<p style="font-size:11px;color:var(--text-4)">لا يوجد</p>';
-  const recentDepsHtml = mp.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5).map(d=>`<div style="padding:6px; border-bottom:1px solid var(--border); font-size:11px;"><span style="color:var(--text-4)">${timeAgo(d.createdAt)}</span> - شحن <b>${d.amount} ج</b> ${statusBadge(d.status)}</div>`).join('') || '<p style="font-size:11px;color:var(--text-4)">لا يوجد</p>';
+  const riskLevel = (u.strikes && u.strikes >= 2) || md.filter(d=>d.status==='disputed').length > 3 ? {n:'عالي الخطورة', c:'var(--danger-tx)', b:'var(--danger-bg)'} : {n:'آمن', c:'var(--success-tx)', b:'var(--success-bg)'};
 
-  const avatarHtml = `<div style="width:50px;height:50px;border-radius:12px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:18px;overflow:hidden;flex-shrink:0">${u.photo ? `<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">` : E(u.name?.charAt(0)||'?')}</div>`;
+  const avatarHtml = `<div style="width:56px;height:56px;border-radius:14px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:900;font-size:22px;overflow:hidden;flex-shrink:0;border:1px solid var(--border)">${u.photo ? `<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">` : E(u.name?.charAt(0)||'?')}</div>`;
   
   const overviewTab = `
-  <div style="display:flex;flex-direction:column;gap:10px;">
-      <div style="display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+  <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
           ${avatarHtml}
-          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-                  <b style="font-size:13px;font-weight:900;color:var(--text)">${E(u.name||'غير معروف')}</b>
-                  ${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:11px"></i>':''}
-                  ${u.suspended?'<span class="badge badge-danger" style="font-size:8px;padding:1px 4px">محظور</span>':''}
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                  <b style="font-size:15px;font-weight:900;color:var(--text)">${E(u.name||'غير معروف')}</b>
+                  ${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-tx);font-size:12px"></i>':''}
+                  ${u.suspended?'<span class="badge badge-danger" style="padding:2px 6px;font-size:9px">محظور</span>':''}
+                  <span class="badge" style="background:${riskLevel.b}; color:${riskLevel.c}; border-color:${riskLevel.c}; font-size:9px;"><i class="fa-solid fa-shield"></i> ${riskLevel.n}</span>
               </div>
-              <p style="font-size:10.5px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p>
-              <p style="font-size:8.5px;color:var(--text-4);" dir="ltr">${E(uid)}</p>
-              <span class="badge" style="background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c}; width:fit-content; font-size:8px; padding:1px 5px; margin-top:2px;"><i class="fa-solid ${lvl.i}"></i> ${lvl.n}</span>
+              <p style="font-size:12px;color:var(--text-3);font-weight:700;direction:ltr;text-align:right;cursor:pointer;" onclick="navigator.clipboard.writeText('${E(u.email)}')">${E(u.email||'لا يوجد إيميل')} <i class="fa-regular fa-copy"></i></p>
+              <p style="font-size:10px;color:var(--text-4);direction:ltr;text-align:right;cursor:pointer;" onclick="navigator.clipboard.writeText('${uid}')">UID: ${E(uid)} <i class="fa-regular fa-copy"></i></p>
+              <span class="badge" style="background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c}; width:fit-content; font-size:9px; margin-top:2px;"><i class="fa-solid ${lvl.i}"></i> ${lvl.n}</span>
           </div>
       </div>
-      <div class="info-grid">
-          <div class="info-cell"><span class="info-label">الرصيد</span><span class="info-value" style="color:var(--success-tx)">${u.balance||0} ج</span></div>
-          <div class="info-cell"><span class="info-label">التقييم</span><span class="info-value" style="color:var(--warn-tx)">${avg!=='—'?'⭐ '+avg:'—'}</span></div>
-          <div class="info-cell" style="grid-column:1/-1"><span class="info-label">الجهاز (Device Info)</span><span class="info-value" style="font-size:10px;font-weight:700">${E(dev(u.deviceInfo))}</span></div>
-          ${u.banReason?`<div class="info-cell" style="grid-column:1/-1;background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">سبب الحظر</span><span class="info-value" style="color:var(--danger-tx);font-size:10px">${E(u.banReason)}</span></div>`:''}
+      <div class="grid-2">
+          <div style="background:var(--success-bg);padding:10px;border-radius:8px;border:1px solid var(--success-bd)"><span style="font-size:10px;color:var(--success-tx);font-weight:800;display:block;margin-bottom:4px;">الرصيد الحالي</span><span style="font-size:16px;color:var(--success-tx);font-weight:900;">${u.balance||0} ج</span></div>
+          <div style="background:var(--warn-bg);padding:10px;border-radius:8px;border:1px solid var(--warn-bd)"><span style="font-size:10px;color:var(--warn-tx);font-weight:800;display:block;margin-bottom:4px;">التقييم العام</span><span style="font-size:16px;color:var(--warn-tx);font-weight:900;">${avg!=='—'?'⭐ '+avg:'—'}</span></div>
+          <div style="background:var(--surface-2);padding:10px;border-radius:8px;border:1px solid var(--border);grid-column:1/-1"><span style="font-size:10px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px;">الجهاز المستخدم</span><span style="font-size:11px;color:var(--text-2);font-weight:700;direction:ltr;text-align:right;">${E(dev(u.deviceInfo))}</span></div>
+          ${u.banReason?`<div style="background:var(--danger-bg);padding:10px;border-radius:8px;border:1px solid var(--danger-bd);grid-column:1/-1"><span style="font-size:10px;color:var(--danger-tx);font-weight:800;display:block;margin-bottom:4px;">سبب الحظر</span><span style="font-size:11px;color:var(--danger-tx);font-weight:700;">${E(u.banReason)}</span></div>`:''}
       </div>
   </div>`;
 
   const timelineTab = `
-  <div style="margin-bottom:10px;">
-      <b style="font-size:12px; display:block; margin-bottom:6px; color:var(--info-tx)"><i class="fa-solid fa-handshake"></i> آخر الصفقات:</b>
-      <div style="background:var(--surface-2); border-radius:8px; padding:4px;">${recentDealsHtml}</div>
+  <div style="margin-bottom:12px;">
+      <b style="font-size:13px; display:block; margin-bottom:8px; color:var(--info-tx); border-bottom:1px solid var(--border); padding-bottom:6px;"><i class="fa-solid fa-handshake"></i> آخر 5 صفقات</b>
+      <div style="background:var(--surface-2); border-radius:10px; padding:8px; border:1px solid var(--border);">
+      ${md.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5).map(d=>`<div style="padding:6px 0; border-bottom:1px solid var(--border); font-size:11px; display:flex; justify-content:space-between;"><span style="color:var(--text-3); font-weight:700">${timeAgo(d.createdAt)}</span> <span>صفقة <b>${d.amount} ج</b></span> ${statusBadge(d.status)}</div>`).join('') || '<p style="font-size:11px;color:var(--text-4);text-align:center;">لا يوجد صفقات</p>'}
+      </div>
   </div>
   <div>
-      <b style="font-size:12px; display:block; margin-bottom:6px; color:var(--success-tx)"><i class="fa-solid fa-wallet"></i> آخر عمليات الشحن:</b>
-      <div style="background:var(--surface-2); border-radius:8px; padding:4px;">${recentDepsHtml}</div>
+      <b style="font-size:13px; display:block; margin-bottom:8px; color:var(--success-tx); border-bottom:1px solid var(--border); padding-bottom:6px;"><i class="fa-solid fa-wallet"></i> آخر عمليات الشحن</b>
+      <div style="background:var(--surface-2); border-radius:10px; padding:8px; border:1px solid var(--border);">
+      ${mp.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5).map(d=>`<div style="padding:6px 0; border-bottom:1px solid var(--border); font-size:11px; display:flex; justify-content:space-between;"><span style="color:var(--text-3); font-weight:700">${timeAgo(d.createdAt)}</span> <span>شحن <b>${d.amount} ج</b></span> ${statusBadge(d.status)}</div>`).join('') || '<p style="font-size:11px;color:var(--text-4);text-align:center;">لا يوجد شحن</p>'}
+      </div>
   </div>`;
 
   const financialTab = `
-  <div class="info-grid">
-      <div class="info-cell" style="background:var(--success-bg);border-color:var(--success-bd)"><span class="info-label" style="color:var(--success-tx)">إجمالي الشحن</span><span class="info-value" style="color:var(--success-tx)">${sum(mp,'approved')} ج</span></div>
-      <div class="info-cell" style="background:var(--danger-bg);border-color:var(--danger-bd)"><span class="info-label" style="color:var(--danger-tx)">إجمالي السحب</span><span class="info-value" style="color:var(--danger-tx)">${sum(mw,'approved')} ج</span></div>
+  <div class="grid-2">
+      <div style="background:var(--success-bg);padding:12px;border-radius:10px;border:1px solid var(--success-bd)"><span style="font-size:10px;color:var(--success-tx);font-weight:800;display:block;margin-bottom:6px;">إجمالي الشحن المقبول</span><span style="font-size:16px;color:var(--success-tx);font-weight:900;">${sum(mp,'approved')} ج</span></div>
+      <div style="background:var(--danger-bg);padding:12px;border-radius:10px;border:1px solid var(--danger-bd)"><span style="font-size:10px;color:var(--danger-tx);font-weight:800;display:block;margin-bottom:6px;">إجمالي السحب</span><span style="font-size:16px;color:var(--danger-tx);font-weight:900;">${sum(mw,'approved')} ج</span></div>
+      <div style="background:var(--info-bg);padding:12px;border-radius:10px;border:1px solid var(--info-bd)"><span style="font-size:10px;color:var(--info-tx);font-weight:800;display:block;margin-bottom:6px;">عدد الصفقات المكتملة</span><span style="font-size:16px;color:var(--info-tx);font-weight:900;">${md.filter(d=>d.status==='completed').length}</span></div>
+      <div style="background:var(--warn-bg);padding:12px;border-radius:10px;border:1px solid var(--warn-bd)"><span style="font-size:10px;color:var(--warn-tx);font-weight:800;display:block;margin-bottom:6px;">نزاعات مفتوحة/سابقة</span><span style="font-size:16px;color:var(--warn-tx);font-weight:900;">${md.filter(d=>d.status==='disputed').length}</span></div>
   </div>`;
 
-  const postsTab = ps.length === 0 ? '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد إعلانات</p>' : ps.slice(0,10).map(p=>`
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:7px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;margin-bottom:5px">
-      <div style="flex:1;min-width:0"><b style="font-size:11.5px;color:var(--text);display:block">${E(p.game)}</b><span style="font-size:9px;color:var(--text-3)">${timeAgo(p.createdAt)}</span></div>
-      <div style="text-align:left;display:flex;flex-direction:column;align-items:flex-end;gap:3px"><b style="font-size:11.5px;color:var(--text);display:block">${p.price} ج</b>${statusBadge(p.status)}</div>
+  const postsTab = ps.length === 0 ? '<p style="font-size:12px;color:var(--text-4);text-align:center;padding:20px">لا يوجد إعلانات</p>' : ps.slice(0,10).map(p=>`
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
+      <div style="flex:1;min-width:0"><b style="font-size:12px;color:var(--text);display:block">${E(p.game)}</b><span style="font-size:10px;color:var(--text-3);font-weight:700">${timeAgo(p.createdAt)}</span></div>
+      <div style="text-align:left;display:flex;flex-direction:column;align-items:flex-end;gap:4px"><b style="font-size:12px;color:var(--text);display:block">${p.price} ج</b>${statusBadge(p.status)}</div>
   </div>`).join('');
 
   const verificationTab = vf ? `
-  <div class="info-cell" style="margin-bottom:8px"><span class="info-label">الحالة</span><span class="info-value">${statusBadge(vf.status)}</span></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${imgs([vf.idUrl,vf.selfieUrl]).map(x=>`<img src="${x}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="zoom('${x}')">`).join('')}</div>` : '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد توثيق</p>';
+  <div style="background:var(--surface-2);padding:10px;border-radius:10px;margin-bottom:12px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:800;color:var(--text-2)">حالة التوثيق</span>${statusBadge(vf.status)}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${imgs([vf.idUrl,vf.selfieUrl]).map(x=>`<img src="${x}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid var(--border);cursor:pointer" onclick="zoom('${x}')">`).join('')}</div>` : '<div style="text-align:center;padding:20px;color:var(--text-4);font-size:12px;font-weight:700;">لا يوجد توثيق</div>';
 
   Swal.fire({ 
-      title: '<span style="font-size:14px;font-weight:900;color:var(--text);">معلومات المستخدم</span>', 
+      title: '<span style="font-size:15px;font-weight:900;color:var(--text);">ملف المستخدم</span>', 
       html: `
       <div style="text-align:right;max-height:65vh;overflow-y:auto;padding:2px" dir="rtl">
-          <div class="modal-tabs">
-              <button class="modal-tab active" onclick="switchUserTab('overview',this)">نظرة عامة</button>
-              <button class="modal-tab" onclick="switchUserTab('timeline',this)">السجل</button>
-              <button class="modal-tab" onclick="switchUserTab('financial',this)">المالية</button>
-              <button class="modal-tab" onclick="switchUserTab('posts',this)">الإعلانات (${ps.length})</button>
-              <button class="modal-tab" onclick="switchUserTab('verify',this)">التوثيق</button>
+          <div class="modal-tabs" style="display:flex;gap:4px;padding:4px;background:var(--surface-2);border-radius:10px;margin-bottom:16px;overflow-x:auto;">
+              <button class="modal-tab active" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);border:none;" onclick="switchUserTab('overview',this)">نظرة عامة</button>
+              <button class="modal-tab" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;color:var(--text-3);background:transparent;border:none;" onclick="switchUserTab('timeline',this)">السجل</button>
+              <button class="modal-tab" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;color:var(--text-3);background:transparent;border:none;" onclick="switchUserTab('financial',this)">المالية</button>
+              <button class="modal-tab" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;color:var(--text-3);background:transparent;border:none;" onclick="switchUserTab('posts',this)">الإعلانات (${ps.length})</button>
+              <button class="modal-tab" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:900;color:var(--text-3);background:transparent;border:none;" onclick="switchUserTab('verify',this)">التوثيق</button>
           </div>
           <div id="utab-overview">${overviewTab}</div>
           <div id="utab-timeline" style="display:none">${timelineTab}</div>
@@ -387,13 +475,13 @@ window.userInfo=async uid=>{try{
           <div id="utab-posts" style="display:none">${postsTab}</div>
           <div id="utab-verify" style="display:none">${verificationTab}</div>
       </div>`, 
-      width: '95%', maxWidth: '500px', showCloseButton: true, showConfirmButton: false, padding: '14px',
+      width: '95%', maxWidth: '500px', showCloseButton: true, showConfirmButton: false, padding: '16px',
       customClass: { popup: 'user-info-modal' }
   });
   
   window.switchUserTab = (tab, btn) => { 
-      document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active')); 
-      btn.classList.add('active'); 
+      document.querySelectorAll('.modal-tab').forEach(b => { b.style.background = 'transparent'; b.style.color = 'var(--text-3)'; b.style.boxShadow = 'none'; }); 
+      btn.style.background = 'var(--surface)'; btn.style.color = 'var(--text)'; btn.style.boxShadow = 'var(--shadow-sm)'; 
       ['overview','timeline','financial','posts','verify'].forEach(t => { $('utab-'+t).style.display = t === tab ? 'block' : 'none'; }); 
   };
 }catch(e){Swal.close();bad(e)}};
@@ -406,7 +494,7 @@ window.viewPrivateInfo = async (pid) => {
     const response = await fetch(WORKER_URL + "/decrypt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: pid }) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
-    Swal.fire({ title:'بيانات الحساب', html:`<div style="background:var(--warn-bg);border:1px solid var(--warn-bd);padding:14px;border-radius:10px;text-align:left;margin-top:6px" dir="ltr"><p style="font-size:12px;margin-bottom:6px;color:var(--warn-tx)"><b>Email:</b> <span style="user-select:all">${E(result.email || 'خطأ')}</span></p><p style="font-size:12px;color:var(--warn-tx)"><b>Password:</b> <span style="user-select:all">${E(result.password || 'خطأ')}</span></p></div>`, confirmButtonText: 'إغلاق' });
+    Swal.fire({ title:'بيانات الحساب', html:`<div style="background:var(--warn-bg);border:1px solid var(--warn-bd);padding:14px;border-radius:10px;text-align:left;margin-top:6px" dir="ltr"><p style="font-size:13px;margin-bottom:8px;color:var(--warn-tx);"><b>Email:</b> <span style="user-select:all;background:rgba(0,0,0,0.1);padding:2px 6px;border-radius:4px;">${E(result.email || 'خطأ')}</span></p><p style="font-size:13px;color:var(--warn-tx);"><b>Password:</b> <span style="user-select:all;background:rgba(0,0,0,0.1);padding:2px 6px;border-radius:4px;">${E(result.password || 'خطأ')}</span></p></div>`, confirmButtonText: 'إغلاق' });
     await log('فك تشفير حساب', `post=${pid}`);
   } catch(e) { Swal.close(); bad(e); }
 };
@@ -433,6 +521,34 @@ window.deleteUserAccount = async (uid) => {
     } catch(e) { Swal.close(); bad(e); }
 };
 
+// Feature 4: Create Promo Code (Fixed)
+window.createPromoCode = async () => {
+    const { value: formValues } = await Swal.fire({ 
+        title: 'إنشاء كوبون جديد', 
+        html: `<p style="font-size:12px; color:var(--text-3); margin-bottom:12px; font-weight:700;">اترك حقل UID فارغاً لإنشاء كوبون عام يمكن لأي شخص استخدامه.</p>
+               <input id="swal-uid" class="swal2-input" placeholder="UID المستخدم (اختياري)" dir="ltr" style="text-align:left; margin-bottom:10px;">
+               <input id="swal-amount" class="swal2-input" placeholder="قيمة الكوبون (ج)" type="number" min="1">`, 
+        showCancelButton: true, 
+        confirmButtonText: 'إنشاء الكوبون', 
+        cancelButtonText: 'إلغاء', 
+        preConfirm: () => { 
+            const uid = document.getElementById('swal-uid').value.trim(); 
+            const amount = document.getElementById('swal-amount').value.trim(); 
+            if (!amount || amount < 1) { Swal.showValidationMessage('أدخل مبلغاً صالحاً'); return false; } 
+            return { uid, amount: Number(amount) }; 
+        } 
+    });
+    if (!formValues) return;
+    const code = 'BLCK-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    try {
+        Swal.fire({title: 'جاري الإنشاء...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+        await set(R('promo_codes/' + code), { amount: formValues.amount, status: 'active', createdAt: Date.now(), targetUser: formValues.uid || null });
+        Swal.close();
+        Swal.fire({ title: 'تم إنشاء الكوبون بنجاح!', html: `<p style="font-size:13px;margin-bottom:12px;color:var(--text-2);font-weight:700;">أعط هذا الكود للمستخدم ليقوم بإدخاله في المحفظة:</p><b style="font-size:24px; color:var(--success-tx); letter-spacing:2px; background:var(--success-bg); border:1px dashed var(--success-bd); padding:10px 20px; border-radius:10px; display:inline-block;">${code}</b><p style="font-size:13px;margin-top:12px; font-weight:900;">القيمة: ${formValues.amount} ج</p>`, confirmButtonText: 'نسخ الكود' }).then(r => { if(r.isConfirmed) navigator.clipboard.writeText(code); });
+        show('cpn');
+    } catch(e) { Swal.close(); bad(e); }
+};
+
 // =========================================
 // Views
 // =========================================
@@ -448,45 +564,61 @@ async dash(){
   const pc=a=>a.filter(x=>x.status==='pending').length,earn=y.filter(x=>x.status==='processed').reduce((a,x)=>a+(x.commission||0),0),bal=u.reduce((a,x)=>a+(x.balance||0),0);
   const pendingTotal = pc(p) + pc(d) + pc(w) + pc(v) + pc(f);
   
+  const heldFunds = dl.filter(d => d.status === 'held' || d.status === 'delivered').reduce((a,b) => a + b.amount, 0);
+  const pendingWds = w.filter(w => w.status === 'pending').reduce((a,b) => a + b.amount, 0);
+
   const stats=[ 
     {l:'المستخدمون', n:u.length, k:'users', icon:'fa-users', bg:'var(--info-bg)', clr:'var(--info-tx)', bd:'var(--info-bd)'}, 
     {l:'نشطون الآن', n:activeUsersCount, k:'users', icon:'fa-wifi', bg:'var(--success-bg)', clr:'var(--success-tx)', bd:'var(--success-bd)'},
     {l:'إعلانات معلقة', n:pc(p), k:'posts', icon:'fa-rectangle-list', bg:'var(--warn-bg)', clr:'var(--warn-tx)', bd:'var(--warn-bd)'}, 
     {l:'شحن معلق', n:pc(d), k:'dep', icon:'fa-wallet', bg:'var(--warn-bg)', clr:'var(--warn-tx)', bd:'var(--warn-bd)'}, 
     {l:'سحب معلق', n:pc(w), k:'wd', icon:'fa-money-bill-transfer', bg:'var(--warn-bg)', clr:'var(--warn-tx)', bd:'var(--warn-bd)'}, 
-    {l:'توثيق معلق', n:pc(v), k:'ver', icon:'fa-id-card', bg:'var(--purple-bg)', clr:'var(--purple-tx)', bd:'var(--purple-bd)'}, 
+    {l:'توثيق معلق', n:pc(v), k:'ver', icon:'fa-id-card', bg:'var(--info-bg)', clr:'var(--info-tx)', bd:'var(--info-bd)'}, 
     {l:'أرباح معلقة', n:pc(y), k:'pay', icon:'fa-sack-dollar', bg:'var(--success-bg)', clr:'var(--success-tx)', bd:'var(--success-bd)'}, 
     {l:'نزاعات', n:pc(f), k:'ref', icon:'fa-scale-balanced', bg:'var(--danger-bg)', clr:'var(--danger-tx)', bd:'var(--danger-bd)'} 
   ];
 
-  const healthHtml = `<div class="card" style="margin-bottom:14px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div style="display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-server" style="color:var(--text-3)"></i> <span style="font-size:11px; font-weight:800; color:var(--text-2)">حالة النظام:</span></div><div style="display:flex; gap:10px; font-size:10px; font-weight:900;"><span style="color:${sysHealth.fb ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.fb ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> قاعدة البيانات</span><span style="color:${sysHealth.cf ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.cf ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> السيرفر</span></div></div>`;
+  const healthHtml = `<div class="card" style="margin-bottom:16px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:var(--surface-2);"><div style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-server" style="color:var(--text-3);font-size:14px;"></i> <span style="font-size:12px; font-weight:900; color:var(--text-2)">حالة النظام:</span></div><div style="display:flex; gap:14px; font-size:11px; font-weight:900;"><span style="color:${sysHealth.fb ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.fb ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> قاعدة البيانات</span><span style="color:${sysHealth.cf ? 'var(--success-tx)' : 'var(--danger-tx)'}"><i class="fa-solid ${sysHealth.cf ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> السيرفر</span></div></div>`;
+
+  const ledgerHtml = `
+  <div class="card" style="background:linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%); border-color:var(--border);">
+      <div class="sec-title" style="color:var(--info-tx);border-bottom-color:var(--info-bd);"><i class="fa-solid fa-scale-balanced"></i> السجل المالي للمنصة</div>
+      <div class="grid-2" style="gap:10px;">
+          <div style="background:var(--success-bg);border:1px solid var(--success-bd);border-radius:10px;padding:12px;"><span style="font-size:11px;color:var(--success-tx);font-weight:800;display:block;margin-bottom:6px;">أرباح المنصة (العمولات)</span><b style="font-size:18px;color:var(--success-tx);">${earn} ج</b></div>
+          <div style="background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:12px;"><span style="font-size:11px;color:var(--warn-tx);font-weight:800;display:block;margin-bottom:6px;">أموال محجوزة (صفقات)</span><b style="font-size:18px;color:var(--warn-tx);">${heldFunds} ج</b></div>
+          <div style="background:var(--danger-bg);border:1px solid var(--danger-bd);border-radius:10px;padding:12px;"><span style="font-size:11px;color:var(--danger-tx);font-weight:800;display:block;margin-bottom:6px;">سحب معلق (مطلوب دفعه)</span><b style="font-size:18px;color:var(--danger-tx);">${pendingWds} ج</b></div>
+          <div style="background:var(--info-bg);border:1px solid var(--info-bd);border-radius:10px;padding:12px;"><span style="font-size:11px;color:var(--info-tx);font-weight:800;display:block;margin-bottom:6px;">إجمالي أرصدة المستخدمين</span><b style="font-size:18px;color:var(--info-tx);">${bal} ج</b></div>
+      </div>
+  </div>`;
 
   const lg = (await fetchLogs(5));
 
   return `${healthHtml}
-  ${pendingTotal > 0 ? `<div class="card" style="background:var(--warn-bg);border-color:var(--warn-bd);padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warn-tx);font-size:14px"></i><span style="color:var(--warn-tx);font-weight:900;font-size:11px">${pendingTotal} طلبات معلقة</span></div>` : ''}
-  <div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:900;color:var(--text);">مرحباً ${roleTitle}</h1><p style="color:var(--text-3);font-size:11px;font-weight:700;">${new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
+  ${pendingTotal > 0 ? `<div class="card" style="background:var(--warn-bg);border-color:var(--warn-bd);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warn-tx);font-size:16px"></i><span style="color:var(--warn-tx);font-weight:900;font-size:12px">لديك ${pendingTotal} طلبات معلقة بحاجة لمراجعة</span></div>` : ''}
+  <div style="margin-bottom:20px"><h1 style="font-size:22px;font-weight:900;color:var(--text);">مرحباً ${roleTitle}</h1><p style="color:var(--text-3);font-size:12px;font-weight:700;margin-top:4px;">${new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
   
   <div class="stats-grid">${stats.map((s)=>`<div onclick="go('${s.k}')" class="stat-card"><div class="stat-icon" style="background:${s.bg};border-color:${s.bd};color:${s.clr}"><i class="fa-solid ${s.icon}"></i></div><span class="stat-label">${s.l}</span><span class="stat-value">${s.n}</span></div>`).join('')}</div>
   
+  ${ledgerHtml}
+
   <div class="grid-2" style="margin-bottom:8px">
-    <div class="card"><h3 style="font-size:12px;font-weight:900;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-clock-rotate-left" style="color:var(--text-3);font-size:10px"></i> آخر الإجراءات</h3><div style="max-height:160px;overflow-y:auto">${lg.map(l=>`<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border)"><div style="width:22px;height:22px;border-radius:6px;background:var(--neutral-bg);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0"><i class="fa-solid fa-circle-dot" style="font-size:7px"></i></div><div style="flex:1;min-width:0"><p style="font-size:10.5px;font-weight:800;color:var(--text);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(l.action)}</p><p style="font-size:9px;color:var(--text-3);margin:1px 0 0">${E((l.email||'').split('@')[0])} · ${timeAgo(l.at)}</p></div></div>`).join('') || '<p style="font-size:10px;color:var(--text-4);text-align:center;padding:8px">لا يوجد</p>'}</div></div>
+    <div class="card"><h3 style="font-size:13px;font-weight:900;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-clock-rotate-left" style="color:var(--text-3);"></i> آخر الإجراءات</h3><div style="max-height:180px;overflow-y:auto">${lg.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:26px;height:26px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0"><i class="fa-solid fa-circle-dot" style="font-size:8px"></i></div><div style="flex:1;min-width:0"><p style="font-size:11px;font-weight:800;color:var(--text);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(l.action)}</p><p style="font-size:10px;color:var(--text-3);margin:2px 0 0">${E((l.email||'').split('@')[0])} · ${timeAgo(l.at)}</p></div></div>`).join('') || '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:10px">لا يوجد</p>'}</div></div>
   </div>`;
 },
 async posts(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
     const all=(await fetchList('posts', limit)).filter(p=> (st('pending')==='all'||p.status===st('pending')) && hit(p,['game','sellerName','desc'])); 
     const a = all.slice(0, limit); 
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:10px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'game',label:'اللعبة'},{key:'sellerName',label:'البائع'},{key:'price',label:'السعر'},{key:'status',label:'الحالة'}], 'posts')"><i class="fa-solid fa-file-excel"></i> تصدير إلى Excel</button>`; 
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'game',label:'اللعبة'},{key:'sellerName',label:'البائع'},{key:'price',label:'السعر'},{key:'status',label:'الحالة'}], 'posts')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
     
     return bar([['pending','قيد المراجعة'],['active','منشورة'],['sold','مباعة'],['deleted','محذوفة'],['all','الكل']], false) + exportBtn + (a.map(p=>card(`
-    <div style="display:flex;align-items:flex-start;gap:8px;">
-        <input type="checkbox" style="width:20px;height:20px;margin-top:5px;cursor:pointer;" onchange="toggleSelect('post', '${p.id}')" ${selectedPosts.has(p.id)?'checked':''}>
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+        <input type="checkbox" style="width:22px;height:22px;margin-top:4px;cursor:pointer;accent-color:var(--info-tx);" onchange="toggleSelect('post', '${p.id}')" ${selectedPosts.has(p.id)?'checked':''}>
         <div style="flex:1;">
-            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div><b style="font-size:12.5px;font-weight:900;color:var(--text);display:block">${E(p.game)} ${p.isAutoBuy ? '<i class="fa-solid fa-bolt" style="color:var(--gold-solid);" title="شراء فوري"></i>' : ''}</b><span style="font-size:12px;font-weight:900;color:var(--success-tx)">${p.price} ج</span></div>${statusBadge(p.status)}</div>
-            <p style="font-size:10px;color:var(--text-3);margin-bottom:6px">${ulink(p.sellerId,p.sellerName)} · ${timeAgo(p.createdAt)}</p>
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><div><b style="font-size:14px;font-weight:900;color:var(--text);display:block">${E(p.game)} ${p.isAutoBuy ? '<i class="fa-solid fa-bolt" style="color:var(--gold-tx);" title="شراء فوري"></i>' : ''}</b><span style="font-size:14px;font-weight:900;color:var(--success-tx)">${p.price} ج</span></div>${statusBadge(p.status)}</div>
+            <p style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-weight:700;">${ulink(p.sellerId,p.sellerName)} · ${timeAgo(p.createdAt)}</p>
             ${thumbs(imgs(p.photos))}
-            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${op('تفاصيل',()=>postInfo(p.id))}${op('البائع',()=>userInfo(p.sellerId))}${p.status==='pending'?btn('قبول',()=>update(R('posts/'+p.id),{status:'active'}).then(()=>notify(p.sellerId,'تم قبول إعلانك','إعلانك منشور.')),'btn-success','قبول')+op('رفض',async()=>{const r=await reason('سبب الرفض');await update(R('posts/'+p.id),{status:'deleted'});await notify(p.sellerId,'رفض إعلان','السبب: '+r);await log('رفض إعلان '+p.id,r,'pending','deleted');ok('تم');show(view)},'btn-danger'):''}${p.status==='active'?btn(p.featured?'إلغاء تمييز':'تمييز',()=>update(R('posts/'+p.id),{featured:!p.featured}),'btn-ghost','تمييز')+btn('حذف',()=>update(R('posts/'+p.id),{status:'deleted'}),'btn-danger','حذف'):''}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">${op('تفاصيل',()=>postInfo(p.id))}${op('البائع',()=>userInfo(p.sellerId))}${p.status==='pending'?btn('قبول',()=>update(R('posts/'+p.id),{status:'active'}).then(()=>notify(p.sellerId,'تم قبول إعلانك','إعلانك منشور.')),'btn-success','قبول')+op('رفض',async()=>{const r=await reason('سبب الرفض');await update(R('posts/'+p.id),{status:'deleted'});await notify(p.sellerId,'رفض إعلان','السبب: '+r);await log('رفض إعلان '+p.id,r,'pending','deleted');ok('تم');show(view)},'btn-danger'):''}${p.status==='active'?btn(p.featured?'إلغاء تمييز':'تمييز',()=>update(R('posts/'+p.id),{featured:!p.featured}),'btn-ghost','تمييز')+btn('حذف',()=>update(R('posts/'+p.id),{status:'deleted'}),'btn-danger','حذف'):''}</div>
         </div>
     </div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
@@ -494,34 +626,35 @@ async dep(){
     const limit = pageState[view] ? pageState[view]*30 : 30;
     let all=(await fetchList('deposits', limit)).filter(d=>(st('pending')==='all'||d.status===st('pending'))&&hit(d,['userName'])); 
     all = filterByDate(all); const a = all.slice(0, limit); 
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:10px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'status',label:'الحالة'},{key:'createdAt',label:'التاريخ'}], 'deposits')"><i class="fa-solid fa-file-excel"></i> تصدير إلى Excel</button>`; 
-    return exportBtn + bar([['pending','معلقة'],['approved','مقبولة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div>${ulink(d.userId,d.userName)}<br><span style="font-size:10px;color:var(--text-3)">${ago(d.createdAt)}</span></div><span style="color:var(--success-tx);font-weight:900;font-size:15px">${d.amount} ج</span></div>${d.receiptUrl ? thumbs([d.receiptUrl]) : ''}<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${op('المستخدم',()=>userInfo(d.userId))}${d.status==='pending'?btn('قبول',async()=>{await confirmPIN('قبول شحن '+d.amount);await claim('deposits/'+d.id,'pending','approved');await credit(d.userId,d.amount);await notify(d.userId,'تم شحن رصيدك',`+${d.amount} ج`);},'btn-success','قبول شحن')+op('رفض',async()=>{const r=await reason('سبب الرفض');await claim('deposits/'+d.id,'pending','rejected');await notify(d.userId,'رفض شحن','السبب: '+r);await log('رفض شحن '+d.id,r,'pending','rejected');ok('تم');show(view)},'btn-danger'):statusBadge(d.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'status',label:'الحالة'},{key:'createdAt',label:'التاريخ'}], 'deposits')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    return exportBtn + bar([['pending','معلقة'],['approved','مقبولة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><div>${ulink(d.userId,d.userName)}<br><span style="font-size:11px;color:var(--text-3);font-weight:700;">${ago(d.createdAt)}</span></div><span style="color:var(--success-tx);font-weight:900;font-size:16px">${d.amount} ج</span></div>${d.receiptUrl ? thumbs([d.receiptUrl]) : ''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${op('المستخدم',()=>userInfo(d.userId))}${d.status==='pending'?btn('قبول',async()=>{await confirmPIN('قبول شحن '+d.amount);await claim('deposits/'+d.id,'pending','approved');await credit(d.userId,d.amount);await notify(d.userId,'تم شحن رصيدك',`+${d.amount} ج`);},'btn-success','قبول شحن')+op('رفض',async()=>{const r=await reason('سبب الرفض');await claim('deposits/'+d.id,'pending','rejected');await notify(d.userId,'رفض شحن','السبب: '+r);await log('رفض شحن '+d.id,r,'pending','rejected');ok('تم');show(view)},'btn-danger'):statusBadge(d.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async wd(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
     let all=(await fetchList('withdrawals', limit)).filter(w=>(st('pending')==='all'||w.status===st('pending'))&&hit(w,['userName','account'])); 
     all = filterByDate(all); const a = all.slice(0, limit); 
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:10px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'method',label:'الطريقة'},{key:'account',label:'الحساب'},{key:'status',label:'الحالة'}], 'withdrawals')"><i class="fa-solid fa-file-excel"></i> تصدير إلى Excel</button>`; 
-    return exportBtn + bar([['pending','معلقة'],['approved','منفذة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(w=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div>${ulink(w.userId,w.userName)}<br><span style="font-size:10px;color:var(--text-3)">${ago(w.createdAt)}</span></div><span style="color:var(--danger-tx);font-weight:900;font-size:15px">${w.amount} ج</span></div><div style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;margin-bottom:8px"><p style="margin:2px 0"><b>الطريقة:</b> ${E(w.method)}</p><p style="margin:2px 0" dir="ltr"><b>الحساب:</b> ${E(w.account)}</p><p style="margin:2px 0"><b>الاسم:</b> ${E(w.accountName)}</p>${op('نسخ',()=>copy(w.account),'btn-ghost')}</div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('المستخدم',()=>userInfo(w.userId))}${w.status==='pending'?btn('تم التحويل',async()=>{await confirmPIN('تنفيذ سحب '+w.amount);await claim('withdrawals/'+w.id,'pending','approved');await notify(w.userId,'تم السحب',`${w.amount} ج`);},'btn-success','تنفيذ سحب')+op('رفض وإرجاع',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض سحب');await claim('withdrawals/'+w.id,'pending','rejected');await credit(w.userId,w.amount);await notify(w.userId,'رفض سحب','السبب: '+r);await log('رفض سحب '+w.id,r);ok('تم');show(view)},'btn-danger'):statusBadge(w.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'method',label:'الطريقة'},{key:'account',label:'الحساب'},{key:'status',label:'الحالة'}], 'withdrawals')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    return exportBtn + bar([['pending','معلقة'],['approved','منفذة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(w=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><div>${ulink(w.userId,w.userName)}<br><span style="font-size:11px;color:var(--text-3);font-weight:700;">${ago(w.createdAt)}</span></div><span style="color:var(--danger-tx);font-weight:900;font-size:16px">${w.amount} ج</span></div><div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;margin-bottom:10px"><p style="margin:4px 0;display:flex;justify-content:space-between;"><b>الطريقة:</b> <span>${E(w.method)}</span></p><p style="margin:4px 0;display:flex;justify-content:space-between;" dir="ltr"><b>الحساب:</b> <span>${E(w.account)}</span></p><p style="margin:4px 0;display:flex;justify-content:space-between;"><b>الاسم:</b> <span>${E(w.accountName)}</span></p>${op('نسخ الحساب',()=>copy(w.account),'btn-ghost')}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${op('المستخدم',()=>userInfo(w.userId))}${w.status==='pending'?btn('تم التحويل',async()=>{await confirmPIN('تنفيذ سحب '+w.amount);await claim('withdrawals/'+w.id,'pending','approved');await notify(w.userId,'تم السحب',`${w.amount} ج`);},'btn-success','تنفيذ سحب')+op('رفض وإرجاع',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض سحب');await claim('withdrawals/'+w.id,'pending','rejected');await credit(w.userId,w.amount);await notify(w.userId,'رفض سحب','السبب: '+r);await log('رفض سحب '+w.id,r);ok('تم');show(view)},'btn-danger'):statusBadge(w.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async ver(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
     const all=(await fetchList('user_verifications', limit)).filter(v=>st('pending')==='all'||v.status===st('pending')); const a = all.slice(0, limit); 
-    return bar([['pending','معلقة'],['approved','موثقة'],['rejected','مرفوضة'],['all','الكل']], false) + ((await Promise.all(a.map(async v=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">${ulink(v.id,await uname(v.id))}</b>${statusBadge(v.status)}</div><p style="font-size:10px;color:var(--text-3);margin-bottom:6px">${ago(v.createdAt)}</p>${thumbs(imgs([v.idUrl,v.selfieUrl]))}<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${op('معلومات',()=>userInfo(v.id))}${v.status==='pending'?btn('توثيق',async()=>{await confirmPIN('توثيق');await claim('user_verifications/'+v.id,'pending','approved');await update(R('users/'+v.id),{verified:true});await notify(v.id,'تم التوثيق','يمكنك النشر الآن')},'btn-success','توثيق')+op('رفض',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض توثيق');await claim('user_verifications/'+v.id,'pending','rejected');await notify(v.id,'رفض توثيق','السبب: '+r);await log('رفض توثيق',r);ok('تم');show(view)},'btn-danger'):''}</div>`)))).join('')||empty) + moreBtn(view, all.length, limit); 
+    return bar([['pending','معلقة'],['approved','موثقة'],['rejected','مرفوضة'],['all','الكل']], false) + ((await Promise.all(a.map(async v=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:8px"><b style="font-size:13px;color:var(--text)">${ulink(v.id,await uname(v.id))}</b>${statusBadge(v.status)}</div><p style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-weight:700;">${ago(v.createdAt)}</p>${thumbs(imgs([v.idUrl,v.selfieUrl]))}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${op('معلومات',()=>userInfo(v.id))}${v.status==='pending'?btn('توثيق',async()=>{await confirmPIN('توثيق');await claim('user_verifications/'+v.id,'pending','approved');await update(R('users/'+v.id),{verified:true});await notify(v.id,'تم التوثيق','يمكنك النشر الآن')},'btn-success','توثيق')+op('رفض',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض توثيق');await claim('user_verifications/'+v.id,'pending','rejected');await notify(v.id,'رفض توثيق','السبب: '+r);await log('رفض توثيق',r);ok('تم');show(view)},'btn-danger'):''}</div>`)))).join('')||empty) + moreBtn(view, all.length, limit); 
 },
-async pay(){ const p=(await fetchList('pending_payouts',50)).filter(x=>x.status==='pending'); return p.map(x=>card(`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><b style="color:var(--text);display:block;margin-bottom:3px;font-size:12.5px">أرباح صفقة <span style="font-size:10px;color:var(--text-4)">#${E(x.id).slice(0,6)}</span></b><span style="color:var(--success-tx);font-weight:900;font-size:15px">${x.amount} ج</span></div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('البائع',()=>userInfo(x.sellerId))}${btn('صرف',async()=>{await confirmPIN('صرف '+x.amount);await claim('pending_payouts/'+x.id,'pending','processed');await credit(x.sellerId,x.amount);await notify(x.sellerId,'تم الصرف',`+${x.amount} ج`)},'btn-success','صرف أرباح')}</div></div><div style="font-size:10px;color:var(--text-3);margin-top:6px">عمولة: ${x.commission} من ${x.grossAmount}</div>`)).join('')||empty; },
-async ref(){ const all = await fetchList('refund_queue',50); const pending = all.filter(x=>x.status==='pending'); if(pending.length === 0) return empty; const html = await Promise.all(pending.map(async f => { const deal = (await get(R('deals/'+f.id))).val() || {}; return card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">نزاع <span style="font-size:10px;color:var(--text-4)" dir="ltr">#${E(f.id).slice(0,8)}</span></b><span style="color:var(--danger-tx);font-weight:900;font-size:13px">${f.amount} ج</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;font-size:11px"><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">المشتري</span>${ulink(f.buyerId,await uname(f.buyerId))}</div><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">البائع</span>${ulink(f.sellerId,await uname(f.sellerId))}</div></div><div style="background:var(--danger-bg);border:1px solid var(--danger-bd);color:var(--danger-tx);font-size:11px;padding:8px;border-radius:8px;margin-bottom:8px"><b>مقدم النزاع:</b> ${f.raisedByRole || '—'}<br><b>السبب:</b> ${E(f.reason)}</div><div style="display:flex;gap:5px;flex-wrap:wrap">${btn('استرداد',async()=>{await confirmPIN('استرداد '+f.amount);await claim('refund_queue/'+f.id,'pending','approved');await credit(f.buyerId,f.amount);const updates={};updates['deals/'+f.id+'/status']='refunded';if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='refunded'}await update(ref(db),updates);await notify(f.buyerId,'تم الاسترداد',`+${f.amount} ج`);await notify(f.sellerId,'استرداد صفقة','');if(deal.chatId)await set(push(R(`chats/${deal.chatId}/messages`)),{senderId:me.uid,type:'admin',text:'تم استرداد المبلغ',createdAt:Date.now()});await log('استرداد '+f.id,'')},'btn-success','استرداد')}${btn('رفض النزاع',async()=>{await confirmPIN('رفض');await claim('refund_queue/'+f.id,'pending','rejected');const com=Math.round(deal.amount*(Number(S.commission)||0)/100);const updates={};updates['deals/'+f.id+'/status']='completed';updates['pending_payouts/'+f.id]={sellerId:f.sellerId,buyerId:f.buyerId,amount:deal.amount-com,grossAmount:deal.amount,commission:com,status:'pending',createdAt:Date.now()};if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='completed'}await update(ref(db),updates);await notify(f.sellerId,'رفض النزاع','تم تحويل أرباحك');await notify(f.buyerId,'رفض النزاع','');await log('رفض نزاع '+f.id,'')},'btn-danger','رفض نزاع')}${op('بيانات',()=>viewPrivateInfo(deal.postId))}${op('الدردشة',()=>adminChat(deal.chatId),'btn-info')}</div>`); })); return html.join(''); },
+async pay(){ const p=(await fetchList('pending_payouts',50)).filter(x=>x.status==='pending'); return p.map(x=>card(`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><b style="color:var(--text);display:block;margin-bottom:4px;font-size:13px;">أرباح صفقة <span style="font-size:10px;color:var(--text-4)" dir="ltr">#${E(x.id).slice(0,6)}</span></b><span style="color:var(--success-tx);font-weight:900;font-size:16px;">${x.amount} ج</span></div><div style="display:flex;gap:8px;flex-wrap:wrap">${op('البائع',()=>userInfo(x.sellerId))}${btn('صرف',async()=>{await confirmPIN('صرف '+x.amount);await claim('pending_payouts/'+x.id,'pending','processed');await credit(x.sellerId,x.amount);await notify(x.sellerId,'تم الصرف',`+${x.amount} ج`)},'btn-success','صرف أرباح')}</div></div><div style="font-size:11px;color:var(--text-3);margin-top:8px;font-weight:700;">عمولة: ${x.commission} من ${x.grossAmount}</div>`)).join('')||empty; },
+async ref(){ const all = await fetchList('refund_queue',50); const pending = all.filter(x=>x.status==='pending'); if(pending.length === 0) return empty; const html = await Promise.all(pending.map(async f => { const deal = (await get(R('deals/'+f.id))).val() || {}; return card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:8px"><b style="font-size:13px;color:var(--text)">نزاع <span style="font-size:10px;color:var(--text-4)" dir="ltr">#${E(f.id).slice(0,8)}</span></b><span style="color:var(--danger-tx);font-weight:900;font-size:14px">${f.amount} ج</span></div><div class="grid-2" style="margin-bottom:8px;font-size:11px"><div style="background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border)"><span style="color:var(--text-4);display:block;margin-bottom:4px;font-size:10px;font-weight:800">المشتري</span>${ulink(f.buyerId,await uname(f.buyerId))}</div><div style="background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border)"><span style="color:var(--text-4);display:block;margin-bottom:4px;font-size:10px;font-weight:800">البائع</span>${ulink(f.sellerId,await uname(f.sellerId))}</div></div><div style="background:var(--danger-bg);border:1px solid var(--danger-bd);color:var(--danger-tx);font-size:12px;padding:10px;border-radius:8px;margin-bottom:10px"><b>مقدم النزاع:</b> ${f.raisedByRole || '—'}<br><b>السبب:</b> ${E(f.reason)}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${btn('استرداد',async()=>{await confirmPIN('استرداد '+f.amount);await claim('refund_queue/'+f.id,'pending','approved');await credit(f.buyerId,f.amount);const updates={};updates['deals/'+f.id+'/status']='refunded';if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='refunded'}await update(ref(db),updates);await notify(f.buyerId,'تم الاسترداد',`+${f.amount} ج`);await notify(f.sellerId,'استرداد صفقة','');if(deal.chatId)await set(push(R(`chats/${deal.chatId}/messages`)),{senderId:me.uid,type:'admin',text:'تم استرداد المبلغ',createdAt:Date.now()});await log('استرداد '+f.id,'')},'btn-success','استرداد')}${btn('رفض النزاع',async()=>{await confirmPIN('رفض');await claim('refund_queue/'+f.id,'pending','rejected');const com=Math.round(deal.amount*(Number(S.commission)||0)/100);const updates={};updates['deals/'+f.id+'/status']='completed';updates['pending_payouts/'+f.id]={sellerId:f.sellerId,buyerId:f.buyerId,amount:deal.amount-com,grossAmount:deal.amount,commission:com,status:'pending',createdAt:Date.now()};if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='completed'}await update(ref(db),updates);await notify(f.sellerId,'رفض النزاع','تم تحويل أرباحك');await notify(f.buyerId,'رفض النزاع','');await log('رفض نزاع '+f.id,'')},'btn-danger','رفض نزاع')}${op('بيانات',()=>viewPrivateInfo(deal.postId))}${op('الدردشة',()=>adminChat(deal.chatId),'btn-info')}</div>`); })); return html.join(''); },
 async deals(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
     let all=(await fetchList('deals', limit)).filter(d=>st('all')==='all'||d.status===st('all')); 
     await Promise.all(all.flatMap(d=>[uname(d.buyerId),uname(d.sellerId)])); 
     all=all.filter(d=>hit({...d,b:NM[d.buyerId],s:NM[d.sellerId]},['id','b','s'])); all = filterByDate(all); const a = all.slice(0, limit); 
-    return bar([['all','الكل'],['held','محجوزة'],['delivered','مسلمة'],['completed','مكتملة'],['disputed','نزاع']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:14px;color:var(--success-tx)">${d.amount} ج</b>${statusBadge(d.status)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;margin-bottom:6px"><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">المشتري</span>${ulink(d.buyerId,NM[d.buyerId])}</div><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">البائع</span>${ulink(d.sellerId,NM[d.sellerId])}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('دردشة',()=>adminChat(d.chatId))}${op('الإعلان',()=>postInfo(d.postId))}${(d.status === 'held' || d.status === 'delivered') ? op('إلغاء وإرجاع', async () => { if (!await ask('هل تريد إلغاء هذه الصفقة وإرجاع المبلغ كاملاً للمشتري؟')) return; await confirmPIN('إلغاء الصفقة'); await credit(d.buyerId, d.amount); await update(R('deals/' + d.id), { status: 'cancelled' }); if(d.chatId) { await update(R('chats/' + d.chatId), { dealStatus: 'cancelled', frozen: false }); await set(push(R(`chats/${d.chatId}/messages`)), {senderId: me.uid, type: 'admin', text: 'تم إلغاء الصفقة وإرجاع المبلغ للمشتري.', createdAt: Date.now()}); } await notify(d.buyerId, 'إلغاء الصفقة', 'تم إلغاء الصفقة وإرجاع المبلغ لرصيدك.'); await log('إلغاء صفقة', `تم إلغاء الصفقة #${d.id}`); ok('تم الإلغاء بنجاح'); }, 'btn-danger') : ''}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'amount',label:'المبلغ'},{key:'status',label:'الحالة'},{key:'createdAt',label:'التاريخ'}], 'deals')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    return exportBtn + bar([['all','الكل'],['held','محجوزة'],['delivered','مسلمة'],['completed','مكتملة'],['disputed','نزاع']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:8px"><b style="font-size:16px;color:var(--success-tx)">${d.amount} ج</b>${statusBadge(d.status)}</div><div class="grid-2" style="font-size:12px;margin-bottom:10px"><div style="background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border)"><span style="color:var(--text-4);display:block;margin-bottom:4px;font-size:10px;font-weight:800">المشتري</span>${ulink(d.buyerId,NM[d.buyerId])}</div><div style="background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border)"><span style="color:var(--text-4);display:block;margin-bottom:4px;font-size:10px;font-weight:800">البائع</span>${ulink(d.sellerId,NM[d.sellerId])}</div></div><div style="display:flex;gap:8px;flex-wrap:wrap">${op('دردشة',()=>adminChat(d.chatId))}${op('الإعلان',()=>postInfo(d.postId))}${(d.status === 'held' || d.status === 'delivered') ? op('إلغاء وإرجاع', async () => { if (!await ask('هل تريد إلغاء هذه الصفقة وإرجاع المبلغ كاملاً للمشتري؟')) return; await confirmPIN('إلغاء الصفقة'); await credit(d.buyerId, d.amount); await update(R('deals/' + d.id), { status: 'cancelled' }); if(d.chatId) { await update(R('chats/' + d.chatId), { dealStatus: 'cancelled', frozen: false }); await set(push(R(`chats/${d.chatId}/messages`)), {senderId: me.uid, type: 'admin', text: 'تم إلغاء الصفقة وإرجاع المبلغ للمشتري.', createdAt: Date.now()}); } await notify(d.buyerId, 'إلغاء الصفقة', 'تم إلغاء الصفقة وإرجاع المبلغ لرصيدك.'); await log('إلغاء صفقة', `تم إلغاء الصفقة #${d.id}`); ok('تم الإلغاء بنجاح'); }, 'btn-danger') : ''}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async cpn(){ 
-    const createBtn = `<button class="btn btn-primary" style="margin-bottom:14px; width:100%" onclick="window.createPromoCode()"><i class="fa-solid fa-plus"></i> إنشاء كوبون / شحن يدوي</button>`;
+    const createBtn = `<button class="btn btn-primary" style="margin-bottom:16px; width:100%; padding:12px; border-radius:10px;" onclick="window.createPromoCode()"><i class="fa-solid fa-plus"></i> إنشاء كوبون / شحن يدوي</button>`;
     const o=(await get(R('credit_queue'))).val()||{},a=[]; Object.entries(o).forEach(([u,c])=>Object.entries(c).forEach(([k,x])=>x.status==='pending'&&a.push({u,k,...x}))); 
-    const listHtml = (await Promise.all(a.map(async c=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:12.5px;color:var(--text)">${await uname(c.u)}</b><code dir="ltr" style="background:var(--neutral-bg);padding:3px 8px;border-radius:6px;color:var(--text);font-weight:900;font-size:11px">${E(c.k)}</code></div><div style="display:flex;gap:5px">${op('المستخدم',()=>userInfo(c.u))}${btn('قبول وتحديد القيمة',async()=>{const {value:v}=await Swal.fire({title:'القيمة',input:'number',showCancelButton:true});const n=Math.round(+v);if(!n||n<1)throw new Error('قيمة غير صالحة');await confirmPIN('قبول كوبون '+n);const p=`credit_queue/${c.u}/${c.k}`;await claim(p,'pending','approved');await update(R(p),{amount:n});await credit(c.u,n);await notify(c.u,'كوبون',`+${n} ج`)},'btn-success')}${btn('رفض',()=>claim(`credit_queue/${c.u}/${c.k}`,'pending','rejected'),'btn-danger')}</div>`)))).join('');
+    const listHtml = (await Promise.all(a.map(async c=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:13px;color:var(--text)">${await uname(c.u)}</b><code dir="ltr" style="background:var(--surface-3);padding:4px 10px;border-radius:6px;color:var(--text);font-weight:900;font-size:12px;border:1px solid var(--border)">${E(c.k)}</code></div><div style="display:flex;gap:8px">${op('المستخدم',()=>userInfo(c.u))}${btn('قبول وتحديد القيمة',async()=>{const {value:v}=await Swal.fire({title:'القيمة',input:'number',showCancelButton:true});const n=Math.round(+v);if(!n||n<1)throw new Error('قيمة غير صالحة');await confirmPIN('قبول كوبون '+n);const p=`credit_queue/${c.u}/${c.k}`;await claim(p,'pending','approved');await update(R(p),{amount:n});await credit(c.u,n);await notify(c.u,'كوبون',`+${n} ج`)},'btn-success')}${btn('رفض',()=>claim(`credit_queue/${c.u}/${c.k}`,'pending','rejected'),'btn-danger')}</div>`)))).join('');
     return createBtn + (listHtml || empty); 
 },
 async users(){ 
@@ -532,24 +665,25 @@ async users(){
     all=all.filter(u=>(st('all')==='all'||(st('ver')==='ver'&&u.verified)||(st('unv')==='unv'&&!u.verified)||(st('ban')==='ban'&&u.suspended))&&hit(u,['name','email','id'])); 
     const a = all.slice(0, limit); 
     
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'name',label:'الاسم'},{key:'email',label:'الإيميل'},{key:'balance',label:'الرصيد'},{key:'verified',label:'موثق'}], 'users')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+
     const items=a.map(u=>{
         const isPro = u.isPro && (u.proUntil||0) > Date.now();
         const lvl = isPro ? {n:'ذهبي', c:'var(--gold-tx)', b:'var(--gold-bg)', i:'fa-crown'} : (u.completedDeals>=50 ? {n:'خبير', c:'var(--warn-tx)', b:'var(--warn-bg)', i:'fa-star'} : (u.completedDeals>=10 ? {n:'محترف', c:'var(--info-tx)', b:'var(--info-bg)', i:'fa-medal'} : {n:'مبتدئ', c:'var(--text-3)', b:'var(--surface-2)', i:'fa-seedling'}));
-        return card(`<div style="display:flex;align-items:flex-start;gap:8px;">
-            <input type="checkbox" style="width:20px;height:20px;margin-top:12px;cursor:pointer;" onchange="toggleSelect('user', '${u.id}')" ${selectedUsers.has(u.id)?'checked':''}>
+        return card(`<div style="display:flex;align-items:flex-start;gap:10px;">
+            <input type="checkbox" style="width:22px;height:22px;margin-top:12px;cursor:pointer;accent-color:var(--info-tx);" onchange="toggleSelect('user', '${u.id}')" ${selectedUsers.has(u.id)?'checked':''}>
             <div style="flex:1;">
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0"><div style="width:38px;height:38px;border-radius:10px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px;flex-shrink:0;overflow:hidden">${u.photo?`<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">`:E(u.name?.charAt(0)||'?')}</div><div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap"><b style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(u.name || 'مستخدم محذوف')}</b>${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:10px"></i>':''}${u.suspended?'<span class="badge badge-danger" style="padding:1px 5px;font-size:8px">محظور</span>':''}</div><div style="display:flex;align-items:center;gap:4px;margin-top:2px;"><span class="badge" style="padding:0px 4px;font-size:8px;background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c};"><i class="fa-solid ${lvl.i}"></i> ${lvl.n}</span> <span style="font-size:9px; color:var(--text-4);">${u.completedDeals||0} صفقة</span></div><p style="font-size:10px;color:var(--text-3);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p></div></div><b style="color:var(--success-tx);font-size:11.5px;white-space:nowrap">${u.balance||0} ج</b></div><div style="display:flex;gap:4px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:6px">${op('تفاصيل',()=>userInfo(u.id))}${op('إشعار',()=>sendNote(u.id))}${u.suspended ? op('رفع الحظر',async()=>{await update(R('users/'+u.id),{suspended:false,banReason:null,banUntil:null});ok('تم');show(view)},'btn-success') : op('حظر',async()=>{await window.adminToggleBan(u.id); show(view);},'btn-danger')}${op('رصيد',()=>window.adminAdjustBalance(u.id))}${isPro ? op('إلغاء برو',async()=>{await update(R('users/'+u.id),{isPro:false, proUntil:0}); ok('تم إلغاء الاشتراك'); show(view);},'btn-warning') : op('ترقية برو',async()=>{await update(R('users/'+u.id),{isPro:true, proUntil:Date.now()+30*86400000}); ok('تمت الترقية'); show(view);},'btn-gold')}<button class="btn btn-danger" onclick="window.deleteUserAccount('${u.id}')"><i class="fa-solid fa-user-minus"></i></button></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0"><div style="width:42px;height:42px;border-radius:12px;background:var(--surface-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:900;font-size:16px;flex-shrink:0;overflow:hidden">${u.photo?`<img src="${E(u.photo)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">`:E(u.name?.charAt(0)||'?')}</div><div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><b style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(u.name || 'مستخدم محذوف')}</b>${u.verified?'<i class="fa-solid fa-circle-check" style="color:var(--success-tx);font-size:11px"></i>':''}${u.suspended?'<span class="badge badge-danger" style="padding:2px 6px;font-size:9px">محظور</span>':''}</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px;"><span class="badge" style="padding:1px 6px;font-size:9px;background:${lvl.b}; color:${lvl.c}; border-color:${lvl.c};"><i class="fa-solid ${lvl.i}"></i> ${lvl.n}</span> <span style="font-size:10px; color:var(--text-4);font-weight:700;">${u.completedDeals||0} صفقة</span></div><p style="font-size:11px;color:var(--text-3);margin:4px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;" dir="ltr">${E(u.email||'لا يوجد إيميل')}</p></div></div><b style="color:var(--success-tx);font-size:13px;white-space:nowrap;background:var(--success-bg);padding:4px 8px;border-radius:6px;">${u.balance||0} ج</b></div><div style="display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:10px">${op('تفاصيل',()=>userInfo(u.id))}${op('إشعار',()=>sendNote(u.id))}${u.suspended ? op('رفع الحظر',async()=>{await update(R('users/'+u.id),{suspended:false,banReason:null,banUntil:null});ok('تم');show(view)},'btn-success') : op('حظر',async()=>{await window.adminToggleBan(u.id); show(view);},'btn-danger')}${op('رصيد',()=>window.adminAdjustBalance(u.id))}${isPro ? op('إلغاء برو',async()=>{await update(R('users/'+u.id),{isPro:false, proUntil:0}); ok('تم إلغاء الاشتراك'); show(view);},'btn-warning') : op('ترقية برو',async()=>{await update(R('users/'+u.id),{isPro:true, proUntil:Date.now()+30*86400000}); ok('تمت الترقية'); show(view);},'btn-gold')}<button class="btn btn-danger" onclick="window.deleteUserAccount('${u.id}')" style="padding:8px;"><i class="fa-solid fa-user-minus"></i></button></div>
             </div>
         </div>`);
     }).join(''); 
     
-    return bar([['all','الكل'],['ver','موثقون'],['unv','غير موثقين'],['ban','محظورون']], false) + (items||empty) + moreBtn(view, all.length, limit); 
+    return exportBtn + bar([['all','الكل'],['ver','موثقون'],['unv','غير موثقين'],['ban','محظورون']], false) + (items||empty) + moreBtn(view, all.length, limit); 
 },
 async chats(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
     const all=(await fetchList('chats', limit)).sort((a,b)=>b.updatedAt-a.updatedAt); 
     
-    // Chat Filters (Feature 9)
     const filtered = all.filter(c => {
         if (chatFilter === 'open') return c.status !== 'closed' && !c.frozen;
         if (chatFilter === 'frozen') return c.frozen === true;
@@ -558,30 +692,30 @@ async chats(){
     });
 
     const openCount = all.filter(c => c.status !== 'closed').length; 
-    const chatTab = document.querySelector(`.nav-icon[onclick="go('chats')"]`); if(chatTab) { let badge = chatTab.querySelector('.chat-tab-badge'); if(!badge && openCount > 0) { badge = document.createElement('span'); badge.className = 'chat-tab-badge'; badge.style.cssText = 'background:var(--danger-solid);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px;margin-right:5px;'; chatTab.appendChild(badge); } if(badge) { badge.textContent = openCount > 99 ? '+99' : openCount; if(openCount === 0) badge.remove(); } } 
+    const chatTab = document.querySelector(`.nav-icon[onclick="go('chats')"]`); if(chatTab) { let badge = chatTab.querySelector('.chat-tab-badge'); if(!badge && openCount > 0) { badge = document.createElement('span'); badge.className = 'chat-tab-badge'; badge.style.cssText = 'background:var(--danger-tx);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-right:5px;'; chatTab.appendChild(badge); } if(badge) { badge.textContent = openCount > 99 ? '+99' : openCount; if(openCount === 0) badge.remove(); } } 
     const a = filtered.slice(0, limit); 
     
     const filterHtml = `
-    <div style="display:flex; gap:6px; overflow-x:auto; margin-bottom:10px;" class="hide-scroll">
-        <button class="chip ${chatFilter==='all'?'active':''}" onclick="window.setChatFilter('all')" style="padding:6px 12px; font-size:11px;">الكل</button>
-        <button class="chip ${chatFilter==='open'?'active':''}" onclick="window.setChatFilter('open')" style="padding:6px 12px; font-size:11px;">نشطة</button>
-        <button class="chip ${chatFilter==='frozen'?'active':''}" onclick="window.setChatFilter('frozen')" style="padding:6px 12px; font-size:11px;">مجمدة (نزاعات)</button>
-        <button class="chip ${chatFilter==='closed'?'active':''}" onclick="window.setChatFilter('closed')" style="padding:6px 12px; font-size:11px;">مغلقة</button>
+    <div style="display:flex; gap:8px; overflow-x:auto; margin-bottom:16px;" class="hide-scroll">
+        <button class="btn ${chatFilter==='all'?'btn-primary':'btn-ghost'}" onclick="window.setChatFilter('all')" style="padding:8px 16px; font-size:12px; border-radius:20px;">الكل</button>
+        <button class="btn ${chatFilter==='open'?'btn-primary':'btn-ghost'}" onclick="window.setChatFilter('open')" style="padding:8px 16px; font-size:12px; border-radius:20px;">نشطة</button>
+        <button class="btn ${chatFilter==='frozen'?'btn-warning':'btn-ghost'}" onclick="window.setChatFilter('frozen')" style="padding:8px 16px; font-size:12px; border-radius:20px;">مجمدة (نزاعات)</button>
+        <button class="btn ${chatFilter==='closed'?'btn-danger':'btn-ghost'}" onclick="window.setChatFilter('closed')" style="padding:8px 16px; font-size:12px; border-radius:20px;">مغلقة</button>
     </div>`;
 
-    const closeIdleBtn = `<button class="btn btn-warning" style="width:100%; margin-bottom:10px; font-size:11px;" onclick="autoCloseIdleChats()"><i class="fa-solid fa-broom"></i> إغلاق الدردشات الخاملة (أكثر من 24 ساعة)</button>`; 
+    const closeIdleBtn = `<button class="btn btn-ghost" style="width:100%; margin-bottom:16px; font-size:12px; border:1px dashed var(--border-2);" onclick="autoCloseIdleChats()"><i class="fa-solid fa-broom"></i> إغلاق الدردشات الخاملة (أكثر من 24 ساعة)</button>`; 
     
     return filterHtml + closeIdleBtn + (a.map(c=>{ 
         const k='h'+(hc++);H[k]=()=>adminChat(c.id); 
         const isNew = c.adminRead === false && c.status !== 'closed'; 
-        const assigned = c.assignedTo ? `<span class="badge badge-purple" style="font-size:8px;"><i class="fa-solid fa-user-tie"></i> ${E(c.assignedTo.split('@')[0])}</span>` : ''; 
-        return card(`<div style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px" onclick="A('${k}')"><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0"><div style="width:34px;height:34px;border-radius:9px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:13px;flex-shrink:0">${E((c.buyerName||'?').charAt(0))}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap"><b style="font-size:11.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${E(c.buyerName)} ↔ ${E(c.sellerName)}</b>${c.status === 'closed' ? '<span class="badge badge-danger" style="padding:1px 5px;font-size:8px">مغلقة</span>' : ''}${c.frozen ? '<span class="badge badge-info" style="padding:1px 5px;font-size:8px">مجمدة</span>' : ''}${isNew ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--danger-solid);display:inline-block;margin-right:5px" title="رسائل جديدة"></span>' : ''}${assigned}</div><p style="font-size:10px;color:var(--text-3);margin:1px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${E(c.lastMessage||'—')}</p></div></div><button class="btn btn-danger" style="padding:4px 7px;font-size:10px;min-height:28px" onclick="event.stopPropagation(); window.deleteChat('${c.id}', '${c.buyerId}', '${c.sellerId}')"><i class="fa-solid fa-trash"></i></button></div>`); 
+        const assigned = c.assignedTo ? `<span class="badge badge-info" style="font-size:9px;"><i class="fa-solid fa-user-tie"></i> ${E(c.assignedTo.split('@')[0])}</span>` : ''; 
+        return card(`<div style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px;" onclick="A('${k}')"><div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0"><div style="width:42px;height:42px;border-radius:50%;background:var(--surface-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:900;font-size:16px;flex-shrink:0">${E((c.buyerName||'?').charAt(0))}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><b style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${E(c.buyerName)} ↔ ${E(c.sellerName)}</b>${c.status === 'closed' ? '<span class="badge badge-danger" style="padding:2px 6px;font-size:9px">مغلقة</span>' : ''}${c.frozen ? '<span class="badge badge-warning" style="padding:2px 6px;font-size:9px">مجمدة</span>' : ''}${isNew ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--danger-tx);display:inline-block;margin-right:5px" title="رسائل جديدة"></span>' : ''}${assigned}</div><p style="font-size:11px;color:var(--text-3);margin:4px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;">${E(c.lastMessage||'—')}</p></div></div><button class="btn btn-danger" style="padding:8px;border-radius:8px;" onclick="event.stopPropagation(); window.deleteChat('${c.id}', '${c.buyerId}', '${c.sellerId}')"><i class="fa-solid fa-trash"></i></button></div>`); 
     }).join('')||empty) + moreBtn(view, filtered.length, limit); 
 },
 async note(){ 
     const recentLogs = (await fetchLogs(5)).filter(l => l.action === 'إشعار');
-    const recentHtml = recentLogs.length ? recentLogs.map(l => `<div style="display:flex;justify-content:space-between;font-size:10px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-2);font-weight:700">تم إرسال إشعار لـ: ${E(l.detail)}</span><span style="color:var(--text-4)">${timeAgo(l.at)}</span></div>`).join('') : '<p style="font-size:11px;color:var(--text-4);text-align:center">لا توجد إشعارات مرسلة مؤخراً.</p>';
-    return `<div class="card"><div class="sec-title"><i class="fa-solid fa-bell"></i> إرسال إشعار</div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">UID (اختياري - اتركه فارغاً للإرسال للجميع)</label><input id="n_u" placeholder="UID..."><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">العنوان</label><input id="n_t"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">النص</label><textarea id="n_b" rows="4"></textarea><label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin:8px 0 12px;color:var(--text-2)"><input type="checkbox" id="n_p" style="width:auto;margin:0"> نافذة منبثقة</label>${btn('إرسال الإشعار',async()=>{const t=$('n_t').value.trim(),b=$('n_b').value.trim();if(!t||!b)throw new Error('مطلوب');const m={title:t.slice(0,100),body:b.slice(0,500),type:'info',popup:$('n_p').checked,read:false,createdAt:Date.now()};const u=$('n_u').value.trim();if(u){await set(push(R('notifications/'+u)),m);await log('إشعار', u);}else{const ids=Object.keys((await get(R('users'))).val()||{});for(const i of ids){await set(push(R('notifications/'+i)),m)}await log('إشعار', 'الجميع');}ok('تم')},'btn-primary','')}</div><div class="card"><div class="sec-title" style="color:var(--info-tx);border-bottom-color:var(--info-bd);"><i class="fa-solid fa-clock-rotate-left"></i> آخر الإشعارات المرسلة</div>${recentHtml}</div>`;
+    const recentHtml = recentLogs.length ? recentLogs.map(l => `<div style="display:flex;justify-content:space-between;font-size:11px;padding:8px 0;border-bottom:1px solid var(--border);font-weight:700;"><span style="color:var(--text-2);">تم إرسال إشعار لـ: ${E(l.detail)}</span><span style="color:var(--text-4)">${timeAgo(l.at)}</span></div>`).join('') : '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:10px;">لا توجد إشعارات مرسلة مؤخراً.</p>';
+    return `<div class="card"><div class="sec-title"><i class="fa-solid fa-bell" style="color:var(--info-tx)"></i> إرسال إشعار</div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">UID (اختياري - اتركه فارغاً للإرسال للجميع)</label><input id="n_u" placeholder="UID..." dir="ltr" style="text-align:left"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">العنوان</label><input id="n_t"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">النص</label><textarea id="n_b" rows="4"></textarea><label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:900;margin:12px 0;color:var(--text-2)"><input type="checkbox" id="n_p" style="width:auto;margin:0;accent-color:var(--info-tx);"> إظهار كنافذة منبثقة للمستخدم</label>${btn('إرسال الإشعار',async()=>{const t=$('n_t').value.trim(),b=$('n_b').value.trim();if(!t||!b)throw new Error('مطلوب');const m={title:t.slice(0,100),body:b.slice(0,500),type:'info',popup:$('n_p').checked,read:false,createdAt:Date.now()};const u=$('n_u').value.trim();if(u){await set(push(R('notifications/'+u)),m);await log('إشعار', u);}else{const ids=Object.keys((await get(R('users'))).val()||{});for(const i of ids){await set(push(R('notifications/'+i)),m)}await log('إشعار', 'الجميع');}ok('تم')},'btn-primary','')}</div><div class="card"><div class="sec-title" style="color:var(--info-tx);border-bottom-color:var(--info-bd);"><i class="fa-solid fa-clock-rotate-left"></i> آخر الإشعارات المرسلة</div>${recentHtml}</div>`;
 },
 async set(){ 
     const s=(await get(R('settings'))).val()||{};S=s; 
@@ -595,28 +729,28 @@ async set(){
     
     const f=[ ['siteName','اسم الموقع'],['supportEmail','بريد الدعم'],['bankName','اسم البنك'], ['accountName','اسم الحساب'],['walletNumber','رقم المحفظة'],['commission','العمولة %'], ['tickerText','الشريط'],['depositWarning','تنبيه الشحن'],['maintenanceMessage','رسالة الصيانة'], ['autoReplyText','الرد التلقائي للدعم'],['proPrice','سعر الباقة المميزة (ج)'], ['proDays','مدة الباقة المميزة (أيام)'],['maxAdsFree','حد الإعلانات المجانية'], ['maxAdsPro','حد الإعلانات للباقة المميزة'],['refBonus','مكافأة الإحالة (ج)'] ]; 
 
-    const adminsHtml = me.isOwner ? (admins.map(a => { const k='h'+(hc++);H[k]=()=>Swal.fire({title:'تعديل',input:'select',inputOptions:{'super_admin':'مدير','accountant':'محاسب','support':'دعم'},inputValue:a.role||'super_admin',showCancelButton:true}).then(async r=>{if(r.isConfirmed){await update(R('admins/'+a.id),{role:r.value});ok('تم');show(view)}}); const delK='h'+(hc++);H[delK]=async()=>{if(!await ask('حذف '+a.email+'؟'))return;await remove(R('admins/'+a.id));await log('حذف مشرف',a.email);ok('تم');show(view)}; return `<div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);padding:8px;border-radius:8px;margin-bottom:5px;border:1px solid var(--border);gap:6px"><div style="min-width:0;flex:1"><b style="font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${E(a.email||a.id)}</b><span style="font-size:10px;color:var(--info-tx);font-weight:800">${a.role==='accountant'?'محاسب':a.role==='support'?'دعم':'مدير'}</span></div><div style="display:flex;gap:3px;flex-shrink:0"><button class="btn btn-ghost" style="padding:3px 7px;font-size:10px;min-height:26px" onclick="A('${k}')">تعديل</button><button class="btn btn-danger" style="padding:3px 7px;font-size:10px;min-height:26px" onclick="A('${delK}')">حذف</button></div></div>`; }).join('') || '<p style="font-size:11px;color:var(--text-4)">لا يوجد مشرفين</p>') : '<p style="font-size:11px;color:var(--text-4)">ليس لديك صلاحية</p>'; 
+    const adminsHtml = me.isOwner ? (admins.map(a => { const k='h'+(hc++);H[k]=()=>Swal.fire({title:'تعديل',input:'select',inputOptions:{'super_admin':'مدير','accountant':'محاسب','support':'دعم'},inputValue:a.role||'super_admin',showCancelButton:true}).then(async r=>{if(r.isConfirmed){await update(R('admins/'+a.id),{role:r.value});ok('تم');show(view)}}); const delK='h'+(hc++);H[delK]=async()=>{if(!await ask('حذف '+a.email+'؟'))return;await remove(R('admins/'+a.id));await log('حذف مشرف',a.email);ok('تم');show(view)}; return `<div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);padding:10px;border-radius:10px;margin-bottom:8px;border:1px solid var(--border);gap:8px"><div style="min-width:0;flex:1"><b style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${E(a.email||a.id)}</b><span class="badge badge-info" style="font-size:10px;margin-top:4px;">${a.role==='accountant'?'محاسب':a.role==='support'?'دعم':'مدير'}</span></div><div style="display:flex;gap:4px;flex-shrink:0"><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;min-height:28px" onclick="A('${k}')">تعديل</button><button class="btn btn-danger" style="padding:4px 10px;font-size:11px;min-height:28px" onclick="A('${delK}')">حذف</button></div></div>`; }).join('') || '<p style="font-size:11px;color:var(--text-4);text-align:center;">لا يوجد مشرفين</p>') : '<p style="font-size:11px;color:var(--text-4);text-align:center;">ليس لديك صلاحية</p>'; 
     const addAdminK = 'h'+(hc++); H[addAdminK] = async () => { const r = await Swal.fire({ title: 'إضافة مشرف', html: '<input id="a_email" class="swal2-input" placeholder="البريد"><input id="a_uid" class="swal2-input" placeholder="UID (اختياري)"><select id="a_role" class="swal2-select"><option value="super_admin">مدير</option><option value="accountant">محاسب</option><option value="support">دعم</option></select>', showCancelButton: true, confirmButtonText: 'إضافة', cancelButtonText: 'إلغاء', preConfirm: () => { const email = $('a_email').value.trim(); const uid = $('a_uid').value.trim(); const role = $('a_role').value; if (!uid && !email) { Swal.showValidationMessage('مطلوب'); return false; } return { email, uid, role }; }}); if (!r.isConfirmed) return; if (r.value.uid) { await set(R('admins/'+r.value.uid), {email: r.value.email, role: r.value.role, addedAt: Date.now()}); await log('إضافة مشرف', r.value.email); ok('تم'); show(view); } else { try { Swal.fire({title: 'جاري البحث...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); const usersSnap = await get(R('users')); let targetUid = null; usersSnap.forEach(child => { if (child.val().email && child.val().email.toLowerCase() === r.value.email.toLowerCase()) targetUid = child.key; }); if (!targetUid) throw new Error('لم يتم إيجاد المستخدم'); await set(R('admins/'+targetUid), {email: r.value.email, role: r.value.role, addedAt: Date.now()}); await log('إضافة مشرف', r.value.email); Swal.close(); ok('تم'); show(view); } catch (err) { Swal.close(); bad(err); } } }; 
     
     return `
     <div class="card">
-        <div class="sec-title"><i class="fa-solid fa-gear"></i> إعدادات الموقع</div>
-        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم الموقع</label><input id="s_siteName" value="${E(s.siteName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">بريد الدعم</label><input id="s_supportEmail" value="${E(s.supportEmail||'')}"></div></div>
-        <div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-wallet"></i> بيانات الدفع والعمولة</div>
-        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم البنك</label><input id="s_bankName" value="${E(s.bankName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">اسم الحساب</label><input id="s_accountName" value="${E(s.accountName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رقم المحفظة</label><input id="s_walletNumber" value="${E(s.walletNumber||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">العمولة (%)</label><input id="s_commission" type="number" value="${E(s.commission||0)}"></div></div>
-        <div class="sec-title" style="margin-top:14px; color:var(--gold-tx); border-bottom-color:var(--gold-bd);"><i class="fa-solid fa-crown"></i> الباقات والإحالات</div>
-        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">سعر الباقة المميزة (ج)</label><input id="s_proPrice" type="number" value="${E(s.proPrice||50)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">مدة الباقة (أيام)</label><input id="s_proDays" type="number" value="${E(s.proDays||30)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">حد الإعلانات المجانية</label><input id="s_maxAdsFree" type="number" value="${E(s.maxAdsFree||5)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">حد الإعلانات المميزة (برو)</label><input id="s_maxAdsPro" type="number" value="${E(s.maxAdsPro||50)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">مكافأة الإحالة (ج)</label><input id="s_refBonus" type="number" value="${E(s.refBonus||10)}"></div></div>
-        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الشريط المتحرك</label><input id="s_tickerText" value="${E(s.tickerText||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تنبيه الشحن</label><input id="s_depositWarning" value="${E(s.depositWarning||'')}"></div><div style="grid-column:1/-1"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الرد التلقائي للدعم</label><input id="s_autoReplyText" value="${E(s.autoReplyText||'')}"></div></div>
-        <div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-gamepad"></i> قوائم الألعاب والسيرفرات</div>
-        <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">الألعاب (مفصولة بفاصلة)</label><textarea id="s_games" rows="2">${E(currentGames)}</textarea>
-        <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">السيرفرات (مفصولة بفاصلة)</label><textarea id="s_servers" rows="2">${E(currentServers)}</textarea>
-        <div class="sec-title" style="margin-top:14px"><i class="fa-solid fa-shield-halved"></i> الأمان والصيانة</div>
-        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">تأمين العمليات</label><div style="padding:10px 12px;background:var(--success-bg);border:1px solid var(--success-bd);border-radius:9px;font-size:11px;font-weight:800;color:var(--success-tx);margin-bottom:9px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-shield-halved"></i> محمي عبر Google</div></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رسالة الصيانة</label><input id="s_maintenanceMessage" value="${E(s.maintenanceMessage||'')}"></div></div>
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin:10px 0 6px;color:var(--text-2)"><input type="checkbox" id="s_maintenanceMode" style="width:auto;margin:0" ${s.maintenanceMode?'checked':''}> تفعيل وضع الصيانة</label>
+        <div class="sec-title"><i class="fa-solid fa-gear" style="color:var(--text-3)"></i> إعدادات الموقع</div>
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">اسم الموقع</label><input id="s_siteName" value="${E(s.siteName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">بريد الدعم</label><input id="s_supportEmail" value="${E(s.supportEmail||'')}"></div></div>
+        <div class="sec-title" style="margin-top:16px"><i class="fa-solid fa-wallet" style="color:var(--success-tx)"></i> بيانات الدفع والعمولة</div>
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">اسم البنك</label><input id="s_bankName" value="${E(s.bankName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">اسم الحساب</label><input id="s_accountName" value="${E(s.accountName||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">رقم المحفظة</label><input id="s_walletNumber" value="${E(s.walletNumber||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">العمولة (%)</label><input id="s_commission" type="number" value="${E(s.commission||0)}"></div></div>
+        <div class="sec-title" style="margin-top:16px; color:var(--gold-tx); border-bottom-color:var(--gold-bd);"><i class="fa-solid fa-crown"></i> الباقات والإحالات</div>
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">سعر الباقة المميزة (ج)</label><input id="s_proPrice" type="number" value="${E(s.proPrice||50)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">مدة الباقة (أيام)</label><input id="s_proDays" type="number" value="${E(s.proDays||30)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">حد الإعلانات المجانية</label><input id="s_maxAdsFree" type="number" value="${E(s.maxAdsFree||5)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">حد الإعلانات المميزة (برو)</label><input id="s_maxAdsPro" type="number" value="${E(s.maxAdsPro||50)}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">مكافأة الإحالة (ج)</label><input id="s_refBonus" type="number" value="${E(s.refBonus||10)}"></div></div>
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">الشريط المتحرك</label><input id="s_tickerText" value="${E(s.tickerText||'')}"></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">تنبيه الشحن</label><input id="s_depositWarning" value="${E(s.depositWarning||'')}"></div><div style="grid-column:1/-1"><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">الرد التلقائي للدعم</label><input id="s_autoReplyText" value="${E(s.autoReplyText||'')}"></div></div>
+        <div class="sec-title" style="margin-top:16px"><i class="fa-solid fa-gamepad" style="color:var(--info-tx)"></i> قوائم الألعاب والسيرفرات</div>
+        <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">الألعاب (مفصولة بفاصلة)</label><textarea id="s_games" rows="2">${E(currentGames)}</textarea>
+        <label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">السيرفرات (مفصولة بفاصلة)</label><textarea id="s_servers" rows="2">${E(currentServers)}</textarea>
+        <div class="sec-title" style="margin-top:16px"><i class="fa-solid fa-shield-halved" style="color:var(--success-tx)"></i> الأمان والصيانة</div>
+        <div class="grid-2"><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">تأمين العمليات</label><div style="padding:12px;background:var(--success-bg);border:1px solid var(--success-bd);border-radius:10px;font-size:12px;font-weight:900;color:var(--success-tx);margin-bottom:10px;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-shield-halved"></i> محمي عبر Google</div></div><div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:6px">رسالة الصيانة</label><input id="s_maintenanceMessage" value="${E(s.maintenanceMessage||'')}"></div></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:900;margin:12px 0;color:var(--text-2)"><input type="checkbox" id="s_maintenanceMode" style="width:auto;margin:0;accent-color:var(--danger-tx);" ${s.maintenanceMode?'checked':''}> تفعيل وضع الصيانة (إغلاق الموقع)</label>
         ${btn('حفظ جميع الإعدادات',async()=>{const o={}; f.forEach(([k])=>o[k]=$('s_'+k).value.trim()); o.commission=Math.min(50,Math.max(0,Number(o.commission)||0)); o.proPrice = Number(o.proPrice) || 50; o.proDays = Number(o.proDays) || 30; o.maxAdsFree = Number(o.maxAdsFree) || 5; o.maxAdsPro = Number(o.maxAdsPro) || 50; o.refBonus = Number(o.refBonus) || 10; o.maintenanceMode=$('s_maintenanceMode').checked; o.games = $('s_games').value.split(',').map(x=>x.trim()).filter(Boolean); o.servers = $('s_servers').value.split(',').map(x=>x.trim()).filter(Boolean); await update(R('settings'),o); $('maintenance-banner').classList.toggle('hidden', !o.maintenanceMode); },'btn-primary','تعديل الإعدادات')}
     </div>
-    <div class="card"><div class="sec-title" style="justify-content:space-between"><span><i class="fa-solid fa-users-gear"></i> إدارة المشرفين</span>${me.isOwner ? `<button class="btn btn-primary" style="padding:3px 9px;font-size:10px;min-height:26px" onclick="A('${addAdminK}')"><i class="fa-solid fa-plus"></i> إضافة</button>` : ''}</div>${adminsHtml}</div>
-    ${me.isOwner ? `<div class="card" style="border-color:var(--danger-bd);"><div class="sec-title" style="color:var(--danger-tx);border-bottom-color:var(--danger-bd);"><i class="fa-solid fa-skull-crossbones"></i> منطقة الخطر (للمالك فقط)</div><p style="font-size:11px;color:var(--text-3);margin-bottom:10px;">أدوات متقدمة للتحكم الكامل بقاعدة البيانات.</p><button class="btn btn-danger" style="width:100%;" onclick="window.openDatabaseManager()"><i class="fa-solid fa-database"></i> فتح شجرة قاعدة البيانات (JSON)</button></div>` : ''}`; 
+    <div class="card"><div class="sec-title" style="justify-content:space-between"><span><i class="fa-solid fa-users-gear" style="color:var(--info-tx)"></i> إدارة المشرفين</span>${me.isOwner ? `<button class="btn btn-primary" style="padding:6px 12px;font-size:11px;min-height:30px" onclick="A('${addAdminK}')"><i class="fa-solid fa-plus"></i> إضافة</button>` : ''}</div>${adminsHtml}</div>
+    ${me.isOwner ? `<div class="card" style="border-color:var(--danger-bd);"><div class="sec-title" style="color:var(--danger-tx);border-bottom-color:var(--danger-bd);"><i class="fa-solid fa-skull-crossbones"></i> منطقة الخطر (للمالك فقط)</div><p style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-weight:700;">أدوات متقدمة للتحكم الكامل بقاعدة البيانات.</p><button class="btn btn-danger" style="width:100%;" onclick="window.openDatabaseManager()"><i class="fa-solid fa-database"></i> فتح شجرة قاعدة البيانات (JSON)</button></div>` : ''}`; 
 },
 async log(){ 
     const limit = pageState[view] ? pageState[view]*30 : 50;
@@ -626,7 +760,7 @@ async log(){
     const q = (fl().q || '').toLowerCase();
     const filtered = all.filter(l => { const matchQ = !q || (l.action||'').toLowerCase().includes(q) || (l.detail||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q); const matchAdmin = !adminFilter || l.email === adminFilter; return matchQ && matchAdmin; });
     const a = filtered.slice(0, limit);
-    return `<div style="display:flex; gap:8px; margin-bottom:14px;"><select onchange="setF('adminFilter',this.value)" style="margin:0; flex:1;"><option value="">كل المشرفين</option>${uniqueAdmins.map(e => `<option value="${e}" ${adminFilter===e?'selected':''}>${E(e.split('@')[0])}</option>`).join('')}</select><div style="position:relative; flex:2;"><i class="fa-solid fa-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px;pointer-events:none"></i><input placeholder="بحث في السجل..." value="${E(fl().q||'')}" onchange="setF('q',this.value)" style="margin:0;padding-right:34px"></div></div>` + (a.map(l=>card(`<div style="display:flex;align-items:start;gap:6px"><div style="width:26px;height:26px;border-radius:7px;background:var(--neutral-bg);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0;margin-top:2px"><i class="fa-solid fa-clipboard-list" style="font-size:9px"></i></div><div style="flex:1;min-width:0"><b style="font-size:11.5px;color:var(--text)">${E(l.action)}</b><p style="font-size:9px;color:var(--text-3);margin:1px 0 0">${E(l.email)} · ${timeAgo(l.at)} · IP: ${E(l.ip||'—')}</p><p style="font-size:10.5px;color:var(--text-2);margin-top:4px;background:var(--neutral-bg);padding:5px 7px;border-radius:6px;font-weight:600">${E(l.detail)}</p>${l.oldVal || l.newVal ? `<div style="display:flex; gap:6px; margin-top:4px; font-size:9px;"><span style="background:var(--danger-bg); color:var(--danger-tx); padding:2px 6px; border-radius:4px; border:1px solid var(--danger-bd);">قبل: ${E(l.oldVal)}</span><span style="background:var(--success-bg); color:var(--success-tx); padding:2px 6px; border-radius:4px; border:1px solid var(--success-bd);">بعد: ${E(l.newVal)}</span></div>` : ''}</div></div>`)).join('')||empty) + moreBtn(view, filtered.length, limit); 
+    return `<div style="display:flex; gap:10px; margin-bottom:16px;"><select onchange="setF('adminFilter',this.value)" style="margin:0; flex:1;"><option value="">كل المشرفين</option>${uniqueAdmins.map(e => `<option value="${e}" ${adminFilter===e?'selected':''}>${E(e.split('@')[0])}</option>`).join('')}</select><div style="position:relative; flex:2;"><i class="fa-solid fa-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px;pointer-events:none"></i><input placeholder="بحث في السجل..." value="${E(fl().q||'')}" onchange="setF('q',this.value)" style="margin:0;padding-right:34px"></div></div>` + (a.map(l=>card(`<div style="display:flex;align-items:start;gap:10px"><div style="width:30px;height:30px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0;margin-top:2px"><i class="fa-solid fa-clipboard-list" style="font-size:10px"></i></div><div style="flex:1;min-width:0"><b style="font-size:12px;color:var(--text)">${E(l.action)}</b><p style="font-size:10px;color:var(--text-3);margin:2px 0 0;font-weight:700;">${E(l.email)} · ${timeAgo(l.at)} · IP: ${E(l.ip||'—')}</p><p style="font-size:11px;color:var(--text-2);margin-top:6px;background:var(--surface-2);padding:6px 10px;border-radius:8px;font-weight:700;border:1px solid var(--border);">${E(l.detail)}</p>${l.oldVal || l.newVal ? `<div style="display:flex; gap:8px; margin-top:6px; font-size:10px;font-weight:800;"><span style="background:var(--danger-bg); color:var(--danger-tx); padding:2px 8px; border-radius:6px; border:1px solid var(--danger-bd);">قبل: ${E(l.oldVal)}</span><span style="background:var(--success-bg); color:var(--success-tx); padding:2px 8px; border-radius:6px; border:1px solid var(--success-bd);">بعد: ${E(l.newVal)}</span></div>` : ''}</div></div>`)).join('')||empty) + moreBtn(view, filtered.length, limit); 
 }
 };
 
@@ -645,7 +779,7 @@ async function show(v){
   if (!allowedTabs.some(([key]) => key === v)) { v = 'dash'; view = 'dash'; }
   set(R('admins_status/'+me.uid), {email: me.email, role: me.role, lastSeen: Date.now()});
   $('tabs-inner').innerHTML = allowedTabs.map(([k,l,icon])=>`<button class="nav-icon ${k===v?'active':''}" onclick="go('${k}')"><i class="fa-solid ${icon}"></i><span>${l}</span></button>`).join('') + `<button class="nav-icon logout" onclick="out()"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>خروج</span></button>`;
-  $('v').innerHTML = Array(2).fill(0).map(() => `<div class="card" style="margin-bottom:8px"><div class="skeleton" style="height:14px;width:33%;margin-bottom:8px"></div><div class="skeleton" style="height:28px;width:100%;margin-bottom:6px"></div><div class="skeleton" style="height:14px;width:66%"></div></div>`).join('');
+  $('v').innerHTML = Array(2).fill(0).map(() => `<div class="card" style="margin-bottom:10px"><div class="skeleton" style="height:16px;width:33%;margin-bottom:10px"></div><div class="skeleton" style="height:32px;width:100%;margin-bottom:8px"></div><div class="skeleton" style="height:16px;width:66%"></div></div>`).join('');
   try{ $('v').innerHTML = await V[v](); window.scrollTo(0,0); }catch(e){ $('v').innerHTML='';bad(e) }
 }
 window.go=(v)=>{ pageState[v]=1; show(v); };
@@ -658,7 +792,7 @@ window.banDevice = async (uid) => { if (!uid) return; try { const u = (await get
 window.adminAddStrike = async (uid) => { if (!uid) return; try { const u = (await get(R('users/'+uid))).val() || {}; const currentStrikes = (u.strikes || 0) + 1; const why = await reason('سبب إعطاء التحذير'); await update(R('users/'+uid), { strikes: currentStrikes }); await log('إعطاء تحذير', `${uid} - التحذير رقم ${currentStrikes} - السبب: ${why}`); await notify(uid, 'تحذير إداري', `لقد تلقيت تحذيراً (${currentStrikes}/3). السبب: ${why}`); if(currentStrikes >= 3) { await update(R('users/'+uid), { suspended: true, banReason: 'تجاوز 3 تحذيرات' }); await notify(uid, 'تم حظر حسابك', 'نظراً لتجاوزك 3 تحذيرات، تم حظر حسابك.'); ok('تم إعطاء التحذير وتم الحظر التلقائي لتجاوز 3 تحذيرات!'); } else { ok(`تم إعطاء التحذير (${currentStrikes}/3)`); } show(view); } catch(e) { bad(e); } };
 
 // =========================================
-// Admin Chat & Dispute Resolution
+// Admin Chat & Dispute Resolution (Refined UI)
 // =========================================
 function adminChat(cid){
   clearLive();H={};hc=0;let c={}, currentUserData = null;
@@ -671,28 +805,26 @@ function adminChat(cid){
   <div id="panel-overlay" class="panel-overlay" onclick="togglePanel()"></div>
   <div id="side-panel" class="side-panel">
       <div class="panel-header">
-          <div id="panel-avatar" style="width:64px;height:64px;border-radius:16px;background:#18181b;color:#fff;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">?</div>
-          <b id="panel-name" style="font-size:15px;font-weight:900;display:block;color:var(--text);">—</b>
-          <span id="panel-email" style="font-size:10px;color:var(--text-3);font-weight:700;direction:ltr;display:block;margin-top:2px;">—</span>
-          <div id="panel-status" style="margin-top:5px;font-size:10px;font-weight:800;"></div>
-          <div id="panel-balance" style="margin-top:10px;background:var(--success-bg);color:var(--success-tx);padding:5px 10px;border-radius:8px;font-size:12px;font-weight:900;display:inline-block;">الرصيد: 0 ج</div>
+          <div style="width:60px;height:60px;border-radius:16px;background:var(--surface-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;color:var(--text);"><i class="fa-solid fa-user-tie"></i></div>
+          <b style="font-size:16px;font-weight:900;display:block;color:var(--text);">لوحة الأدوات</b>
+          <span style="font-size:11px;color:var(--text-3);font-weight:700;">إدارة النزاع والمستخدمين</span>
       </div>
       
       <div class="panel-body">
-          <!-- أزرار خاصة بالنزاع (تظهر فقط إذا كانت هناك صفقة) -->
-          <div id="dispute-admin-tools" style="display:none; margin-bottom: 15px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px;">
-              <b style="font-size:12px; color:var(--danger-tx); display:block; margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;"><i class="fa-solid fa-gavel"></i> قرارات الصفقة (للإدارة)</b>
-              <div style="display:grid; grid-template-columns:1fr; gap:6px;">
-                  <button class="btn btn-success" style="width:100%; font-size:11px; justify-content:flex-start;" onclick="window.adminResolveDispute('${cid}', 'release')"><i class="fa-solid fa-check"></i> تحرير المبلغ للبائع (إنهاء النزاع)</button>
-                  <button class="btn btn-danger" style="width:100%; font-size:11px; justify-content:flex-start;" onclick="window.adminResolveDispute('${cid}', 'refund')"><i class="fa-solid fa-rotate-left"></i> استرداد المبلغ للمشتري (إلغاء الصفقة)</button>
-                  <button class="btn btn-info" style="width:100%; font-size:11px; justify-content:flex-start;" onclick="window.sendDealInfoToChat('${cid}')"><i class="fa-solid fa-file-invoice"></i> إرفاق بطاقة تفاصيل الصفقة</button>
-                  <button class="btn btn-warning" style="width:100%; font-size:11px; justify-content:flex-start;" onclick="window.requestEvidence('${cid}')"><i class="fa-solid fa-camera"></i> طلب أدلة وإثباتات</button>
+          <!-- قرارات الصفقة -->
+          <div id="dispute-admin-tools" class="tools-card" style="display:none; border-color:var(--danger-bd); background:var(--danger-bg);">
+              <b class="tools-title" style="color:var(--danger-tx); border-bottom-color:var(--danger-bd);"><i class="fa-solid fa-gavel"></i> قرارات الصفقة (للإدارة)</b>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                  <button class="btn btn-success" style="width:100%; justify-content:flex-start; padding:12px;" onclick="window.adminResolveDispute('${cid}', 'release')"><i class="fa-solid fa-check-circle"></i> تحرير المبلغ للبائع</button>
+                  <button class="btn btn-danger" style="width:100%; justify-content:flex-start; padding:12px;" onclick="window.adminResolveDispute('${cid}', 'refund')"><i class="fa-solid fa-rotate-left"></i> استرداد المبلغ للمشتري</button>
+                  <button class="btn btn-info" style="width:100%; justify-content:flex-start; padding:12px;" onclick="window.sendDealInfoToChat('${cid}')"><i class="fa-solid fa-file-invoice"></i> إرفاق بطاقة تفاصيل الصفقة</button>
+                  <button class="btn btn-warning" style="width:100%; justify-content:flex-start; padding:12px;" onclick="window.requestEvidence('${cid}')"><i class="fa-solid fa-camera"></i> طلب أدلة وإثباتات</button>
               </div>
           </div>
 
           <!-- أدوات المشتري -->
-          <div id="buyer-tools" style="display:none; margin-bottom: 15px; border: 1px solid var(--info-bd); border-radius: 10px; padding: 10px; background: var(--info-bg);">
-              <b style="font-size:12px; color:var(--info-tx); display:block; margin-bottom:8px;"><i class="fa-solid fa-user-tag"></i> إجراءات بحق المشتري</b>
+          <div id="buyer-tools" class="tools-card" style="display:none; border-color:var(--info-bd); background:var(--info-bg);">
+              <b class="tools-title" style="color:var(--info-tx); border-bottom-color:var(--info-bd);"><i class="fa-solid fa-user-tag"></i> إجراءات بحق المشتري</b>
               <div class="action-grid">
                   <button class="action-btn" style="background:var(--surface);" onclick="window.targetedAction('${cid}', 'buyer', 'info')"><i class="fa-solid fa-address-card"></i> الملف</button>
                   <button class="action-btn" style="background:var(--surface);" onclick="window.targetedAction('${cid}', 'buyer', 'tx')"><i class="fa-solid fa-receipt"></i> المعاملات</button>
@@ -704,8 +836,8 @@ function adminChat(cid){
           </div>
 
           <!-- أدوات البائع -->
-          <div id="seller-tools" style="display:none; margin-bottom: 15px; border: 1px solid var(--purple-bd); border-radius: 10px; padding: 10px; background: var(--purple-bg);">
-              <b style="font-size:12px; color:var(--purple-tx); display:block; margin-bottom:8px;"><i class="fa-solid fa-store"></i> إجراءات بحق البائع</b>
+          <div id="seller-tools" class="tools-card" style="display:none; border-color:var(--purple-bd); background:var(--purple-bg);">
+              <b class="tools-title" style="color:var(--purple-tx); border-bottom-color:var(--purple-bd);"><i class="fa-solid fa-store"></i> إجراءات بحق البائع</b>
               <div class="action-grid">
                   <button class="action-btn" style="background:var(--surface);" onclick="window.targetedAction('${cid}', 'seller', 'info')"><i class="fa-solid fa-address-card"></i> الملف</button>
                   <button class="action-btn" style="background:var(--surface);" onclick="window.targetedAction('${cid}', 'seller', 'tx')"><i class="fa-solid fa-receipt"></i> المعاملات</button>
@@ -716,34 +848,37 @@ function adminChat(cid){
               </div>
           </div>
 
-          <!-- أدوات الدعم العادية (تظهر فقط في تذاكر الدعم) -->
+          <!-- أدوات الدعم العادية -->
           <div id="support-tools" style="display:none;">
-             <div class="action-grid">
-                <button class="action-btn info" onclick="window.sendUserInfoCard()"><i class="fa-solid fa-address-card"></i> بطاقة المستخدم</button>
-                <button class="action-btn" onclick="window.openUserTransactions(window._chatCtx.uid, window._chatCtx.cid)"><i class="fa-solid fa-receipt" style="color:var(--info-solid)"></i> المعاملات</button>
-                <button class="action-btn warning" onclick="window.adminAdjustBalance(window._chatCtx.uid)"><i class="fa-solid fa-wallet"></i> تعديل الرصيد</button>
-                <button class="action-btn danger" onclick="window.adminToggleBan(window._chatCtx.uid)"><i class="fa-solid fa-ban"></i> حظر / إلغاء</button>
-                <button class="action-btn" onclick="userInfo(window._chatCtx.uid)"><i class="fa-solid fa-user-gear" style="color:var(--purple-solid)"></i> الملف الشخصي</button>
-                <button class="action-btn success" onclick="window.sendQuickNote(window._chatCtx.uid)"><i class="fa-solid fa-bell"></i> إشعار سريع</button>
-                <button class="action-btn danger" style="background:#7f1d1d;color:#fca5a5;border-color:#991b1b;" onclick="window.banDevice(window._chatCtx.uid)"><i class="fa-solid fa-laptop-circle-xmark"></i> حظر الجهاز</button>
-                <button class="action-btn warning" onclick="window.adminAddStrike(window._chatCtx.uid)"><i class="fa-solid fa-triangle-exclamation"></i> إعطاء تحذير</button>
+             <div class="tools-card">
+                 <b class="tools-title" style="color:var(--text-2); border-bottom-color:var(--border);"><i class="fa-solid fa-headset"></i> أدوات الدعم الفني</b>
+                 <div class="action-grid">
+                    <button class="action-btn info" onclick="window.sendUserInfoCard()"><i class="fa-solid fa-address-card"></i> بطاقة المستخدم</button>
+                    <button class="action-btn" onclick="window.openUserTransactions(window._chatCtx.uid, window._chatCtx.cid)"><i class="fa-solid fa-receipt" style="color:var(--info-tx)"></i> المعاملات</button>
+                    <button class="action-btn warning" onclick="window.adminAdjustBalance(window._chatCtx.uid)"><i class="fa-solid fa-wallet"></i> تعديل الرصيد</button>
+                    <button class="action-btn danger" onclick="window.adminToggleBan(window._chatCtx.uid)"><i class="fa-solid fa-ban"></i> حظر / إلغاء</button>
+                    <button class="action-btn" onclick="userInfo(window._chatCtx.uid)"><i class="fa-solid fa-user-gear" style="color:var(--purple-tx)"></i> الملف الشخصي</button>
+                    <button class="action-btn success" onclick="window.sendQuickNote(window._chatCtx.uid)"><i class="fa-solid fa-bell"></i> إشعار سريع</button>
+                    <button class="action-btn danger" style="background:#7f1d1d;color:#fca5a5;border-color:#991b1b;" onclick="window.banDevice(window._chatCtx.uid)"><i class="fa-solid fa-laptop-circle-xmark"></i> حظر الجهاز</button>
+                    <button class="action-btn warning" onclick="window.adminAddStrike(window._chatCtx.uid)"><i class="fa-solid fa-triangle-exclamation"></i> إعطاء تحذير</button>
+                 </div>
              </div>
           </div>
           
           <div class="internal-notes" id="notes-container" style="display:none;">
-              <b style="font-size:11px; color:var(--warn-tx); display:block; margin-bottom:5px;"><i class="fa-solid fa-pen-nib"></i> ملاحظات النزاع الداخلية (سرية)</b>
-              <textarea id="admin-note-input" style="font-size:11px; height:60px; margin-bottom:5px; padding:6px;" placeholder="اكتب ملاحظة..."></textarea>
-              <button class="btn btn-warning" style="width:100%; font-size:10px; min-height:28px;" onclick="window.saveAdminNote(window._chatCtx.uid)">حفظ</button>
+              <b style="font-size:12px; color:var(--gold-tx); display:block; margin-bottom:8px;"><i class="fa-solid fa-pen-nib"></i> ملاحظات النزاع (سرية)</b>
+              <textarea id="admin-note-input" style="font-size:12px; height:80px; margin-bottom:8px; padding:10px; background:var(--surface);" placeholder="اكتب ملاحظة سرية للفريق هنا..."></textarea>
+              <button class="btn btn-warning" style="width:100%; font-size:12px; padding:10px;" onclick="window.saveAdminNote(window._chatCtx.uid)">حفظ الملاحظة</button>
           </div>
       </div>
   </div>
   
   <div class="chat-shell">
       <div class="chat-header" style="cursor:pointer;" onclick="togglePanel()">
-          <button class="icon-btn" onclick="event.stopPropagation(); go('chats')" style="width:30px;height:30px;flex-shrink:0"><i class="fa-solid fa-arrow-right" style="font-size:11px"></i></button>
+          <button class="icon-btn" onclick="event.stopPropagation(); go('chats')" style="width:34px;height:34px;flex-shrink:0;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-arrow-right" style="font-size:13px"></i></button>
           <div id="chat-avatar-wrap" class="chat-avatar">?</div>
-          <div class="chat-info"><div id="chat-title" class="chat-name" style="display:flex;align-items:center;gap:5px;">— <i class="fa-solid fa-bars-staggered" style="font-size:10px;color:var(--text-4)"></i></div><div id="chat-status" class="chat-status"><span class="status-dot"></span><span>—</span></div></div>
-          <div style="display:flex;gap:4px;flex-shrink:0"><span id="assign-btn"></span><span id="fz"></span><span id="cl"></span></div>
+          <div class="chat-info"><div id="chat-title" class="chat-name" style="display:flex;align-items:center;gap:6px;">— <i class="fa-solid fa-bars-staggered" style="font-size:12px;color:var(--text-4); background:var(--surface-2); padding:4px; border-radius:6px;"></i></div><div id="chat-status" class="chat-status"><span class="status-dot"></span><span>—</span></div></div>
+          <div style="display:flex;gap:6px;flex-shrink:0"><span id="assign-btn"></span><span id="fz"></span><span id="cl"></span></div>
       </div>
       <div id="dp"></div>
       <div id="ms" class="chat-messages"></div>
@@ -751,20 +886,18 @@ function adminChat(cid){
           <input type="file" id="fi" accept="image/*" style="display:none">
           <button class="icon-btn" id="btn-img" title="صورة"><i class="fa-solid fa-image"></i></button>
           <button class="icon-btn" id="btn-qr" title="ردود سريعة" style="color:var(--warn-tx);background:var(--warn-bg);border-color:var(--warn-bd)"><i class="fa-solid fa-bolt"></i></button>
-          <input id="mi" placeholder="اكتب ردك...">
-          <button class="btn btn-primary" id="mb" style="padding:8px 12px;min-height:38px"><i class="fa-solid fa-paper-plane"></i></button>
+          <input id="mi" placeholder="اكتب ردك هنا..." style="border-radius:20px;">
+          <button class="btn btn-primary" id="mb" style="padding:0 16px;min-height:42px;border-radius:20px;"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
   </div>`;
 
   window.togglePanel = () => { $('side-panel').classList.toggle('open'); $('panel-overlay').classList.toggle('open'); };
   
-  // دالة موجهة لتنفيذ الإجراءات على المشتري أو البائع
   window.targetedAction = async (chatId, target, action) => {
       const chat = (await get(R('chats/' + chatId))).val();
       const uid = target === 'buyer' ? chat.buyerId : chat.sellerId;
       if (!uid) return bad(new Error('المستخدم غير موجود'));
       $('side-panel').classList.remove('open'); $('panel-overlay').classList.remove('open');
-      
       if (action === 'info') userInfo(uid);
       else if (action === 'tx') window.openUserTransactions(uid, chatId);
       else if (action === 'note') window.sendQuickNote(uid);
@@ -773,7 +906,7 @@ function adminChat(cid){
       else if (action === 'device') window.banDevice(uid);
   };
 
-  $('btn-qr').onclick = () => { Swal.fire({ title: 'ردود سريعة', html: `<div style="display:flex;flex-direction:column;gap:8px;">${quickReplies.map(r=>`<button class="btn btn-ghost" style="justify-content:flex-start;text-align:right;font-size:12px;padding:10px;" onclick="window.applyQR('${r.replace(/'/g,"\\'")}')">${r}</button>`).join('')}</div>`, showConfirmButton: false, showCloseButton: true }); };
+  $('btn-qr').onclick = () => { Swal.fire({ title: 'ردود سريعة', html: `<div style="display:flex;flex-direction:column;gap:8px;">${quickReplies.map(r=>`<button class="btn btn-ghost" style="justify-content:flex-start;text-align:right;font-size:13px;padding:12px;" onclick="window.applyQR('${r.replace(/'/g,"\\'")}')">${r}</button>`).join('')}</div>`, showConfirmButton: false, showCloseButton: true }); };
   window.applyQR = (text) => { $('mi').value = text; Swal.close(); $('mi').focus(); };
   const sendText=async()=>{ const t=$('mi').value.trim().slice(0,1000); if(!t)return; try{ await set(push(R(`chats/${cid}/messages`)),{senderId:me.uid,type:'admin',text:t,createdAt:Date.now(),read:false}); await update(R('chats/'+cid),{lastMessage:t.slice(0,60),updatedAt:Date.now(), adminRead: true}); $('mi').value=''; }catch(e){bad(e)} };
   $('mb').onclick=sendText; $('mi').onkeydown=e=>e.key==='Enter'&&sendText();
@@ -784,7 +917,6 @@ function adminChat(cid){
     c=s.val()||{};
     if (c.adminRead === false) { update(R('chats/'+cid), {adminRead: true}); }
     
-    // تحديد نوع الدردشة وإظهار الأدوات المناسبة
     const isDispute = c.dealId && typeof c.dealId === 'string' && c.dealId.trim() !== '';
     if (isDispute) {
         $('dispute-admin-tools').style.display = 'block';
@@ -796,7 +928,7 @@ function adminChat(cid){
         $('dispute-admin-tools').style.display = 'none';
         $('buyer-tools').style.display = 'none';
         $('seller-tools').style.display = 'none';
-        $('support-tools').style.display = 'grid';
+        $('support-tools').style.display = 'block';
         $('notes-container').style.display = 'block';
         window._chatCtx.uid = c.buyerId !== 'admin_support' ? c.buyerId : c.sellerId;
     }
@@ -804,24 +936,12 @@ function adminChat(cid){
     if (window._chatCtx.uid && (!currentUserData || currentUserData.uid !== window._chatCtx.uid) && !isDispute) {
         currentUserData = { uid: window._chatCtx.uid, ...(await get(R('users/'+window._chatCtx.uid))).val() };
         if(currentUserData) {
-            $('panel-avatar').textContent = (currentUserData.name || '?').charAt(0);
-            $('panel-name').textContent = currentUserData.name || 'غير معروف';
-            $('panel-email').textContent = currentUserData.email || 'لا يوجد إيميل';
-            const statusEl = $('panel-status');
-            let stText = [];
-            if (currentUserData.verified) stText.push('<span style="color:var(--success-tx);"><i class="fa-solid fa-circle-check"></i> موثق</span>');
-            if (currentUserData.strikes) stText.push(`<span style="color:var(--warn-tx);"><i class="fa-solid fa-triangle-exclamation"></i> ${currentUserData.strikes} تحذيرات</span>`);
-            statusEl.innerHTML = stText.join(' | ');
             $('admin-note-input').value = currentUserData.adminNote || '';
-            $('panel-balance').textContent = 'الرصيد: ' + (currentUserData.balance || 0) + ' ج';
-            $('panel-balance').style.background = currentUserData.suspended ? 'var(--danger-bg)' : 'var(--success-bg)';
-            $('panel-balance').style.color = currentUserData.suspended ? 'var(--danger-tx)' : 'var(--success-tx)';
-            $('panel-balance').textContent = currentUserData.suspended ? 'محظور 🚫' : 'الرصيد: ' + (currentUserData.balance || 0) + ' ج';
         }
     }
     
     const displayName = c.buyerId === 'admin_support' ? c.sellerName : c.buyerName;
-    $('chat-title').innerHTML = displayName + (c.buyerId !== 'admin_support' && c.sellerId !== 'admin_support' ? ' ↔ ' + c.sellerName : '') + ' <i class="fa-solid fa-bars-staggered" style="font-size:10px;color:var(--text-4)"></i>';
+    $('chat-title').innerHTML = displayName + (c.buyerId !== 'admin_support' && c.sellerId !== 'admin_support' ? ' ↔ ' + c.sellerName : '') + ' <i class="fa-solid fa-bars-staggered" style="font-size:12px;color:var(--text-4); background:var(--surface-2); padding:4px; border-radius:6px;"></i>';
     $('chat-avatar-wrap').textContent = (displayName || '?').charAt(0);
     
     const statusEl = $('chat-status');
@@ -831,18 +951,18 @@ function adminChat(cid){
     
     const assignBtn = $('assign-btn');
     if (c.assignedTo === me.email) {
-        assignBtn.innerHTML = `<span class="badge badge-purple" style="font-size:9px;"><i class="fa-solid fa-check"></i> مسند لك</span>`;
+        assignBtn.innerHTML = `<span class="badge badge-info" style="font-size:10px;padding:4px 8px;border-radius:6px;"><i class="fa-solid fa-check"></i> مسند لك</span>`;
     } else if (c.assignedTo) {
-        assignBtn.innerHTML = `<span class="badge badge-neutral" style="font-size:9px;"><i class="fa-solid fa-user-tie"></i> ${E(c.assignedTo.split('@')[0])}</span>`;
+        assignBtn.innerHTML = `<span class="badge badge-neutral" style="font-size:10px;padding:4px 8px;border-radius:6px;"><i class="fa-solid fa-user-tie"></i> ${E(c.assignedTo.split('@')[0])}</span>`;
     } else {
         const kAssign = 'h'+(hc++); H[kAssign] = async () => { await update(R('chats/'+cid), {assignedTo: me.email}); ok('تم التعيين لك'); };
-        assignBtn.innerHTML = `<button class="btn btn-ghost" style="padding:4px 8px;font-size:10px;min-height:24px" onclick="A('${kAssign}')"><i class="fa-solid fa-hand"></i> تعيين</button>`;
+        assignBtn.innerHTML = `<button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;min-height:30px;border-radius:6px;" onclick="A('${kAssign}')"><i class="fa-solid fa-hand"></i> تعيين</button>`;
     }
 
     const kFreeze='h'+(hc++);H[kFreeze]=async()=>{await update(R('chats/'+cid),{frozen:!c.frozen});await log(c.frozen?'رفع تجميد':'تجميد',cid)};
-    $('fz').innerHTML=`<button class="icon-btn" style="width:30px;height:30px;${c.frozen?'background:var(--info-bg);color:var(--info-tx);border-color:var(--info-bd)':'background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn-bd)'}" onclick="event.stopPropagation(); A('${kFreeze}')" title="${c.frozen?'إلغاء':'تجميد'}"><i class="fa-solid fa-${c.frozen?'lock-open':'snowflake'}" style="font-size:10px"></i></button>`;
+    $('fz').innerHTML=`<button class="icon-btn" style="width:32px;height:32px;border-radius:8px;${c.frozen?'background:var(--info-bg);color:var(--info-tx);border-color:var(--info-bd)':'background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn-bd)'}" onclick="event.stopPropagation(); A('${kFreeze}')" title="${c.frozen?'إلغاء التجميد':'تجميد الدردشة'}"><i class="fa-solid fa-${c.frozen?'lock-open':'snowflake'}" style="font-size:12px"></i></button>`;
     const kClose='h'+(hc++);H[kClose]=async()=>{if(!await ask('إغلاق؟'))return;await update(R('chats/'+cid),{status:'closed'});await log('إغلاق',cid);ok('تم');show('chats')};
-    if(c.status !== 'closed') { $('cl').innerHTML=`<button class="icon-btn" style="width:30px;height:30px;background:var(--danger-bg);color:var(--danger-tx);border-color:var(--danger-bd)" onclick="event.stopPropagation(); A('${kClose}')" title="إغلاق"><i class="fa-solid fa-xmark" style="font-size:11px"></i></button>`; }
+    if(c.status !== 'closed') { $('cl').innerHTML=`<button class="icon-btn" style="width:32px;height:32px;border-radius:8px;background:var(--danger-bg);color:var(--danger-tx);border-color:var(--danger-bd)" onclick="event.stopPropagation(); A('${kClose}')" title="إغلاق الدردشة"><i class="fa-solid fa-xmark" style="font-size:14px"></i></button>`; }
     else { $('cl').innerHTML=''; $('mi').disabled = true; $('mb').disabled = true; $('mb').style.opacity=0.5; }
     
     if(c.dealId && typeof c.dealId === 'string' && c.dealId.trim() !== '') {
@@ -854,13 +974,13 @@ function adminChat(cid){
     const a=Object.values(s.val()||{}).sort((x,y)=>x.createdAt-y.createdAt);
     $('ms').innerHTML=a.map(m=>{
         const time = new Date(m.createdAt).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-        if(m.type === 'image' && m.imageUrl) { const isMe = m.senderId === me.uid; return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}" style="padding:3px"><img src="${m.imageUrl}" style="max-height:180px;border-radius:10px;display:block;cursor:pointer" onclick="zoom(this.src)"><span class="msg-time">${time}</span></div></div>`; }
-        else if(m.type === 'transaction') { return `<div class="msg-system"><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;text-align:right;max-width:280px" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:9px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:2px"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3)"><span>الحالة:</span>${statusBadge(m.status)}</div></div></div>`; }
+        if(m.type === 'image' && m.imageUrl) { const isMe = m.senderId === me.uid; return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}" style="padding:4px"><img src="${m.imageUrl}" style="max-height:200px;border-radius:12px;display:block;cursor:pointer" onclick="zoom(this.src)"><span class="msg-time" style="padding:0 4px;">${time}</span></div></div>`; }
+        else if(m.type === 'transaction') { return `<div class="msg-system"><div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:12px;text-align:right;max-width:280px;box-shadow:var(--shadow-sm);" dir="rtl"><div style="font-weight:900;color:var(--success-tx);margin-bottom:6px;display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);padding-bottom:6px;"><span><i class="fa-solid fa-receipt"></i> ${m.txType || 'معاملة'}</span><span style="color:var(--text-4);font-size:10px" dir="ltr">#${(m.txId||'').slice(0,8)}</span></div><div style="display:flex;justify-content:space-between;color:var(--text-3);margin-bottom:4px;font-weight:700;"><span>المبلغ:</span><b style="color:var(--text)">${m.amount} ج</b></div><div style="display:flex;justify-content:space-between;color:var(--text-3);font-weight:700;"><span>الحالة:</span>${statusBadge(m.status)}</div></div></div>`; }
         else if(m.type === 'system') { return `<div class="msg-system"><div class="msg-system-bubble"><i class="fa-solid fa-circle-info"></i> ${E(m.text)}</div></div>`; }
-        else if(m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble"><i class="fa-solid fa-headset"></i> ${E(m.text)}</div></div>`; }
+        else if(m.type === 'admin') { return `<div class="msg-admin"><div class="msg-admin-bubble"><i class="fa-solid fa-headset" style="margin-bottom:4px;display:block;font-size:16px;"></i> ${E(m.text)}</div></div>`; }
         const isMe = m.senderId === me.uid;
         return `<div class="msg-row ${isMe?'me':'other'}"><div class="msg-bubble ${isMe?'me':'other'}">${E(m.text)}<span class="msg-time">${time}</span></div></div>`;
-    }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-4);font-size:12px">لا توجد رسائل</div>';
+    }).join('') || '<div style="text-align:center;padding:30px;color:var(--text-4);font-size:13px;font-weight:700;">لا توجد رسائل بعد</div>';
     $('ms').scrollTop=1e9;
   }));
 }
@@ -921,7 +1041,7 @@ window.sendDealInfoToChat = async (cid) => {
 };
 
 window.requestEvidence = async (cid) => {
-    const {value: msg} = await Swal.fire({title:'طلب أدلة', input:'textarea', inputValue:'يرجى من الطرفين إرفاق صور إثبات (لقطات شاشة للمحادثات أو الحساب) لتسهيل حل النزاع.', showCancelButton:true, confirmButtonText:'إرسال'});
+    const {value: msg} = await Swal.fire({title:'طلب أدلة وإثباتات', input:'textarea', inputValue:'يرجى من الطرفين إرفاق صور إثبات (لقطات شاشة للمحادثات أو الحساب) لتسهيل حل النزاع.', showCancelButton:true, confirmButtonText:'إرسال'});
     if(!msg) return;
     try {
         await set(push(R(`chats/${cid}/messages`)), { senderId: me.uid, type: 'admin', text: `📸 طلب إثباتات:\n${msg}`, createdAt: Date.now(), read: false });
@@ -957,7 +1077,7 @@ function resetIdleTimer() { clearTimeout(idleTimer); idleTimer = setTimeout(() =
 onAuthStateChanged(auth,async u=>{
   if(!u){
     me=null;$('tabs-inner').innerHTML='';$('who').innerHTML='?';$('user-email').innerHTML='—';$('role-badge').innerHTML='—';clearTimeout(idleTimer);
-    $('v').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:80px;padding:0 20px;text-align:center"><div style="width:70px;height:70px;border-radius:18px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;margin-bottom:18px"><i class="fa-solid fa-user-shield"></i></div><h2 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:5px">دخول المشرفين</h2><p style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:20px">سجّل الدخول للمتابعة</p><button class="btn btn-primary" style="padding:11px 26px;font-size:13px" onclick="signInAdmin()">الدخول بحساب Google</button></div>`;
+    $('v').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:80px;padding:0 20px;text-align:center"><div style="width:80px;height:80px;border-radius:20px;background:var(--text);display:flex;align-items:center;justify-content:center;color:var(--surface);font-size:32px;margin-bottom:20px;box-shadow:var(--shadow-lg)"><i class="fa-solid fa-user-shield"></i></div><h2 style="font-size:20px;font-weight:900;color:var(--text);margin-bottom:8px">دخول المشرفين</h2><p style="font-size:13px;color:var(--text-3);font-weight:700;margin-bottom:24px">سجّل الدخول للمتابعة إلى لوحة التحكم</p><button class="btn btn-primary" style="padding:14px 30px;font-size:14px;border-radius:12px;" onclick="signInAdmin()">الدخول بحساب Google</button></div>`;
     return;
   }
   try{
