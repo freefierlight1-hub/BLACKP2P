@@ -68,7 +68,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--info-tx);background:v
 .card:hover{border-color:var(--border-2)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:900;border:1px solid transparent;min-height:36px;transition:0.2s;white-space:nowrap}
 .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
-.btn:active{transform:translateY(0)}
 .btn-primary{background:var(--text);color:var(--surface)}
 .btn-ghost{background:var(--surface-2);color:var(--text-2);border-color:var(--border)}
 .btn-success{background:var(--success-bg);color:var(--success-tx);border-color:var(--success-bd)}
@@ -239,6 +238,21 @@ let chatFilter = 'all';
 try { fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>adminIP=d.ip).catch(()=>{}); } catch(e) {}
 
 const downloadExcel=(data, headers, filename)=>{ const ws_data = [headers.map(h => h.label)]; data.forEach(row => { ws_data.push(headers.map(h => { let val = row[h.key] ?? ''; if(h.key==='createdAt' || h.key==='at') val = new Date(val).toLocaleString('ar-EG'); return val; })); }); const ws = XLSX.utils.aoa_to_sheet(ws_data); ws['!cols'] = headers.map(() => ({ wch: 20 })); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "البيانات"); XLSX.writeFile(wb, filename + '.xlsx'); };
+
+// ✅ إصلاح ثغرة XSS في التصدير: تخزين البيانات في متغير عام آمن
+window._exportData = null;
+window._exportType = null;
+window.prepareExport = (type, data) => { window._exportData = data; window._exportType = type; };
+window.safeExport = () => {
+    if(!window._exportData || !window._exportData.length) return ok('لا توجد بيانات للتصدير');
+    let headers = [];
+    if(window._exportType === 'posts') headers = [{key:'id',label:'ID'},{key:'game',label:'اللعبة'},{key:'sellerName',label:'البائع'},{key:'price',label:'السعر'},{key:'status',label:'الحالة'}];
+    else if(window._exportType === 'deposits') headers = [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'status',label:'الحالة'},{key:'createdAt',label:'التاريخ'}];
+    else if(window._exportType === 'withdrawals') headers = [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'method',label:'الطريقة'},{key:'account',label:'الحساب'},{key:'status',label:'الحالة'}];
+    else if(window._exportType === 'users') headers = [{key:'id',label:'ID'},{key:'name',label:'الاسم'},{key:'email',label:'الإيميل'},{key:'balance',label:'الرصيد'},{key:'verified',label:'موثق'}];
+    else if(window._exportType === 'deals') headers = [{key:'id',label:'ID'},{key:'amount',label:'المبلغ'},{key:'status',label:'الحالة'},{key:'createdAt',label:'التاريخ'}];
+    downloadExcel(window._exportData, headers, window._exportType);
+};
 
 const checkSystemHealth = async () => { try { await get(R('settings')); sysHealth.fb = true; } catch(e) { sysHealth.fb = false; } try { const res = await fetch(WORKER_URL + '/health'); if(res.ok) sysHealth.cf = true; else sysHealth.cf = false; } catch(e) { sysHealth.cf = false; } };
 
@@ -616,7 +630,10 @@ async posts(){
     const limit = pageState[view] ? pageState[view]*30 : 30;
     const all=(await fetchList('posts', limit)).filter(p=> (st('pending')==='all'||p.status===st('pending')) && hit(p,['game','sellerName','desc'])); 
     const a = all.slice(0, limit); 
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'game',label:'اللعبة'},{key:'sellerName',label:'البائع'},{key:'price',label:'السعر'},{key:'status',label:'الحالة'}], 'posts')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    
+    // ✅ إصلاح XSS: استخدام المتغيرات العامة بدلاً من JSON.stringify في onClick
+    window.prepareExport('posts', a);
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="window.safeExport()"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
     
     return bar([['pending','قيد المراجعة'],['active','منشورة'],['sold','مباعة'],['deleted','محذوفة'],['all','الكل']], false) + exportBtn + (a.map(p=>card(`
     <div style="display:flex;align-items:flex-start;gap:10px;">
@@ -633,14 +650,20 @@ async dep(){
     const limit = pageState[view] ? pageState[view]*30 : 30;
     let all=(await fetchList('deposits', limit)).filter(d=>(st('pending')==='all'||d.status===st('pending'))&&hit(d,['userName'])); 
     all = filterByDate(all); const a = all.slice(0, limit); 
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'status',label:'الحالة'},{key:'createdAt',label:'التاريخ'}], 'deposits')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    
+    window.prepareExport('deposits', a);
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="window.safeExport()"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    
     return exportBtn + bar([['pending','معلقة'],['approved','مقبولة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><div>${ulink(d.userId,d.userName)}<br><span style="font-size:11px;color:var(--text-3);font-weight:700;">${ago(d.createdAt)}</span></div><span style="color:var(--success-tx);font-weight:900;font-size:16px">${d.amount} ج</span></div>${d.receiptUrl ? thumbs([d.receiptUrl]) : ''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${op('المستخدم',()=>userInfo(d.userId))}${d.status==='pending'?btn('قبول',async()=>{await confirmPIN('قبول شحن '+d.amount);await claim('deposits/'+d.id,'pending','approved');await credit(d.userId,d.amount);await notify(d.userId,'تم شحن رصيدك',`+${d.amount} ج`);},'btn-success','قبول شحن')+op('رفض',async()=>{const r=await reason('سبب الرفض');await claim('deposits/'+d.id,'pending','rejected');await notify(d.userId,'رفض شحن','السبب: '+r);await log('رفض شحن '+d.id,r,'pending','rejected');ok('تم');show(view)},'btn-danger'):statusBadge(d.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async wd(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
     let all=(await fetchList('withdrawals', limit)).filter(w=>(st('pending')==='all'||w.status===st('pending'))&&hit(w,['userName','account'])); 
     all = filterByDate(all); const a = all.slice(0, limit); 
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'userName',label:'المستخدم'},{key:'amount',label:'المبلغ'},{key:'method',label:'الطريقة'},{key:'account',label:'الحساب'},{key:'status',label:'الحالة'}], 'withdrawals')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    
+    window.prepareExport('withdrawals', a);
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="window.safeExport()"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    
     return exportBtn + bar([['pending','معلقة'],['approved','منفذة'],['rejected','مرفوضة'],['all','الكل']]) + (a.map(w=>card(`<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><div>${ulink(w.userId,w.userName)}<br><span style="font-size:11px;color:var(--text-3);font-weight:700;">${ago(w.createdAt)}</span></div><span style="color:var(--danger-tx);font-weight:900;font-size:16px">${w.amount} ج</span></div><div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;margin-bottom:10px"><p style="margin:4px 0;display:flex;justify-content:space-between;"><b>الطريقة:</b> <span>${E(w.method)}</span></p><p style="margin:4px 0;display:flex;justify-content:space-between;" dir="ltr"><b>الحساب:</b> <span>${E(w.account)}</span></p><p style="margin:4px 0;display:flex;justify-content:space-between;"><b>الاسم:</b> <span>${E(w.accountName)}</span></p>${op('نسخ الحساب',()=>copy(w.account),'btn-ghost')}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${op('المستخدم',()=>userInfo(w.userId))}${w.status==='pending'?btn('تم التحويل',async()=>{await confirmPIN('تنفيذ سحب '+w.amount);await claim('withdrawals/'+w.id,'pending','approved');await notify(w.userId,'تم السحب',`${w.amount} ج`);},'btn-success','تنفيذ سحب')+op('رفض وإرجاع',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض سحب');await claim('withdrawals/'+w.id,'pending','rejected');await credit(w.userId,w.amount);await notify(w.userId,'رفض سحب','السبب: '+r);await log('رفض سحب '+w.id,r);ok('تم');show(view)},'btn-danger'):statusBadge(w.status)}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async ver(){ 
@@ -655,7 +678,10 @@ async deals(){
     let all=(await fetchList('deals', limit)).filter(d=>st('all')==='all'||d.status===st('all')); 
     await Promise.all(all.flatMap(d=>[uname(d.buyerId),uname(d.sellerId)])); 
     all=all.filter(d=>hit({...d,b:NM[d.buyerId],s:NM[d.sellerId]},['id','b','s'])); all = filterByDate(all); const a = all.slice(0, limit); 
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'amount',label:'المبلغ'},{key:'status',label:'الحالة'},{key:'createdAt',label:'التاريخ'}], 'deals')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    
+    window.prepareExport('deals', a);
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="window.safeExport()"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    
     return exportBtn + bar([['all','الكل'],['held','محجوزة'],['delivered','مسلمة'],['completed','مكتملة'],['disputed','نزاع']]) + (a.map(d=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:8px"><b style="font-size:16px;color:var(--success-tx)">${d.amount} ج</b>${statusBadge(d.status)}</div><div class="grid-2" style="font-size:12px;margin-bottom:10px"><div style="background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border)"><span style="color:var(--text-4);display:block;margin-bottom:4px;font-size:10px;font-weight:800">المشتري</span>${ulink(d.buyerId,NM[d.buyerId])}</div><div style="background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--border)"><span style="color:var(--text-4);display:block;margin-bottom:4px;font-size:10px;font-weight:800">البائع</span>${ulink(d.sellerId,NM[d.sellerId])}</div></div><div style="display:flex;gap:8px;flex-wrap:wrap">${op('دردشة',()=>adminChat(d.chatId))}${op('الإعلان',()=>postInfo(d.postId))}${(d.status === 'held' || d.status === 'delivered') ? op('إلغاء وإرجاع', async () => { if (!await ask('هل تريد إلغاء هذه الصفقة وإرجاع المبلغ كاملاً للمشتري؟')) return; await confirmPIN('إلغاء الصفقة'); await credit(d.buyerId, d.amount); await update(R('deals/' + d.id), { status: 'cancelled' }); if(d.chatId) { await update(R('chats/' + d.chatId), { dealStatus: 'cancelled', frozen: false }); await set(push(R(`chats/${d.chatId}/messages`)), {senderId: me.uid, type: 'admin', text: 'تم إلغاء الصفقة وإرجاع المبلغ للمشتري.', createdAt: Date.now()}); } await notify(d.buyerId, 'إلغاء الصفقة', 'تم إلغاء الصفقة وإرجاع المبلغ لرصيدك.'); await log('إلغاء صفقة', `تم إلغاء الصفقة #${d.id}`); ok('تم الإلغاء بنجاح'); }, 'btn-danger') : ''}</div>`)).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async cpn(){ 
@@ -672,7 +698,8 @@ async users(){
     all=all.filter(u=>(st('all')==='all'||(st('ver')==='ver'&&u.verified)||(st('unv')==='unv'&&!u.verified)||(st('ban')==='ban'&&u.suspended))&&hit(u,['name','email','id'])); 
     const a = all.slice(0, limit); 
     
-    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="exportTable(${JSON.stringify(a)}, [{key:'id',label:'ID'},{key:'name',label:'الاسم'},{key:'email',label:'الإيميل'},{key:'balance',label:'الرصيد'},{key:'verified',label:'موثق'}], 'users')"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
+    window.prepareExport('users', a);
+    const exportBtn = `<button class="btn btn-ghost" style="margin-bottom:14px; width:100%;" onclick="window.safeExport()"><i class="fa-solid fa-file-excel" style="color:var(--success-tx)"></i> تصدير إلى Excel</button>`; 
 
     const items=a.map(u=>{
         const isPro = u.isPro && (u.proUntil||0) > Date.now();
