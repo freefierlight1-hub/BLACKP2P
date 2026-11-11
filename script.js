@@ -414,7 +414,6 @@ onAuthStateChanged(auth, async u => {
   } catch(e) { console.error(e); }
 });
 
-// قراءة الحقول العامة فقط من ملف أي مستخدم (القواعد تمنع قراءة الملف كاملاً)
 const PUB_FIELDS = ['name','photo','verified','isPro','proUntil','createdAt','followersCount','completedDeals','autoReplyText'];
 async function pubUser(uid) {
   const o = {};
@@ -484,22 +483,18 @@ window.sellerProfile = async (uid) => {
                 </div>`;
             }).join('')}</div>`;
 
-        // تصميم صفحة البائع الجديد والمنسق
         $('app').innerHTML = `
         <button class="btn btn-ghost" onclick="go('feed')" style="margin-bottom:10px; padding:7px 12px; font-size:11px;"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
         
         <div class="card" style="padding:0; overflow:hidden; position:relative; background:var(--surface); border-radius:16px; ${isProSeller ? 'border:2px solid #eab308; box-shadow:0 0 15px rgba(234,179,8,0.15);' : 'border:1px solid var(--border);'}">
-            <!-- خلفية الغلاف -->
             <div style="height: 70px; background: ${isProSeller ? 'linear-gradient(135deg, rgba(234,179,8,0.3), transparent)' : 'linear-gradient(135deg, var(--surface-2), transparent)'}; border-bottom: 1px solid var(--border);"></div>
             
             <div style="padding: 0 16px 16px; margin-top: -35px; display:flex; flex-direction:column; align-items:center; text-align:center;">
-                <!-- الصورة الشخصية -->
                 <div style="position:relative; margin-bottom:8px;">
                     <img src="${E(u.photo || '')}" style="width:70px; height:70px; border-radius:18px; object-fit:cover; border:3px solid var(--surface); box-shadow:var(--shadow-md); background:var(--surface-2);" alt="">
                     ${u.verified ? '<div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)"><i class="fa-solid fa-circle-check" style="color:var(--success-solid);font-size:12px"></i></div>' : ''}
                 </div>
 
-                <!-- الاسم والشارات -->
                 <div style="display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap; margin-bottom:2px;">
                     <h2 style="font-size:16px; font-weight:900; color:var(--text); margin:0;">${E(u.name)}</h2>
                     ${getBadges(u)}
@@ -509,7 +504,6 @@ window.sellerProfile = async (uid) => {
                     <i class="fa-regular fa-calendar"></i> عضو منذ ${new Date(u.createdAt || Date.now()).toLocaleDateString('ar-EG')}
                 </p>
 
-                <!-- الإحصائيات (3 أعمدة) -->
                 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; margin-bottom: 12px;">
                     <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:6px 2px;">
                         <span style="font-size:9px; color:var(--text-3); font-weight:800; display:block; margin-bottom:2px;">الصفقات</span>
@@ -525,7 +519,6 @@ window.sellerProfile = async (uid) => {
                     </div>
                 </div>
 
-                <!-- أزرار المتابعة والثقة -->
                 <div style="display:flex; width:100%; gap:6px; align-items:center;">
                     <span class="trust-meter ${trc}" style="cursor:pointer; font-size:10px; padding:8px 10px; flex:1; justify-content:center; border-radius:8px;" onclick="showTrust(${tr}, ${u.verified}, ${u.completedDeals}, ${avg !== 'جديد' ? avg : 0})">
                         <i class="fa-solid fa-shield-halved"></i> ${tr}% ثقة
@@ -589,12 +582,10 @@ function feed() {
 }
 
 function renderFeed() {
-  // فلترة صارمة جداً للتأكد من أننا لا نعرض إلا الإعلانات النشطة فقط
   let a = Object.entries(P).map(([id,p]) => ({id, ...p})).filter(p => p.status === 'active');
   const q = F.q.toLowerCase();
   a = a.filter(p => (!q || [p.game,p.desc,p.server].join(' ').toLowerCase().includes(q)) && (!F.game || (p.game||'').toLowerCase() === F.game.toLowerCase()));
   
-  // الترتيب: أولوية لبائعين VIP
   a.sort((x,y) => {
       const xPro = S_PRO[x.sellerId] ? 1 : 0;
       const yPro = S_PRO[y.sellerId] ? 1 : 0;
@@ -713,7 +704,6 @@ window.bumpPost = async (id) => {
     } catch(e) { Swal.close(); bad(e); }
 };
 
-// إصلاح خطأ الصلاحيات ومنع عرض الإعلانات المحذوفة
 window.openPost = async id => {
   try {
     clearU(); view = 'post'; 
@@ -724,7 +714,6 @@ window.openPost = async id => {
     const p = (await get(R('posts/' + id))).val(); 
     if (!p) { bad(new Error('هذا الإعلان غير موجود أو تم حذفه نهائياً.')); return go('feed'); }
     
-    // منع فتح الإعلانات المحذوفة إلا لصاحبها
     if (p.status !== 'active' && p.sellerId !== me.uid) {
         return bad(new Error('هذا الإعلان تم حذفه أو غير متاح حالياً.'));
     }
@@ -733,7 +722,6 @@ window.openPost = async id => {
     try { sellerData = await pubUser(p.sellerId); } catch(e) { console.log("seller data perm", e); }
     const isProSeller = sellerData.isPro && (sellerData.proUntil || 0) > Date.now();
 
-    // استخدام catch لتجنب ظهور خطأ الصلاحيات إذا لم يكن المستخدم صاحب الإعلان
     runTransaction(R(`posts/${id}/views`), v => (v || 0) + 1).catch(()=>{});
     const views = (p.views || 0) + 1;
 
@@ -853,7 +841,6 @@ window.add = function() {
     return;
   }
 
-  // التحقق مما إذا كان المستخدم VIP
   const isPro = me.isPro && (me.proUntil || 0) > Date.now();
   
   const maxAdsAllowed = isPro ? (Number(S.maxAdsPro) || 50) : (Number(S.maxAdsFree) || 5);
@@ -887,7 +874,6 @@ window.add = function() {
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">السعر (ج)</label><input id="a_p" type="number" placeholder="مثال: 500" style="margin-bottom:12px">
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">نوع الربط</label><select id="a_l" style="margin-bottom:12px" onchange="updateLinkInput()">${linkTypes.map(l => `<option value="${l}">${l}</option>`).join('')}</select>
     
-    <!-- إخفاء خيار الشراء الفوري إذا لم يكن المستخدم VIP -->
     ${isPro ? `
     <label style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; margin-bottom:12px; background:var(--gold-bg); padding:10px; border-radius:8px; border:1px solid var(--gold-bd); color:var(--gold-tx);">
         <input type="checkbox" id="a_auto" style="width:auto; margin:0;"> تفعيل "الشراء الفوري" (يتحول المبلغ فوراً لبائعك بمجرد الضغط)
@@ -931,7 +917,6 @@ window.add = function() {
 
       const id = push(R('posts')).key; 
       
-      // التحقق الآمن من وجود المربع (لتجنب الأخطاء إذا كان المستخدم ليس VIP)
       const isAutoBuyChecked = isPro && $('a_auto') ? $('a_auto').checked : false;
 
       await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: isPro ? 'active' : 'pending', createdAt: Date.now(), featured: isPro ? true : false, isAutoBuy: isAutoBuyChecked });
@@ -1119,7 +1104,6 @@ window.closeChatUser = async cid => {
   } catch(e) { bad(e); }
 };
 
-// مراقبة الدردشات: شارة على تبويب الدردشة + نافذة منبثقة للبائع عند وجود صفقة جارية
 function refreshChatAlerts() {
   if (!me) return;
   let n = 0; const pops = [];
@@ -1161,7 +1145,7 @@ function dealPanel(cid, c, d) {
     else if (isSeller) btns = `<button class="btn btn-success" style="padding:5px 10px;font-size:10px" onclick="deliver('${cid}')">تسليم الحساب</button>`;
   } else if (d.status === 'delivered') {
     if (isBuyer) {
-        btns = `<button class="btn btn-warning" style="padding:5px 10px;font-size:10px" onclick="reveal('${d.postId}')"><i class="fa-solid fa-eye"></i> عرض البيانات</button>
+        btns = `<button class="btn btn-warning" style="padding:5px 10px;font-size:10px" onclick="reveal('${d.postId}', '${cid}')"><i class="fa-solid fa-eye"></i> عرض البيانات</button>
                 <button class="btn btn-success" style="padding:5px 10px;font-size:10px" onclick="confirmRx('${cid}')">تأكيد الاستلام</button>
                 <button class="btn btn-danger" style="padding:5px 10px;font-size:10px" onclick="dispute('${cid}')">نزاع</button>`;
     } else if (isSeller) {
@@ -1170,7 +1154,7 @@ function dealPanel(cid, c, d) {
   } else if (d.status === 'completed') {
     btns = `<span class="badge badge-success"><i class="fa-solid fa-check"></i> مكتملة</span>`;
     if (isBuyer) {
-        btns += `<button class="btn btn-warning" style="padding:5px 10px;font-size:10px;margin-right:4px" onclick="reveal('${d.postId}')"><i class="fa-solid fa-eye"></i> عرض البيانات</button>
+        btns += `<button class="btn btn-warning" style="padding:5px 10px;font-size:10px;margin-right:4px" onclick="reveal('${d.postId}', '${cid}')"><i class="fa-solid fa-eye"></i> عرض البيانات</button>
                  <button class="btn btn-ghost" style="padding:5px 10px;font-size:10px;margin-right:4px" onclick="rate('${d.sellerId}')">تقييم</button>`;
     }
   } else if (d.status === 'refunded') { btns = `<span class="badge badge-danger"><i class="fa-solid fa-rotate-left"></i> مسترد</span>`; }
@@ -1183,12 +1167,12 @@ function dealPanel(cid, c, d) {
 
 window.deliver = async cid => { if(!requireAuth()) return; try { if (!await ask('هل سلّمت بيانات الحساب بالكامل؟')) return; const chat = (await get(R('chats/' + cid))).val(); if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); const updates = {}; updates[`deals/${chat.dealId}/status`] = 'delivered'; updates[`chats/${cid}/dealStatus`] = 'delivered'; await update(ref(db), updates); notify(chat.buyerId, 'تم تسليم حسابك', 'راجع الدردشة ثم أكّد الاستلام.', 'deal'); ok('تم تحديد الحساب كمسلم'); } catch(e) { bad(e); } };
 
-window.reveal = async pid => { 
+window.reveal = async (pid, cid) => { 
     if(!requireAuth()) return;
     try { 
         Swal.fire({title:'جاري فك التشفير...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
         const idToken = await auth.currentUser.getIdToken();
-        const response = await fetch(WORKER_URL + "/decrypt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: pid }) });
+        const response = await fetch(WORKER_URL + "/decrypt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: pid, chatId: cid }) });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
         Swal.fire({ title:'بيانات الحساب', html:`<div style="background:var(--warn-bg);border:1px solid var(--warn-bd);padding:14px;border-radius:10px;text-align:left;margin-top:6px" dir="ltr"><p style="font-size:12px;margin-bottom:6px;color:var(--warn-tx)"><b>Email:</b> <span style="user-select:all">${E(result.email)}</span></p><p style="font-size:12px;color:var(--warn-tx)"><b>Password:</b> <span style="user-select:all">${E(result.password)}</span></p></div>`, confirmButtonText: 'نسخ وإغلاق' }).then(r => { if (r.isConfirmed) navigator.clipboard.writeText(`Email: ${result.email}\nPass: ${result.password}`); }); 
@@ -1250,17 +1234,13 @@ window.copyRef = () => {
     ok('تم نسخ رابط الإحالة الخاص بك');
 };
 
-// نافذة مزايا الباقة المميزة
-// نافذة مزايا الباقة المميزة (محدثة بالكامل)
 window.upgradePro = async () => {
     const price = Number(S.proPrice) || 50;
     const days = Number(S.proDays) || 30;
     const isRich = me.balance >= price;
 
-    // تصميم المعاينة البصرية للمزايا
     const previewHtml = `
     <div style="text-align:right; font-family:'Cairo', sans-serif;">
-        <!-- العنوان -->
         <div style="text-align:center; margin-bottom:15px;">
             <div style="font-size:45px; color:#eab308; text-shadow:0 0 25px rgba(234,179,8,0.4); margin-bottom:5px;"><i class="fa-solid fa-crown"></i></div>
             <h2 style="font-size:18px; font-weight:900; color:var(--text); margin:0;">الباقة المميزة (برو VIP)</h2>
@@ -1268,12 +1248,9 @@ window.upgradePro = async () => {
 
         <p style="font-size:11px; color:var(--text-3); text-align:center; margin-bottom:15px;">إليك كيف سيرى المشترون حسابك وإعلاناتك بعد الترقية:</p>
         
-        <!-- المعاينة البصرية -->
         <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:20px; position:relative; overflow:hidden;">
-            <!-- خلفية ذهبية خفيفة -->
             <div style="position:absolute; top:0; left:0; right:0; height:40px; background:linear-gradient(90deg, rgba(234,179,8,0.15), transparent);"></div>
             
-            <!-- بطاقة البائع -->
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; position:relative; z-index:2;">
                 <div style="width:36px; height:36px; border-radius:10px; background:#18181b; color:#fff; font-size:14px; font-weight:900; display:flex; align-items:center; justify-content:center; border:2px solid #eab308;">L</div>
                 <div>
@@ -1285,7 +1262,6 @@ window.upgradePro = async () => {
                 </div>
             </div>
 
-            <!-- بطاقة الإعلان -->
             <div style="border:2px solid #eab308; border-radius:8px; padding:10px; box-shadow:0 0 15px rgba(234,179,8,0.15); background:var(--surface); position:relative;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <b style="font-size:12px; color:var(--text);">إعلانك المميز</b>
@@ -1297,7 +1273,6 @@ window.upgradePro = async () => {
             </div>
         </div>
 
-        <!-- قائمة المميزات -->
         <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:10px; font-size:12px; font-weight:700; color:var(--text-2);">
             <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-arrow-up-wide-short" style="color:#eab308; width:16px;"></i> ظهور إعلاناتك في <b>أعلى السوق</b> فوراً.</li>
             <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-bolt" style="color:#eab308; width:16px;"></i> نشر الإعلانات <b>بدون مراجعة</b> (فوري).</li>
@@ -1306,7 +1281,6 @@ window.upgradePro = async () => {
             <li style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-chart-simple" style="color:#eab308; width:16px;"></i> إحصائيات متقدمة (مشاهدات ومفضلة).</li>
         </ul>
 
-        <!-- السعر والرصيد -->
         <div style="background:var(--surface-2); border-radius:8px; padding:12px; margin-top:20px; border:1px solid var(--border);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:12px; color:var(--text-3); font-weight:800;">سعر الترقية (${days} يوم):</span>
@@ -1326,19 +1300,17 @@ window.upgradePro = async () => {
         showCancelButton: true, 
         confirmButtonText: isRich ? `تأكيد الشراء (${price} ج)` : 'شحن الرصيد الآن', 
         cancelButtonText: 'إلغاء',
-        customClass: { popup: 'user-info-modal' } // نستخدم كلاس التنسيق الجميل
+        customClass: { popup: 'user-info-modal' }
     });
     
     if (!r.isConfirmed) return;
 
-    // إذا ضغط على زر الشراء ولكن ليس لديه رصيد
     if (!isRich) {
-        go('wallet'); // يوجهه للمحفظة
-        setTimeout(() => deposit(), 300); // يفتح له نافذة الشحن مباشرة
+        go('wallet'); 
+        setTimeout(() => deposit(), 300); 
         return;
     }
     
-    // تنفيذ عملية الترقية
     try {
         Swal.fire({title:'جاري الترقية...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
         const updates = {};
@@ -1349,7 +1321,7 @@ window.upgradePro = async () => {
         await update(ref(db), updates);
         Swal.close(); 
         ok('تمت ترقية حسابك بنجاح! أنت الآن عضو VIP 👑'); 
-        profile(); // تحديث الصفحة
+        profile(); 
     } catch(e) { Swal.close(); bad(e); }
 };
 
