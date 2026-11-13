@@ -726,7 +726,14 @@ window.bumpPost = async (id) => {
         }
         
         Swal.fire({title:'جاري رفع الإعلان...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
-        await update(R('posts/' + id), { createdAt: Date.now() });
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch(WORKER_URL + "/bump-post", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+            body: JSON.stringify({ postId: id })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'فشل رفع الإعلان');
         Swal.close(); ok('تم رفع إعلانك لأعلى السوق');
         openPost(id);
     } catch(e) { Swal.close(); bad(e); }
@@ -862,9 +869,22 @@ window.buy = async function(id, isAutoBuy) {
     if (!await ask(isAutoBuy ? 'هل أنت متأكد من الشراء الفوري؟ سيتم خصم المبلغ وتحويلك للدردشة فوراً.' : 'هل أنت متأكد من الشراء؟ سيتم حجز المبلغ حتى تؤكد الاستلام.')) return;
     Swal.fire({title:'جاري تنفيذ الشراء بأمان...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
     const idToken = await auth.currentUser.getIdToken();
-    const response = await fetch(WORKER_URL + "/buy", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: id, isAutoBuy: isAutoBuy }) });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
+    // مفتاح عملية ثابت لهذه المحاولة: إعادة الإرسال (انقطاع شبكة/ضغط مزدوج) لا تخصم مرتين
+    const keyName = 'buyKey_' + id;
+    let idemKey = sessionStorage.getItem(keyName);
+    if (!idemKey) { idemKey = crypto.randomUUID(); sessionStorage.setItem(keyName, idemKey); }
+    let response, result;
+    try {
+      response = await fetch(WORKER_URL + "/buy", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: id, isAutoBuy: isAutoBuy, idempotencyKey: idemKey }) });
+      result = await response.json();
+    } catch (netErr) {
+      throw new Error('انقطع الاتصال. أعد المحاولة وسيتم استكمال العملية دون خصم مضاعف.');
+    }
+    if (!response.ok) {
+      if (!result.retryable) sessionStorage.removeItem(keyName); // فشل نهائي: المحاولة القادمة بمفتاح جديد
+      throw new Error(result.error || 'فشل الاتصال بالخادم');
+    }
+    sessionStorage.removeItem(keyName);
     Swal.close(); ok('تم الشراء بنجاح'); openChat(result.chatId);
   } catch(e) { Swal.close(); bad(e); }
 };
@@ -1022,7 +1042,7 @@ window.supportChat = async () => {
         const cid = `support_${me.uid}_${Date.now()}`;
         await set(R('chats/' + cid), { buyerId: me.uid, sellerId: 'admin_support', buyerName: me.name, sellerName: 'الدعم الفني', lastMessage: 'تذكرة جديدة', dealStatus: '', status: 'open', updatedAt: Date.now(), adminRead: false });
         await set(R(`user_chats/${me.uid}/${cid}`), true);
-        if(S.autoReplyText) { await set(push(R(`chats/${cid}/messages`)), { senderId: 'admin_support', type: 'admin', text: S.autoReplyText, createdAt: Date.now() }); }
+        if(S.autoReplyText) { try { await set(push(R(`chats/${cid}/messages`)), { senderId: 'admin_support', type: 'admin', text: S.autoReplyText, createdAt: Date.now() }); } catch(_) {} }
         Swal.close(); openChat(cid);
     }
   } catch(e) { Swal.close(); bad(e); }
@@ -1075,6 +1095,18 @@ window.openChat = cid => {
     </div>
   </div>`;
   
+  const markRead = async () => {
+      try {
+          const idToken = await auth.currentUser.getIdToken();
+          await fetch(WORKER_URL + "/mark-read", {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+              body: JSON.stringify({ chatId: cid })
+          });
+      } catch(_) {}
+  };
+  markRead();
+  
   const doSend = async (t, i) => { try { await send(cid, t, i); if (!i) $('mi').value = ''; } catch(e) { bad(e); } };
   $('mb').onclick = () => doSend($('mi').value);
   $('mi').onkeydown = e => e.key === 'Enter' && doSend($('mi').value);
@@ -1119,6 +1151,7 @@ window.openChat = cid => {
       return `<div class="msg-row ${align}"><div class="msg-bubble ${align}">${renderMsg(m)}<span class="msg-time">${timeOnly(m.createdAt)}</span></div></div>`;
     }).join('');
     $('ms').scrollTop = 1e9;
+    if (a.some(m => m.senderId !== me.uid && !m.read)) markRead();
   }));
 };
 
@@ -1126,11 +1159,14 @@ window.closeChatUser = async cid => {
   if(!requireAuth()) return;
   try {
     if (!await ask('إغلاق الدردشة؟ ستختفي من الدردشات وتبقى في "طلباتي".')) return;
-    const chat = (await get(R('chats/' + cid))).val();
-    if (!chat || (chat.buyerId !== me.uid && chat.sellerId !== me.uid)) throw new Error('غير مصرح');
-    if (chat.dealId) { const d = (await get(R('deals/' + chat.dealId))).val(); if (!d || !['completed','refunded','cancelled'].includes(d.status)) throw new Error('لا يمكن إغلاق دردشة صفقة جارية'); }
-    try { await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: 'تم إغلاق الدردشة. تجد سجل الصفقة في "طلباتي".', createdAt: Date.now()}); } catch(_) {}
-    await update(ref(db), {[`chats/${cid}/status`]: 'closed', [`chats/${cid}/closedBy`]: me.uid, [`chats/${cid}/closedAt`]: Date.now()});
+    const idToken = await auth.currentUser.getIdToken();
+    const response = await fetch(WORKER_URL + "/close-chat", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+      body: JSON.stringify({ chatId: cid })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'فشل الإغلاق');
     ok('تم إغلاق الدردشة');
     go('chats');
   } catch(e) { bad(e); }
@@ -1197,18 +1233,66 @@ function dealPanel(cid, c, d) {
   el.innerHTML = `<div class="deal-panel"><div class="deal-header"><b class="deal-amount">${d.amount} ج</b><div class="deal-actions">${btns}</div></div><div class="deal-steps">${step('الدفع', true, 'fa-check')}${step('التسليم', idx >= 1, 'fa-box')}${step('الاكتمال', idx >= 2, 'fa-flag-checkered')}</div></div>`;
 }
 
-window.deliver = async cid => { if(!requireAuth()) return; try { if (!await ask('هل سلّمت بيانات الحساب بالكامل؟')) return; const chat = (await get(R('chats/' + cid))).val(); if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); const updates = {}; updates[`deals/${chat.dealId}/status`] = 'delivered'; updates[`chats/${cid}/dealStatus`] = 'delivered'; await update(ref(db), updates); notify(chat.buyerId, 'تم تسليم حسابك', 'راجع الدردشة ثم أكّد الاستلام.', 'deal'); ok('تم تحديد الحساب كمسلم'); } catch(e) { bad(e); } };
-
-window.reveal = async (pid, cid) => { 
+window.deliver = async cid => {
     if(!requireAuth()) return;
-    try { 
-        Swal.fire({title:'جاري فك التشفير...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
+    try {
+        if (!await ask('هل سلّمت بيانات الحساب بالكامل؟')) return;
+        Swal.fire({title:'جاري التسليم...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch(WORKER_URL + "/deliver", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+            body: JSON.stringify({ chatId: cid })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'فشل التسليم');
+        Swal.close(); ok('تم تحديد الحساب كمسلم');
+    } catch(e) { Swal.close(); bad(e); }
+};
+
+window.reveal = async (pid, cid) => {
+    if(!requireAuth()) return;
+    const confirmed = await Swal.fire({
+        icon: 'warning',
+        title: '⚠️ تحذير قبل عرض البيانات',
+        html: `<div style="text-align:right; font-size:13px; line-height:1.9; padding:8px;">
+            <p style="color:#991b1b; font-weight:900; background:#fef2f2; padding:10px; border-radius:8px; border:1px solid #fecaca; margin-bottom:10px;">
+                قراءة هذا التحذير شرط لعرض بيانات الحساب.
+            </p>
+            <p><b>بالضغط على "أوافق" فإنك تقر:</b></p>
+            <ul style="padding-right:20px; margin:10px 0;">
+                <li>✅ <b>استلمت الحساب</b> وهو مطابق للوصف.</li>
+                <li>✅ <b>أنت المسؤول الوحيد</b> عن تأمينه (تغيير كلمة المرور والبريد فوراً).</li>
+                <li>✅ <b>لا يحق لك فتح نزاع</b> لاحقاً بادعاء "لم أستلم".</li>
+                <li>✅ <b>تم تسجيل هذه العملية</b> في سجلات المنصة.</li>
+            </ul>
+            <p style="color:#b45309; font-weight:800; font-size:12px;">
+                ⚠️ أي نزاع لاحق سيُرفض إلا إذا أثبت ببيانات جديدة أن الحساب غير مطابق للوصف.
+            </p>
+            <label style="display:flex; gap:10px; align-items:flex-start; margin-top:14px; padding:12px; background:#fef2f2; border:2px solid #fecaca; border-radius:10px; cursor:pointer;">
+                <input type="checkbox" id="reveal-agree" style="width:auto; margin-top:3px;">
+                <span style="color:#991b1b; font-weight:800; font-size:12px;">أوافق وأتحمل المسؤولية الكاملة.</span>
+            </label>
+        </div>`,
+        showCancelButton: true,
+        confirmButtonText: 'أوافق وأعرض البيانات',
+        cancelButtonText: 'إلغاء',
+        width: '95%',
+        preConfirm: () => {
+            const cb = document.getElementById('reveal-agree');
+            if (!cb || !cb.checked) { Swal.showValidationMessage('يجب الموافقة لعرض البيانات'); return false; }
+            return true;
+        }
+    });
+    if (!confirmed.isConfirmed) return;
+    try {
+        Swal.fire({title:'جاري فك التشفير...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
         const idToken = await auth.currentUser.getIdToken();
         const response = await fetch(WORKER_URL + "/decrypt", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: pid, chatId: cid }) });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
-        Swal.fire({ title:'بيانات الحساب', html:`<div style="background:var(--warn-bg);border:1px solid var(--warn-bd);padding:14px;border-radius:10px;text-align:left;margin-top:6px" dir="ltr"><p style="font-size:12px;margin-bottom:6px;color:var(--warn-tx)"><b>Email:</b> <span style="user-select:all">${E(result.email)}</span></p><p style="font-size:12px;color:var(--warn-tx)"><b>Password:</b> <span style="user-select:all">${E(result.password)}</span></p></div>`, confirmButtonText: 'نسخ وإغلاق' }).then(r => { if (r.isConfirmed) navigator.clipboard.writeText(`Email: ${result.email}\nPass: ${result.password}`); }); 
-    } catch(e) { Swal.close(); bad(e); } 
+        Swal.fire({ title:'بيانات الحساب', html:`<div style="background:var(--warn-bg);border:1px solid var(--warn-bd);padding:14px;border-radius:10px;text-align:left;margin-top:6px" dir="ltr"><p style="font-size:12px;margin-bottom:6px;color:var(--warn-tx)"><b>Email:</b> <span style="user-select:all">${E(result.email)}</span></p><p style="font-size:12px;color:var(--warn-tx)"><b>Password:</b> <span style="user-select:all">${E(result.password)}</span></p></div><p style="font-size:11px;color:var(--text-3);margin-top:10px;font-weight:700;">💡 غيّر كلمة المرور والبريد الآن.</p>`, confirmButtonText: 'نسخ وإغلاق' }).then(r => { if (r.isConfirmed) navigator.clipboard.writeText(`Email: ${result.email}\nPass: ${result.password}`); });
+    } catch(e) { Swal.close(); bad(e); }
 };
 
 window.confirmRx = async cid => { 
@@ -1224,29 +1308,22 @@ window.confirmRx = async cid => {
     } catch(e) { Swal.close(); bad(e); } 
 };
 
-window.dispute = async cid => { 
-    if(!requireAuth()) return; 
-    const {value: r} = await Swal.fire({ title:'سبب النزاع / الإبلاغ', input:'textarea', placeholder:'اكتب تفاصيل المشكلة بوضوح...', showCancelButton:true, confirmButtonText:'إرسال للإدارة', cancelButtonText:'إلغاء' }); 
-    if (!r) return; 
-    try { 
-        const chat = (await get(R('chats/' + cid))).val(); 
-        if (!chat || !chat.dealId) throw new Error('لم يتم العثور على الصفقة'); 
-        const d = (await get(R('deals/' + chat.dealId))).val(); 
-        const exist = await get(R('refund_queue/' + chat.dealId)); 
-        if (exist.exists() && exist.val().status === 'pending') throw new Error('يوجد نزاع مفتوح بالفعل.'); 
-        if (me.uid !== d.buyerId && me.uid !== d.sellerId) throw new Error('غير مصرح'); 
-
-        await set(push(R(`chats/${cid}/messages`)), {senderId: 'system', type: 'system', text: '⚠️ تم فتح نزاع. يرجى الانتظار.', createdAt: Date.now()});
-
-        const updates = {}; 
-        updates['refund_queue/' + chat.dealId] = { buyerId: d.buyerId, sellerId: d.sellerId, amount: d.amount, status: 'pending', reason: Security.text(r, 5, 500), createdAt: Date.now(), raisedBy: me.uid, raisedByRole: me.uid === d.buyerId ? 'المشتري' : 'البائع' }; 
-        updates[`deals/${chat.dealId}/status`] = 'disputed'; 
-        updates[`chats/${cid}/frozen`] = true; 
-        updates[`chats/${cid}/dealStatus`] = 'disputed'; 
-        await update(ref(db), updates); 
-
-        ok('تم فتح النزاع وسيراجعه الدعم'); 
-    } catch(e) { bad(e); } 
+window.dispute = async cid => {
+    if(!requireAuth()) return;
+    const {value: r} = await Swal.fire({ title:'سبب النزاع / الإبلاغ', input:'textarea', placeholder:'اكتب تفاصيل المشكلة بوضوح...', showCancelButton:true, confirmButtonText:'إرسال للإدارة', cancelButtonText:'إلغاء' });
+    if (!r) return;
+    try {
+        Swal.fire({title:'جاري الإرسال...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch(WORKER_URL + "/dispute", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+            body: JSON.stringify({ chatId: cid, reasonText: Security.text(r, 5, 500) })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'فشل فتح النزاع');
+        Swal.close(); ok('تم فتح النزاع وسيراجعه الدعم');
+    } catch(e) { Swal.close(); bad(e); }
 };
 window.rate = async sid => { if(!requireAuth()) return; if (!sid) return bad(new Error('معرف غير صالح')); const {value: v} = await Swal.fire({title:'تقييم البائع', input:'select', inputOptions:{5:'⭐⭐⭐⭐⭐',4:'⭐⭐⭐⭐',3:'⭐⭐⭐',2:'⭐⭐',1:'⭐'}, showCancelButton:true}); if (!v) return; try { await set(R(`ratings/${sid}/${me.uid}`), {rating: +v, createdAt: Date.now()}); ok('شكراً لتقييمك'); } catch(e) { bad(e); } };
 
@@ -1273,13 +1350,26 @@ window.deposit = () => { if(!requireAuth()) return; form('شحن الرصيد', 
 }); };
 
 window.withdraw = () => { if(!requireAuth()) return; form('طلب سحب', inp('f_a','المبلغ (ج)','number') + inp('f_m','الطريقة (مثال: فودافون كاش)') + inp('f_c','رقم الحساب/المحفظة') + inp('f_n','اسم صاحب الحساب'), async () => { 
-    Security.limit('wd', 3, 36e5); 
-    const a = Security.amount($('f_a').value, 50, 10000000); 
-    if (a > me.balance) throw new Error('الرصيد غير كافٍ'); 
+    const a = Security.amount($('f_a').value, 50, 10000000);
+    if (a > me.balance) throw new Error('الرصيد غير كافٍ');
+    const payload = { amount: a, method: Security.text($('f_m').value, 2, 40), account: Security.text($('f_c').value, 3, 60), accountName: Security.text($('f_n').value, 3, 60) };
+    // مفتاح عملية ثابت لهذه المحاولة: يبقى عند انقطاع الشبكة/الضغط المزدوج، ويتغير إذا تغيّرت البيانات
+    const sig = JSON.stringify(payload);
+    let saved = null; try { saved = JSON.parse(sessionStorage.getItem('wdKey') || 'null'); } catch (_) {}
+    let idemKey;
+    if (saved && saved.sig === sig) idemKey = saved.key;
+    else { Security.limit('wd', 3, 36e5); idemKey = crypto.randomUUID(); sessionStorage.setItem('wdKey', JSON.stringify({ sig, key: idemKey })); }
     const idToken = await auth.currentUser.getIdToken();
-    const response = await fetch(WORKER_URL + "/withdraw", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ amount: a, method: Security.text($('f_m').value, 2, 40), account: Security.text($('f_c').value, 3, 60), accountName: Security.text($('f_n').value, 3, 60) }) });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
+    let response, result;
+    try {
+      response = await fetch(WORKER_URL + "/withdraw", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ ...payload, idempotencyKey: idemKey }) });
+      result = await response.json();
+    } catch (netErr) { throw new Error('انقطع الاتصال. أعد المحاولة وسيتم استكمال الطلب دون خصم مضاعف.'); }
+    if (!response.ok) {
+      if (!result.retryable) sessionStorage.removeItem('wdKey');
+      throw new Error(result.error || 'فشل الاتصال بالخادم');
+    }
+    sessionStorage.removeItem('wdKey');
     setTimeout(() => { ok('تم تسجيل طلب السحب'); go('wallet'); }, 100);
 }); };
 
@@ -1381,9 +1471,18 @@ window.upgradePro = async () => {
     try {
         Swal.fire({title:'جاري الترقية...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
         const idToken = await auth.currentUser.getIdToken();
-        const response = await fetch(WORKER_URL + "/upgrade-pro", { method: 'POST', headers: { 'Authorization': 'Bearer ' + idToken } });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'فشل الاتصال بالخادم');
+        let idemKey = sessionStorage.getItem('proKey');
+        if (!idemKey) { idemKey = crypto.randomUUID(); sessionStorage.setItem('proKey', idemKey); }
+        let response, result;
+        try {
+          response = await fetch(WORKER_URL + "/upgrade-pro", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ idempotencyKey: idemKey }) });
+          result = await response.json();
+        } catch (netErr) { throw new Error('انقطع الاتصال. أعد المحاولة وسيتم استكمال الترقية دون خصم مضاعف.'); }
+        if (!response.ok) {
+          if (!result.retryable) sessionStorage.removeItem('proKey');
+          throw new Error(result.error || 'فشل الاتصال بالخادم');
+        }
+        sessionStorage.removeItem('proKey');
         
         Swal.close(); 
         ok('تمت ترقية حسابك بنجاح! أنت الآن عضو VIP 👑'); 
@@ -1508,7 +1607,7 @@ window.showTermsPage = (type) => {
   clearU(); view = 'terms';
   const isTerms = type === 'terms';
   const title = isTerms ? 'الشروط والأحكام' : 'سياسة الخصوصية';
-  const content = isTerms ? `<h2>1. طبيعة المنصة (الوساطة)</h2><p>منصة BLACKP2P هي منصة وسيطة تهدف إلى تسهيل عمليات بيع وشراء الحسابات بين المستخدمين. المنصة لا تمتلك الحسابات ولا تتحمل مسؤولية أي إجراء تتخذه شركات الألعاب.</p><h2>2. نظام الضمان (Escrow)</h2><p>عند قيام المشتري بشراء إعلان، يتم خصم المبلغ من محفظته وحجزه لدى المنصة. لا يتم تحويل المبلغ للبائع إلا بعد أن يقوم المشتري باستلام الحساب وتأكيد الاستلام.</p><h2>3. مسؤوليات البائع</h2><ul><li>يجب أن يكون الحساب المعروض ملكاً للبائع بشكل قانوني.</li><li>يُمنع منعاً باتاً بيع الحسابات المسروقة. أي مستخدم يثبت تورطه في ذلك سيتم حظر حسابه نهائياً.</li></ul>` : `<h2>1. جمع المعلومات</h2><p>نحن نجمع بعض المعلومات الأساسية مثل (الاسم، البريد الإلكتروني) من خلال تسجيل الدخول بجوجل لتسهيل عملية الدخول. كما نقوم بتسجيل بيانات المتصفح لأغراض أمنية.</p><h2>2. سرية البيانات المشفرة</h2><p>بيانات الحسابات المعروضة للبيع يتم تشفيرها فوراً باستخدام خوارزميات مصرفية (AES-256). لا يمكن لأي شخص الاطلاع عليها إلا في حالات النزاع.</p>`;
+  const content = isTerms ? `<h2>1. طبيعة المنصة (الوساطة)</h2><p>منصة BLACKP2P هي منصة وسيطة تتيح بيع وشراء الحسابات بين المستخدمين. المنصة لا تمتلك الحسابات ولا تتحمل مسؤولية أي إجراء من شركات الألعاب.</p><h2>2. نظام الضمان (Escrow)</h2><p>عند شراء إعلان، يُخصم المبلغ ويُحجز لدى المنصة. لا يُحوَّل للبائع إلا بعد تأكيد المشتري للاستلام أو مرور 72 ساعة تلقائياً.</p><h2>3. مسؤوليات البائع</h2><ul><li>الحساب ملك للبائع بشكل قانوني.</li><li>يُمنع بيع الحسابات المسروقة (حظر نهائي وإبلاغ الجهات).</li></ul><h2>4. مسؤوليات المشتري</h2><ul><li>تأمين الحساب فوراً (تغيير كلمة المرور والبريد).</li><li>تأكيد الاستلام خلال 24 ساعة (وإلا يتم التأكيد تلقائياً بعد 72 ساعة).</li></ul><h2>5. النزاعات والاسترداد</h2><p>يحق لأي طرف فتح نزاع خلال 24 ساعة من التسليم. قرار الدعم نهائي.</p><h2>⚠️ تحذير مهم للمشتري</h2><div style="background:#fef2f2; border:2px solid #fecaca; padding:15px; border-radius:10px; margin:15px 0;"><p style="color:#991b1b; font-weight:900; margin-bottom:10px;">بمجرد ضغطك على "عرض البيانات" تُعتبر قانونياً أنك:</p><ul style="color:#7f1d1d; font-weight:700; font-size:13px; padding-right:20px;"><li>استلمت الحساب كاملاً وهو مطابق للوصف.</li><li>تتحمل وحدك مسؤولية تأمينه.</li><li>لا يحق لك فتح نزاع لاحقاً بادعاء "لم أستلم".</li><li>أي محاولة لسرقة الحساب ستؤدي لحظرك نهائياً وإبلاغ الجهات الأمنية.</li></ul></div><h2>6. سياسة الخصوصية</h2><ul><li>بيانات الحسابات مشفرة بـ AES-256.</li><li>لا يمكن رؤيتها إلا في حالات نزاع موثقة.</li><li>كل فك تشفير يُسجل في audit_logs.</li><li>لا نشارك بياناتك مع أطراف ثالثة تسويقياً.</li></ul>` : `<h2>1. جمع المعلومات</h2><p>نحن نجمع بعض المعلومات الأساسية مثل (الاسم، البريد الإلكتروني) من خلال تسجيل الدخول بجوجل لتسهيل عملية الدخول. كما نقوم بتسجيل بيانات المتصفح لأغراض أمنية.</p><h2>2. سرية البيانات المشفرة</h2><p>بيانات الحسابات المعروضة للبيع يتم تشفيرها فوراً باستخدام خوارزميات مصرفية (AES-256). لا يمكن لأي شخص الاطلاع عليها إلا في حالات النزاع.</p>`;
 
   $('app').innerHTML = `<style>.legal-page { background: #ffffff; color: #1a1a1a; min-height: 100vh; padding: 20px; border-radius: 14px; margin-top: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); font-family: 'Cairo', sans-serif; } .legal-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 20px; } .legal-title { font-size: 22px; font-weight: 900; color: #111827; margin: 0; } .legal-date { font-size: 11px; color: #6b7280; font-weight: 700; margin-top: 4px; } .legal-content h2 { font-size: 15px; font-weight: 900; color: #1f2937; margin-top: 24px; margin-bottom: 8px; background: #f3f4f6; padding: 8px 12px; border-radius: 8px; border-right: 4px solid #18181b; } .legal-content p { font-size: 13px; color: #4b5563; line-height: 1.8; margin-bottom: 12px; text-align: justify; } .legal-content ul { padding-right: 20px; margin-bottom: 12px; } .legal-content li { font-size: 13px; color: #4b5563; line-height: 1.8; margin-bottom: 6px; text-align: justify; } .legal-footer { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; }</style><div class="legal-page"><div class="legal-header"><div><h1 class="legal-title">${title}</h1><div class="legal-date">آخر تحديث: نوفمبر 2026</div></div><button class="btn btn-ghost" style="border-color:#d1d5db; color:#374151; background:#f9fafb;" onclick="go('feed')"><i class="fa-solid fa-arrow-right"></i> عودة</button></div><div class="legal-content"><div style="background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:8px; margin-bottom:20px;"><p style="color:#991b1b; font-weight:800; margin:0; font-size:12px;"><i class="fa-solid fa-circle-info"></i> يرجى قراءة هذه الشروط بعناية. بمجرد استخدامك للمنصة، فإنك توافق على الالتزام بجميع ما ورد فيها.</p></div>${content}<div class="legal-footer">جميع الحقوق محفوظة &copy; 2026 BLACKP2P<br>منصة الوساطة الآمنة لبيع وشراء الحسابات.</div></div></div>`;
 };
