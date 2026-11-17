@@ -4,148 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>الشروط والأحكام - BLACKP2P</title>
+<meta name="description" content="الشروط والأحكام الحاكمة لاستخدام منصة BLACKP2P لوساطة بيع وشراء الحسابات.">
+<meta name="theme-color" content="#18181b">
+<script>try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<style>
-:root { --primary: #18181b; --gold: #ca8a04; --bg: #f8fafc; --text: #1e293b; --text-2: #475569; --border: #e2e8f0; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.8; padding-bottom: 50px; }
-.header { background: var(--primary); color: #fff; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-.header h1 { font-size: 22px; font-weight: 900; margin-bottom: 5px; }
-.header p { font-size: 12px; color: #a1a1aa; }
-.container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
-.trust-section { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
-.stamp { background: #fff; border: 2px dashed var(--border); border-radius: 12px; padding: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; position: relative; overflow: hidden; }
-.stamp::before { content: ''; position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: rgba(202, 138, 4, 0.1); border-radius: 50%; }
-.stamp i { font-size: 26px; color: var(--primary); background: #f1f5f9; padding: 12px; border-radius: 50%; border: 2px solid var(--gold); }
-.stamp h3 { font-size: 13px; font-weight: 900; color: var(--primary); }
-.stamp p { font-size: 10px; color: var(--text-2); font-weight: 700; }
-.paper { background: #fff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-.paper h2 { font-size: 18px; font-weight: 900; color: var(--primary); margin-top: 25px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 8px; }
-.paper h2:first-child { margin-top: 0; }
-.paper h2 i { color: var(--gold); font-size: 16px; }
-.paper p { font-size: 14px; color: var(--text-2); font-weight: 600; margin-bottom: 15px; text-align: justify; }
-.paper ul { padding-right: 20px; margin-bottom: 15px; }
-.paper li { font-size: 14px; color: var(--text-2); font-weight: 600; margin-bottom: 8px; text-align: justify; }
-.warning-box { background: #fef2f2; border: 1px solid #fecaca; border-right: 4px solid #ef4444; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-.warning-box p { color: #991b1b; font-weight: 800; margin: 0; font-size: 13px; }
-.date-badge { display: inline-block; background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; margin-bottom: 20px; }
-.footer-actions { text-align: center; margin-top: 30px; }
-.btn { display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: #fff; text-decoration: none; padding: 12px 30px; border-radius: 10px; font-size: 14px; font-weight: 900; transition: opacity 0.2s; }
-.btn:hover { opacity: 0.9; }
-@media (max-width: 480px) { .trust-section { grid-template-columns: 1fr; } .paper { padding: 18px; } }
-</style>
+<link rel="stylesheet" href="legal.css">
 </head>
 <body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="index.html"><span class="brand-mark"><i class="fa-solid fa-shield-halved"></i></span><span><b>BLACKP2P</b><small>سوق آمن ومضمون</small></span></a>
+  <div class="bar-actions">
+    <a class="bar-link" href="index.html"><i class="fa-solid fa-arrow-right"></i>العودة للمنصة</a>
+    <button class="bar-btn" id="theme-btn" aria-label="تبديل الوضع"><i class="fa-solid fa-moon"></i></button>
+  </div>
+</div></header>
 
-<div class="header">
-    <h1>BLACKP2P</h1>
-    <p>وثيقة الشروط والأحكام وسياسة الخصوصية</p>
+<nav class="docs" aria-label="المستندات القانونية"><div class="docs-row"><a class="doc-chip" href="terms.html" aria-current="page"><i class="fa-solid fa-file-contract"></i>الشروط والأحكام</a><a class="doc-chip" href="privacy.html"><i class="fa-solid fa-user-lock"></i>سياسة الخصوصية</a><a class="doc-chip" href="aml.html"><i class="fa-solid fa-scale-balanced"></i>مكافحة غسل الأموال</a><a class="doc-chip" href="refunds.html"><i class="fa-solid fa-rotate-left"></i>النزاعات والاسترداد</a><a class="doc-chip" href="acceptable-use.html"><i class="fa-solid fa-ban"></i>الاستخدام المقبول</a></div></nav>
+
+<div class="head">
+  <h1>الشروط والأحكام</h1>
+  <p class="lead">القواعد التي تحكم علاقتك بمنصة BLACKP2P كبائع أو مشترٍ، وكيف نحمي أموالك أثناء الصفقة.</p>
+  <div class="meta">
+    <span class="pill"><i class="fa-regular fa-calendar"></i> آخر تحديث: 17 نوفمبر 2026</span>
+    <span class="pill"><i class="fa-solid fa-code-branch"></i> الإصدار 1.0</span>
+  </div>
 </div>
 
-<div class="container">
-    
-    <!-- أختام الأمان (الشهادات) -->
-    <div class="trust-section">
-        <div class="stamp">
-            <i class="fa-solid fa-shield-halved"></i>
-            <h3>حماية مصرفية</h3>
-            <p>تشفير AES-256</p>
-        </div>
-        <div class="stamp">
-            <i class="fa-solid fa-vault"></i>
-            <h3>نظام الضمان (Escrow)</h3>
-            <p>أموالك محجوزة حتى الاستلام</p>
-        </div>
-        <div class="stamp">
-            <i class="fa-solid fa-user-check"></i>
-            <h3>بائعون موثقون</h3>
-            <p>هوية تم التحقق منها</p>
-        </div>
-        <div class="stamp">
-            <i class="fa-solid fa-scale-balanced"></i>
-            <h3>عدالة النزاعات</h3>
-            <p>حماية للبائع والمشتري</p>
-        </div>
-    </div>
-
-    <!-- المستند القانوني -->
-    <div class="paper">
-        <div class="date-badge"><i class="fa-regular fa-calendar"></i> آخر تحديث: نوفمبر 2026</div>
-
-        <div class="warning-box">
-            <p><i class="fa-solid fa-triangle-exclamation"></i> تنبيه هام: استخدامك لمنصة BLACKP2P يعني موافقتك التامة على جميع الشروط المذكورة أدناه. يرجى القراءة بعناية.</p>
-        </div>
-
-        <h2><i class="fa-solid fa-1"></i> طبيعة عمل المنصة</h2>
-        <p>منصة BLACKP2P هي منصة وسيطة (Brokerage Platform) تهدف لتسهيل عمليات بيع وشراء الحسابات بين المستخدمين. المنصة <b>لا تمتلك</b> الحسابات المعروضة، ولا تتحمل أي مسؤولية عن أي إجراء تتخذه شركات الألعاب (مثل الحظر أو تعليق الحساب) بعد إتمام عملية البيع.</p>
-
-        <h2><i class="fa-solid fa-2"></i> نظام الضمان المالي (Escrow)</h2>
-        <p>لضمان حقوق الطرفين، تعتمد المنصة نظام الضمان:</p>
-        <ul>
-            <li>يقوم المشتري بدفع المبلغ للمنصة (يُخصم من محفظته).</li>
-            <li>يظل المبلغ <b>محجوزاً لدى المنصة</b> ولا يستلمه البائع فوراً.</li>
-            <li>يقوم البائع بتسليم الحساب عبر الدردشة.</li>
-            <li>يتأكد المشتري من الحساب، يغير كلمة المرور، ثم يضغط "تأكيد الاستلام".</li>
-            <li>عندها فقط، يتم تحويل المبلغ للبائع (بعد خصم عمولة المنصة).</li>
-        </ul>
-
-        <h2><i class="fa-solid fa-3"></i> شروط وواجبات البائع</h2>
-        <ul>
-            <li>يجب أن يكون الحساب المعروض ملكاً قانونياً للبائع.</li>
-            <li>يُمنع منعاً باتاً عرض أو بيع حسابات مسروقة أو مخترقة. أي مستخدم يثبت تورطه في ذلك سيتم حظر حسابه وتجميد أمواله فوراً وإبلاغ الجهات المختصة إن لزم الأمر.</li>
-            <li>يجب إرفاق صور حقيقية للحساب وكتابة وصف دقيق ومطابق للواقع.</li>
-            <li>يجب تسليم بيانات الحساب كاملة للمشتري فور بدء الصفقة.</li>
-        </ul>
-
-        <h2><i class="fa-solid fa-4"></i> شروط وواجبات المشتري</h2>
-        <ul>
-            <li>بمجرد استلام بيانات الحساب، يتحمل المشتري مسؤولية تأمينه (تغيير الإيميل، كلمة المرور، ربطه بحسابه).</li>
-            <li>لا يحق للمشتري فتح نزاع بداعي "سرقة الحساب" إذا لم يقم بتأمينه بشكل صحيح.</li>
-            <li>يجب على المشتري تأكيد الاستلام بمجرد التأكد من صحة الحساب لإتمام الصفقة.</li>
-        </ul>
-
-        <h2><i class="fa-solid fa-5"></i> النزاعات والاسترداد</h2>
-        <p>يحق لأي من الطرفين فتح نزاع خلال <b>24 ساعة</b> من التسليم. قرار الدعم نهائي وملزم.</p>
-
-        <h2><i class="fa-solid fa-triangle-exclamation"></i> تحذير مهم للمشتري</h2>
-        <div style="background:#fef2f2; border:2px solid #fecaca; border-right:4px solid #dc2626; padding:15px; border-radius:10px; margin:15px 0;">
-            <p style="color:#991b1b; font-weight:900; margin-bottom:10px;">⚠️ اقرأ قبل الضغط على "عرض البيانات":</p>
-            <p style="color:#7f1d1d; font-weight:700;">بمجرد ضغطك تُعتبر قانونياً أنك:</p>
-            <ul style="color:#7f1d1d; font-weight:700; padding-right:20px;">
-                <li><b>استلمت الحساب كاملاً</b> ومطابق للوصف.</li>
-                <li><b>تتحمل وحدك</b> مسؤولية تأمينه.</li>
-                <li><b>لا يحق لك فتح نزاع لاحقاً</b> بادعاء "لم أستلم".</li>
-                <li>أي محاولة لسرقة الحساب تُؤدي إلى <b>حظر نهائي وإبلاغ الجهات الأمنية</b>.</li>
-            </ul>
-        </div>
-
-        <h2><i class="fa-solid fa-user-shield"></i> مسؤولية المشتري بعد الاستلام</h2>
-        <ul>
-            <li>تغيير كلمة المرور والبريد فوراً.</li>
-            <li>التحقق من مطابقة الحساب للوصف.</li>
-            <li>تأكيد الاستلام خلال 24 ساعة (وإلا يتم التأكيد تلقائياً بعد 72 ساعة).</li>
-        </ul>
-        <p><b>ملاحظة:</b> المنصة وسيط تقني، ولا تتحمل مسؤولية إجراءات شركات الألعاب بعد إتمام البيع.</p>
-
-        <h2><i class="fa-solid fa-lock"></i> سياسة الخصوصية</h2>
-        <ul>
-            <li>بيانات الحسابات مشفرة بـ <b>AES-256</b>.</li>
-            <li>لا تُرى إلا في حالات نزاع موثقة.</li>
-            <li>كل فك تشفير يُسجل في سجل تدقيق دائم.</li>
-            <li>يمكن للمستخدم طلب حذف بياناته (يُحتفظ بالسجلات المالية فقط).</li>
-        </ul>
-
-        <h2><i class="fa-solid fa-7"></i> تعليق وحظر الحسابات</h2>
-        <p>تحتفظ إدارة BLACKP2P بالحق الكامل في تعليق أو حظر أي حساب يخالف القوانين، أو يحاول التلاعب بالأسعار، أو يسيء استخدام نظام الدردشة، أو يثبت تورطه في عمليات احتيال، دون إشعار مسبق.</p>
-
-    </div>
-
-    <div class="footer-actions">
-        <a href="index.html" class="btn"><i class="fa-solid fa-arrow-right"></i> العودة إلى المنصة</a>
-    </div>
-
+<div class="wrap">
+  <details class="toc" id="toc"><summary><span><i class="fa-solid fa-list-ul" style="margin-inline-end:8px;color:var(--gold)"></i>محتويات الصفحة</span><i class="fa-solid fa-chevron-down"></i></summary><ol><li><a href="#s1">التعريفات</a></li><li><a href="#s2">قبول الشروط والأهلية</a></li><li><a href="#s3">طبيعة المنصة ودورها</a></li><li><a href="#s4">الحساب والأمان</a></li><li><a href="#s5">المحفظة والإيداع والسحب</a></li><li><a href="#s6">نظام الضمان (Escrow)</a></li><li><a href="#s7">الإعلانات وقواعد النشر</a></li><li><a href="#s8">التسليم والاستلام ومسؤولية المشتري</a></li><li><a href="#s9">العمولات والرسوم</a></li><li><a href="#s10">العضوية المميزة (VIP)</a></li><li><a href="#s11">النزاعات والاسترداد</a></li><li><a href="#s12">السلوك المحظور</a></li><li><a href="#s13">التعليق والحظر والتجميد</a></li><li><a href="#s14">حدود المسؤولية</a></li><li><a href="#s15">الملكية الفكرية والمحتوى</a></li><li><a href="#s16">التعديل على الشروط وإنهاء الاستخدام</a></li><li><a href="#s17">القانون الواجب التطبيق وحل الخلافات</a></li><li><a href="#s18">التواصل</a></li></ol></details>
+  <main class="paper">
+    <div class="summary"><h2><i class="fa-solid fa-bolt"></i>الخلاصة بكلمات بسيطة</h2><ul><li>BLACKP2P وسيط فقط: لا نملك الحسابات المعروضة ولا نبيعها بأنفسنا.</li><li>أموال المشتري تُحجز لدى المنصة (ضمان) ولا تصل للبائع إلا بعد تأكيد الاستلام أو مرور 72 ساعة على التسليم دون نزاع.</li><li>بعد ضغطك على «عرض البيانات» تُعتبر مستلماً للحساب وتتحمل مسؤولية تأمينه.</li><li>يُمنع بيع الحسابات المسروقة أو المخترقة، والعقوبة حظر نهائي وتجميد الأموال وإبلاغ الجهات المختصة.</li><li>الرصيد داخل المحفظة هو رصيد استخدام داخل المنصة وليس حساباً مصرفياً ولا يُدرّ فوائد.</li></ul></div>
+    <section class="s" id="s1"><h2>التعريفات</h2><ul><li><b>المنصة:</b> منصة BLACKP2P بجميع صفحاتها وتطبيقها وخدماتها.</li><li><b>المستخدم:</b> كل من يسجّل حساباً على المنصة، سواء كان بائعاً أو مشترياً.</li><li><b>البائع:</b> المستخدم الذي ينشر إعلاناً لبيع حساب لعبة.</li><li><b>المشتري:</b> المستخدم الذي يشتري حساباً معروضاً عبر المنصة.</li><li><b>الإعلان:</b> العرض المنشور لبيع حساب، ويتضمن اللعبة والسيرفر والوصف والسعر والصور.</li><li><b>الصفقة:</b> عملية الشراء التي تبدأ بدفع المشتري وتنتهي بتأكيد الاستلام أو الاسترداد.</li><li><b>المحفظة:</b> رصيد المستخدم داخل المنصة المستخدم في الشراء والسحب والترقية.</li><li><b>الضمان (Escrow):</b> حجز المنصة لمبلغ الصفقة إلى حين اكتمالها.</li><li><b>الدعم الفني:</b> فريق الإدارة الذي يتواصل معه المستخدم عبر دردشة الدعم داخل التطبيق.</li></ul></section><section class="s" id="s2"><h2>قبول الشروط والأهلية</h2><p>باستخدامك المنصة أو بتسجيل الدخول إليها فإنك توافق على هذه الشروط وعلى سياسة الخصوصية وسياسة مكافحة غسل الأموال وسياسة النزاعات والاسترداد وسياسة الاستخدام المقبول. إذا لم توافق على أي منها فلا يجوز لك استخدام المنصة.</p><ul><li>يجب ألا يقل عمرك عن <b>18 عاماً</b> وأن تكون كامل الأهلية القانونية للتعاقد.</li><li>يجب أن تكون المعلومات التي تقدمها صحيحة ومحدثة، وأن تكون صاحب الحساب الذي تسجل به.</li><li>يُسمح بحساب واحد فقط لكل شخص. يحق للمنصة دمج أو إغلاق الحسابات المتعددة.</li></ul></section><section class="s" id="s3"><h2>طبيعة المنصة ودورها</h2><p>BLACKP2P منصة وساطة تقنية تتيح للمستخدمين عرض حسابات الألعاب وبيعها وشرائها، وتوفر نظام ضمان ودردشة وتسوية مالية. المنصة ليست طرفاً في عقد البيع بين البائع والمشتري، ولا تمتلك الحسابات المعروضة، ولا تضمن جودتها أو استمرار صلاحيتها لدى الشركة المطوّرة للعبة.</p><div class="co warn"><i class="fa-solid fa-triangle-exclamation"></i><div><strong>تنبيه بشأن شروط شركات الألعاب</strong><p>قد تمنع شركات الألعاب أو تقيّد نقل ملكية الحسابات أو بيعها في شروط استخدامها. المنصة غير تابعة لأي شركة ألعاب ولا تتحمل أي مسؤولية عن إجراءات هذه الشركات (مثل الحظر أو التعليق أو استرجاع الحساب) بعد إتمام البيع. على المستخدم الاطلاع على شروط اللعبة المعنية وتحمل مسؤولية قراره.</p></div></div></section><section class="s" id="s4"><h2>الحساب والأمان</h2><ul><li>تسجيل الدخول يتم عبر حساب Google. أنت مسؤول عن أمان حساب Google وجهازك وعن كل نشاط يتم من خلال حسابك على المنصة.</li><li>لا يجوز مشاركة حسابك أو بيعه أو تأجيره.</li><li>لن يطلب منك فريق المنصة كلمة مرور حسابك على Google أو بيانات الحسابات المباعة في أي وقت. أبلغ الدعم فوراً عن أي طلب من هذا النوع.</li><li>عند الاشتباه في وصول شخص غير مصرح له إلى حسابك، أبلغ الدعم الفني فوراً.</li></ul></section><section class="s" id="s5"><h2>المحفظة والإيداع والسحب</h2><h3>الإيداع</h3><ul><li>يتم شحن الرصيد بتحويل المبلغ إلى وسيلة الدفع المعلنة داخل التطبيق ثم رفع صورة إيصال واضحة وبيانات المبلغ.</li><li>تُراجَع الإيصالات يدوياً من فريق المحاسبة، ولا يُضاف الرصيد إلا بعد اعتماد الإيصال.</li><li>يجب أن يتم التحويل من حساب باسمك. يُرفض الإيداع من طرف ثالث أو بإيصال غير مطابق أو مزوّر.</li><li>الحد الأقصى للطلب الواحد 1,000,000 ج، وللمنصة تحديد حدود أقل لأسباب أمنية.</li></ul><h3>السحب</h3><ul><li>الحد الأدنى للسحب <b>50 ج</b> وبمبالغ صحيحة.</li><li>يلزم إدخال طريقة السحب ورقم الحساب أو المحفظة واسم صاحبها، ويجب أن يكون الحساب باسمك.</li><li>يُخصم المبلغ من المحفظة فور تسجيل الطلب، ثم يُراجَع ويُنفّذ يدوياً. وإذا رُفض الطلب يعود المبلغ إلى محفظتك.</li><li>قد نؤجل السحب أو نطلب توثيق الهوية وفق سياسة مكافحة غسل الأموال.</li><li>المنصة غير مسؤولة عن خطأ تكتبه في بيانات السحب.</li></ul><div class="co key"><i class="fa-solid fa-star"></i><div><strong>طبيعة الرصيد</strong><p>الرصيد هو قيمة استخدام داخل المنصة لإتمام الصفقات. وهو ليس وديعة مصرفية، ولا يُدرّ فوائد، ولا يجوز استخدامه كوسيلة لتحويل الأموال بين الأطراف دون صفقة حقيقية.</p></div></div></section><section class="s" id="s6"><h2>نظام الضمان (Escrow)</h2><p>لحماية الطرفين تتم كل صفقة وفق الخطوات التالية:</p><ol class="steps"><li>يضغط المشتري على «شراء»، فيُخصم السعر من محفظته ويُحجز لدى المنصة، ويُحجز الإعلان لحين اكتمال العملية.</li><li>تُنشأ دردشة خاصة بالصفقة بين المشتري والبائع.</li><li>يسلّم البائع بيانات الحساب بالكامل، ويضغط «تم التسليم».</li><li>يتحقق المشتري من الحساب ويؤمّنه (تغيير البريد وكلمة المرور وروابط الحماية).</li><li>يضغط المشتري «تأكيد الاستلام»، فيُحوَّل المبلغ للبائع بعد خصم عمولة المنصة.</li><li>إذا لم يؤكد المشتري ولم يفتح نزاعاً خلال <b>72 ساعة</b> من التسليم، تُؤكَّد الصفقة تلقائياً.</li></ol><p>لا يملك البائع التصرف في المبلغ المحجوز قبل اكتمال الصفقة، ولا يملك المشتري استرداده إلا وفق سياسة النزاعات والاسترداد.</p></section><section class="s" id="s7"><h2>الإعلانات وقواعد النشر</h2><ul><li>يجب أن يكون الحساب المعروض ملكاً قانونياً للبائع وتحت سيطرته الكاملة.</li><li>يجب أن يكون الوصف دقيقاً ومطابقاً للواقع، وأن تكون الصور حقيقية للحساب نفسه.</li><li>السعر بالجنيه المصري ويجب أن يكون رقماً صحيحاً موجباً، ولا يجوز تغييره بعد بدء صفقة على الإعلان.</li><li>تُشفَّر بيانات دخول الحساب فور إدخالها ولا تُعرض للمشتري إلا بعد بدء الصفقة وتسليمها.</li><li>للمنصة مراجعة أي إعلان أو إخفاؤه أو حذفه إذا خالف الشروط أو بدا مضللاً.</li></ul></section><section class="s" id="s8"><h2>التسليم والاستلام ومسؤولية المشتري</h2><p>يلتزم البائع بتسليم بيانات الحساب كاملة وصحيحة عبر المنصة فور بدء الصفقة، ويلتزم بعدم الاحتفاظ بأي وسيلة تتيح له استرجاع الحساب أو الدخول إليه بعد التسليم.</p><div class="co warn"><i class="fa-solid fa-triangle-exclamation"></i><div><strong>اقرأ قبل الضغط على «عرض البيانات»</strong><p>بمجرد عرضك البيانات تُعتبر قانونياً أنك:</p><ul><li>استلمت الحساب كاملاً وهو مطابق للوصف.</li><li>تتحمل وحدك مسؤولية تأمينه.</li><li>لا يحق لك لاحقاً فتح نزاع بادعاء «لم أستلم».</li></ul><p>أي محاولة لسرقة الحساب أو استرجاعه بعد تأكيد الاستلام تؤدي إلى حظر نهائي وإبلاغ الجهات المختصة.</p></div></div><p>على المشتري فور الاستلام: تغيير البريد وكلمة المرور، وتفعيل التحقق بخطوتين إن توفر، والتحقق من مطابقة الحساب للوصف، ثم تأكيد الاستلام. لا يحق لمشترٍ لم يؤمّن الحساب بشكل سليم أن يفتح نزاعاً بداعي «سرقة الحساب».</p></section><section class="s" id="s9"><h2>العمولات والرسوم</h2><ul><li>تُخصم عمولة المنصة من مبلغ الصفقة عند تحويله للبائع، وتُحسب بالنسبة المعلنة في المنصة وقت اكتمال الصفقة، ويظهر صافي مستحق البائع في سجل الصفقة.</li><li>لا يدفع المشتري أي رسوم إضافية على سعر الإعلان ما لم يُعلن غير ذلك داخل التطبيق قبل الدفع.</li><li>قد تتغير النسب والرسوم، ولا يسري التغيير على صفقة بدأت قبله.</li><li>أي رسوم يفرضها مزوّد وسيلة الدفع أو البنك على التحويل يتحملها المستخدم.</li></ul></section><section class="s" id="s10"><h2>العضوية المميزة (VIP)</h2><ul><li>تتيح العضوية المميزة المزايا المعلنة داخل التطبيق، ومنها رفع الإعلان للأعلى مرة كل 6 ساعات.</li><li>السعر والمدة معلنان وقت الشراء، ويُخصمان من المحفظة. التجديد يتم يدوياً بطلب منك ولا يتجدد تلقائياً.</li><li>عند تجديد العضوية قبل انتهائها تُضاف المدة الجديدة إلى المدة المتبقية.</li><li>رسوم العضوية غير قابلة للاسترداد إلا في حال خلل تقني من المنصة، أو إغلاق حسابك لسبب لا ترجع إليك مسؤوليته.</li><li>تنتهي المزايا عند حظر الحساب لمخالفة الشروط.</li></ul></section><section class="s" id="s11"><h2>النزاعات والاسترداد</h2><p>يحق لأي من طرفي الصفقة فتح نزاع قبل اكتمالها، وعندها يتجمد مبلغ الصفقة والدردشة بانتظار قرار الدعم. التفاصيل الكاملة في <a href="refunds.html">سياسة النزاعات والاسترداد</a>. قرار الدعم الفني بعد مراجعة الأدلة هو القرار النهائي داخل المنصة، دون الإخلال بحقك في اللجوء إلى الجهات القضائية.</p></section><section class="s" id="s12"><h2>السلوك المحظور</h2><p>يُحظر على المستخدمين بيع الحسابات المسروقة أو المخترقة، والاحتيال، وتزوير الإيصالات، وإتمام الصفقات خارج المنصة، وإنشاء حسابات متعددة، والتلاعب بالتقييمات، وغيرها مما ورد في <a href="acceptable-use.html">سياسة الاستخدام المقبول</a>.</p></section><section class="s" id="s13"><h2>التعليق والحظر والتجميد</h2><ul><li>يحق للمنصة تعليق الحساب أو حظره مؤقتاً أو نهائياً عند مخالفة الشروط أو الاشتباه في الاحتيال، ودون إشعار مسبق إذا اقتضى ذلك حماية المستخدمين.</li><li>يجوز تجميد الرصيد وتأخير السحب أثناء التحقيق في مخالفة أو بلاغ أو أمر من جهة مختصة.</li><li>يحق للمستخدم الاعتراض على أي إجراء عبر الدعم الفني، وتدرس الإدارة الاعتراض وتردّ عليه.</li><li>إذا ثبتت المخالفة جاز للمنصة خصم الأضرار الثابتة من الرصيد المجمَّد، وإبلاغ الجهات المختصة.</li></ul></section><section class="s" id="s14"><h2>حدود المسؤولية</h2><ul><li>تُقدَّم الخدمة «كما هي» ودون ضمان بأنها ستكون متاحة دون انقطاع أو خالية من الأخطاء.</li><li>لا تتحمل المنصة مسؤولية: إجراءات شركات الألعاب، أو استرجاع مالك سابق للحساب بوسائل خارج علم المنصة، أو إهمال المستخدم في حفظ بياناته وتأمين الحساب، أو خسائر ناتجة عن إتمام صفقة خارج المنصة.</li><li>في الحدود التي يسمح بها القانون، لا تتجاوز مسؤولية المنصة عن أي صفقة قيمة مبلغ تلك الصفقة، ولا تشمل الأضرار غير المباشرة أو الخسائر المتوقعة.</li><li>لا يُخلّ هذا البند بأي حق لا يجوز التنازل عنه بموجب القانون، ومنه حقوق المستهلك.</li></ul></section><section class="s" id="s15"><h2>الملكية الفكرية والمحتوى</h2><ul><li>اسم BLACKP2P وشعارها وتصميم المنصة وبرمجياتها ملك للمنصة ولا يجوز نسخها أو استخدامها دون إذن كتابي.</li><li>أسماء الألعاب وشعاراتها علامات تجارية لأصحابها، ولا يعني ذكرها أي ارتباط أو رعاية.</li><li>تمنح المنصة ترخيصاً غير حصري لاستخدام ما تنشره من إعلانات وصور وتقييمات لغرض تشغيل الخدمة وعرضها فقط، وتبقى ملكيتها لك. أنت تقر بأن لك الحق في نشر ما تنشره.</li></ul></section><section class="s" id="s16"><h2>التعديل على الشروط وإنهاء الاستخدام</h2><p>قد نحدّث هذه الشروط من وقت لآخر، وننشر النسخة الجديدة هنا مع تاريخ التحديث، ونُخطر المستخدمين بالتغييرات الجوهرية عبر الإشعارات. استمرارك في استخدام المنصة بعد النشر يعني موافقتك على التعديل. يمكنك إيقاف استخدام المنصة وطلب إغلاق حسابك في أي وقت بعد تسوية صفقاتك المفتوحة وسحب رصيدك.</p></section><section class="s" id="s17"><h2>القانون الواجب التطبيق وحل الخلافات</h2><p>تخضع هذه الشروط وتُفسَّر وفقاً لقوانين جمهورية مصر العربية. نشجع على حل أي خلاف ودياً عبر الدعم الفني أولاً، وفي حال تعذر ذلك تختص المحاكم المصرية المختصة بنظره، مع مراعاة أي قواعد اختصاص آمرة لصالح المستهلك.</p></section><section class="s" id="s18"><h2>التواصل</h2><p>لأي استفسار أو اعتراض أو بلاغ، افتح تذكرة من زر <b>«الدعم الفني»</b> داخل التطبيق، وسيتولى فريقنا الرد عليك.</p></section>
+  </main>
 </div>
 
+<footer class="foot">
+  <div class="foot-links"><a href="terms.html">الشروط والأحكام</a><a href="privacy.html">سياسة الخصوصية</a><a href="aml.html">مكافحة غسل الأموال</a><a href="refunds.html">النزاعات والاسترداد</a><a href="acceptable-use.html">الاستخدام المقبول</a></div>
+  <p>هذه الوثيقة جزء لا يتجزأ من اتفاقية استخدام منصة BLACKP2P. باستمرارك في استخدام المنصة فإنك تقر بقراءتها والموافقة عليها. للاستفسار تواصل مع الدعم الفني من داخل التطبيق.</p>
+  <p style="margin-top:6px">© <span id="yr">2026</span> BLACKP2P. جميع الحقوق محفوظة.</p>
+</footer>
+<script>document.getElementById('yr').textContent=new Date().getFullYear()</script>
+<script src="legal.js"></script>
 </body>
-  </html>
+</html>
