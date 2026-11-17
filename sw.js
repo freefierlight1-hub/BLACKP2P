@@ -1,8 +1,11 @@
-const CACHE_NAME = 'blackp2p-v1';
+const CACHE_NAME = 'blackp2p-v2';
 const ASSETS = [
     './',
     './index.html',
     './Admin.html',
+    './kyc.html',
+    './auth.html',
+    './welcome.html',
     './style.css',
     './script.js',
     './manifest.json',
