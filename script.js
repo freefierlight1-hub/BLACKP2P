@@ -1614,13 +1614,9 @@ window.showTermsPage = (type) => {
 
 window.verify = () => {
     if(!requireAuth()) return;
-    if (VS === 'pending') return bad(new Error('طلبك قيد المراجعة بالفعل، يرجى الانتظار.'));
     if (me.verified) return bad(new Error('حسابك موثق بالفعل.'));
-    form('توثيق الحساب', '<label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:4px">صورة الهوية</label><input id="f_i" type="file" accept="image/*" style="margin-bottom:10px;font-size:11px;padding:8px"><label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:4px">سيلفي مع الهوية</label><input id="f_s" type="file" accept="image/*" style="font-size:11px;padding:8px">', async () => { 
-        const a = await img($('f_i').files[0]); const b = await img($('f_s').files[0]); 
-        await set(R('user_verifications/' + me.uid), {idUrl: a, selfieUrl: b, status: 'pending', createdAt: Date.now()}); 
-        VS = 'pending'; if (view === 'me') profile(); ok('تم إرسال طلب التوثيق'); 
-    });
+    if (VS === 'pending') return bad(new Error('طلبك قيد المراجعة بالفعل، يرجى الانتظار.'));
+    location.href = 'kyc.html';   // صفحة التوثيق الكاملة
 };
 
 const ST = {held:'بانتظار التسليم', delivered:'تم التسليم', completed:'مكتملة', cancelled:'ملغية', refunded:'مستردة', disputed:'نزاع'};
