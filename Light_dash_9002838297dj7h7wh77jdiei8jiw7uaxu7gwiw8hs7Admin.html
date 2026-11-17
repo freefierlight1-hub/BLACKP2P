@@ -361,93 +361,28 @@ const card=h=>`<div class="card">${h}</div>`;
 const empty=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--text-4)"><i class="fa-regular fa-folder-open" style="font-size:32px;margin-bottom:12px;opacity:0.5"></i><p style="font-size:12px;font-weight:700">لا توجد بيانات</p></div>`;
 const thumbs=a=>`<div style="display:flex;gap:6px;overflow-x:auto;margin:8px 0;padding-bottom:4px" class="hide-scroll">${a.map(s=>`<img src="${s}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--border);flex-shrink:0" onclick="zoom(this.src)">`).join('')}</div>`;
 
-/* ===== التوثيق (KYC): يقرأ الهيكل الجديد والقديم معًا ===== */
-const isImg=x=>typeof x==='string'&&(x.startsWith('http')||x.startsWith('data:image/'));
-const DOCT={id:'بطاقة شخصية',passport:'جواز سفر'};
-const ZS={};
-window.zoomSet=(k,i)=>{const a=ZS[k]||[],n=a.length;if(!n)return;i=(i+n)%n;Swal.fire({imageUrl:a[i],imageWidth:'100%',background:'#0a0a0a',showCloseButton:true,showConfirmButton:n>1,confirmButtonText:'التالي ›',showDenyButton:n>1,denyButtonText:'‹ السابق',footer:'<span style="color:#a1a1aa">'+(i+1)+' / '+n+'</span>'}).then(r=>{if(r.isConfirmed)zoomSet(k,i+1);else if(r.isDenied)zoomSet(k,i-1)})};
-const kycData=v=>{
-  const im=v.idImages||{};
-  const front=isImg(im.front)?im.front:(isImg(v.idUrl)?v.idUrl:'');
-  const back=isImg(im.back)?im.back:(isImg(v.idBackUrl)?v.idBackUrl:'');
-  let frames=(Array.isArray(v.livenessFrames)?v.livenessFrames:Object.values(v.livenessFrames||{})).filter(isImg);
-  if(!frames.length&&isImg(v.selfieUrl))frames=[v.selfieUrl];
-  return {front,back,frames};
-};
-const kycAge=b=>{if(!b)return null;const d=new Date(b);return isNaN(d)?null:Math.floor((Date.now()-d)/31557600000)};
-const kycWarn=(v,extra=[])=>{
-  const {front,back,frames}=kycData(v),w=[...extra],nw=!!(v.idImages||v.livenessFrames||v.fullName);
-  if(!front)w.push('صورة الهوية الأمامية مفقودة');
-  if(nw&&v.docType!=='passport'&&!back)w.push('صورة الهوية الخلفية مفقودة');
-  if(nw&&frames.length<5)w.push('صور الوجه '+frames.length+' من 5');
+const kycAge=b=>{if(!b)return '';const d=new Date(b);if(isNaN(d))return '';const n=new Date();let a=n.getFullYear()-d.getFullYear();if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--;return a};
+const kycImgs=(arr,label)=>arr.length?`<div style="margin-top:8px"><span class="info-label">${label}</span><div style="display:flex;gap:6px;overflow-x:auto;padding:4px 0" class="hide-scroll">${arr.map(([t,u])=>`<div style="flex-shrink:0;text-align:center"><img src="${E(u)}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--border)" onclick="zoom(this.src)"><div style="font-size:9px;color:var(--text-3);margin-top:2px">${t}</div></div>`).join('')}</div></div>`:'';
+const kycDetails=v=>{
+  const row=(l,val,ltr)=>`<div class="info-cell"><span class="info-label">${l}</span><span class="info-value" ${ltr?'dir="ltr" style="text-align:right;user-select:all"':'style="user-select:all"'}>${E(val||'—')}</span></div>`;
+  const pass=v.docType==='passport';
+  const ids=v.idImages||{};
+  const idList=[];
+  if(ids.front||v.idUrl)idList.push([pass?'صفحة الجواز':'الوجه الأمامي',ids.front||v.idUrl]);
+  if(ids.back)idList.push(['الوجه الخلفي',ids.back]);
+  const live=imgs(v.livenessFrames).map((u,i)=>['لقطة '+(i+1),u]);
+  if(v.selfieUrl)live.unshift(['سيلفي',v.selfieUrl]);
   const age=kycAge(v.birthDate);
-  if(age!==null&&age<18)w.push('العمر أقل من 18 سنة');
-  if(nw&&(!v.fullName||!v.birthDate||!v.address||!v.job))w.push('بيانات الطلب ناقصة');
-  return w;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+    <div style="grid-column:1/-1">${row('الاسم الكامل',v.fullName)}</div>
+    ${row('نوع الوثيقة',pass?'جواز سفر':'بطاقة هوية')}
+    ${row('رقم الهوية / الجواز',v.idNumber,true)}
+    ${row('تاريخ الميلاد',v.birthDate?v.birthDate+(age!==''?' ('+age+' سنة)':''):'',true)}
+    ${row('العمل',v.job)}
+    <div style="grid-column:1/-1">${row('السكن',v.address)}</div>
+    ${v.createdAt?`<div style="grid-column:1/-1">${row('وقت الطلب',ago(v.createdAt))}</div>`:''}
+  </div>${kycImgs(idList,'صور الهوية')}${kycImgs(live,'صور التحقق الحي')}`;
 };
-const kycBody=(v,key,extra=[])=>{
-  const {front,back,frames}=kycData(v),age=kycAge(v.birthDate),w=kycWarn(v,extra);
-  const all=[front,back,...frames].filter(Boolean);ZS[key]=all;
-  const nw=!!(v.idImages||v.livenessFrames||v.fullName);
-  const tile=(src,label,ar)=>src
-    ?`<div><img src="${E(src)}" style="width:100%;aspect-ratio:${ar};object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer;display:block" onclick="zoomSet('${key}',${all.indexOf(src)})"><div style="font-size:9.5px;color:var(--text-3);text-align:center;margin-top:3px;font-weight:700">${label}</div></div>`
-    :`<div style="aspect-ratio:${ar};border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:9.5px;color:var(--text-4);font-weight:700">${label}<br>غير متوفرة</div>`;
-  const cell=(l,val,full)=>`<div class="info-cell" ${full?'style="grid-column:1/-1"':''}><span class="info-label">${l}</span><span class="info-value">${val}</span></div>`;
-  const idn=v.idNumber?`<span dir="ltr">${E(v.idNumber)}</span>`:(v.idHash?`<span dir="ltr" style="font-size:10px">بصمة ${E(String(v.idHash).slice(0,12))}…</span>`:'—');
-  const warnHtml=w.length
-    ?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${w.map(x=>`<span class="badge badge-danger" style="font-size:9.5px"><i class="fa-solid fa-triangle-exclamation"></i> ${E(x)}</span>`).join('')}</div>`
-    :(nw?`<div style="margin-bottom:8px"><span class="badge badge-success" style="font-size:9.5px"><i class="fa-solid fa-check"></i> الطلب مكتمل</span></div>`:'');
-  return warnHtml
-    +(nw?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">`
-      +cell('الاسم الكامل',E(v.fullName||'—'),true)
-      +cell('تاريخ الميلاد',E(v.birthDate||'—')+(age!==null?' ('+age+' سنة)':''))
-      +cell('نوع الوثيقة',DOCT[v.docType]||'—')
-      +cell('رقم الهوية',idn,true)
-      +cell('السكن',E(v.address||'—'))
-      +cell('العمل',E(v.job||'—'))
-      +`</div>`:'')
-    +`<p style="font-size:10.5px;font-weight:800;color:var(--text-3);margin:8px 0 5px">صور الوثيقة</p>`
-    +`<div style="display:grid;grid-template-columns:${v.docType==='passport'?'1fr':'1fr 1fr'};gap:6px">${tile(front,v.docType==='passport'?'صفحة البيانات':'الوجه الأمامي','4/3')}${v.docType==='passport'?'':tile(back,'الوجه الخلفي','4/3')}</div>`
-    +`<p style="font-size:10.5px;font-weight:800;color:var(--text-3);margin:10px 0 5px">صور الوجه (${frames.length}/5)</p>`
-    +`<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px">${Array.from({length:Math.max(5,frames.length)},(_,i)=>tile(frames[i],String(i+1),'1')).join('')}</div>`;
-};
-const kycDup=async v=>{if(!v.idHash)return [];const s=await get(query(R('user_verifications'),orderByChild('idHash'),equalTo(v.idHash)));return Object.entries(s.val()||{}).filter(([id])=>id!==v.id).map(([id,x])=>({id,...x}))};
-const kycLoad=async uid=>({id:uid,...((await get(R('user_verifications/'+uid))).val()||{})});
-const approveKyc=async uid=>{
-  const v=await kycLoad(uid);
-  const d=(await kycDup(v)).filter(x=>x.status==='approved');
-  if(d.length)throw new Error('هذه الهوية موثقة بالفعل في حساب آخر ('+(await uname(d[0].id))+')');
-  await confirmPIN('توثيق');
-  await claim('user_verifications/'+uid,'pending','approved');
-  await update(R('user_verifications/'+uid),{reviewedAt:Date.now()});
-  await update(R('users/'+uid),{verified:true,verifiedAt:Date.now()});
-  await notify(uid,'تم التوثيق','يمكنك النشر الآن');
-  await log('توثيق مستخدم',uid);
-};
-const rejectKyc=async uid=>{
-  const r=await reason('سبب الرفض');
-  await confirmPIN('رفض توثيق');
-  await claim('user_verifications/'+uid,'pending','rejected');
-  await update(R('user_verifications/'+uid),{rejectReason:r,reviewedAt:Date.now()});
-  await notify(uid,'رفض توثيق','السبب: '+r);
-  await log('رفض توثيق',r);
-};
-window.reviewKyc=async uid=>{try{
-  const v=await kycLoad(uid);
-  if(!v.status){return Swal.fire({icon:'info',title:'لا يوجد طلب توثيق لهذا المستخدم'})}
-  const [nm,dups]=await Promise.all([uname(uid),kycDup(v)]);
-  const dn=await Promise.all(dups.map(d=>uname(d.id)));
-  const dupHtml=dups.length?`<div class="alert-box" style="border:1px solid var(--danger-bd,#f87171);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:11px;font-weight:700;color:var(--danger-tx,#dc2626);text-align:right"><i class="fa-solid fa-triangle-exclamation"></i> نفس الهوية مستخدمة في حسابات أخرى:${dups.map((d,i)=>`<div style="margin-top:4px">${ulink(d.id,dn[i])} ${statusBadge(d.status)}</div>`).join('')}</div>`:'';
-  const pending=v.status==='pending';
-  const r=await Swal.fire({
-    title:E(nm),width:720,showCloseButton:true,
-    html:`<div style="text-align:right"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">${statusBadge(v.status)}<span style="font-size:10px;color:var(--text-3)">${v.createdAt?ago(v.createdAt):''}</span></div>${dupHtml}${kycBody(v,'r'+uid)}${v.status==='rejected'&&v.rejectReason?`<p style="font-size:11px;color:var(--danger-tx,#dc2626);margin-top:8px;font-weight:700">سبب الرفض: ${E(v.rejectReason)}</p>`:''}</div>`,
-    showConfirmButton:pending,confirmButtonText:'توثيق الحساب',confirmButtonColor:'#16a34a',
-    showDenyButton:pending,denyButtonText:'رفض',cancelButtonText:'إغلاق'
-  });
-  if(r.isConfirmed){await approveKyc(uid);ok('تم التوثيق');await show(view)}
-  else if(r.isDenied){await rejectKyc(uid);ok('تم الرفض');await show(view)}
-}catch(e){bad(e)}};
 const NM={};const uname=async u=>NM[u]||(NM[u]=await get(R('users/'+u+'/name')).then(x=>x.val()||u).catch(()=>u));
 const claim=async(path,from,to)=>{const r=await runTransaction(R(path+'/status'),v=>v===from||v===null?to:undefined);if(!r.committed)throw new Error('تمت المعالجة مسبقاً')};
 const credit=(uid,n)=>runTransaction(R(`users/${uid}/balance`),v=>{const numV = Number(v) || 0; const x = numV + n; return x >= 0 ? x : undefined;}).then(r=>{if(!r.committed)throw new Error('الرصيد لا يكفي')});
@@ -625,7 +560,9 @@ window.userInfo=async uid=>{try{
       </div>
   </div>`).join('');
 
-  const verificationTab = vf ? `<div class="info-cell" style="margin-bottom:8px"><span class="info-label">الحالة</span><span class="info-value">${statusBadge(vf.status)}</span></div>${kycBody({...vf,id:uid},'u'+uid)}${vf.status==='rejected'&&vf.rejectReason?`<p style="font-size:11px;color:var(--danger-tx,#dc2626);margin-top:8px;font-weight:700">سبب الرفض: ${E(vf.rejectReason)}</p>`:''}<div style="margin-top:10px">${op('مراجعة كاملة',()=>reviewKyc(uid),'btn-primary')}</div>` : '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد توثيق</p>';
+  const verificationTab = vf ? `
+  <div class="info-cell" style="margin-bottom:8px"><span class="info-label">الحالة</span><span class="info-value">${statusBadge(vf.status)}</span></div>
+  ${kycDetails(vf)}` : '<p style="font-size:11px;color:var(--text-4);text-align:center;padding:20px">لا يوجد توثيق</p>';
 
   Swal.fire({ 
       title: '<span style="font-size:14px;font-weight:900;color:var(--text);">معلومات المستخدم</span>', 
@@ -903,13 +840,8 @@ async wd(){
 },
 async ver(){ 
     const limit = pageState[view] ? pageState[view]*30 : 30;
-    const raw = await fetchList('user_verifications', limit);
-    const all = raw.filter(v=>st('pending')==='all'||v.status===st('pending')); const a = all.slice(0, limit);
-    const byHash = {}; raw.forEach(v=>{ if(v.idHash)(byHash[v.idHash]=byHash[v.idHash]||[]).push(v.id) });
-    return bar([['pending','معلقة'],['approved','موثقة'],['rejected','مرفوضة'],['all','الكل']], false) + ((await Promise.all(a.map(async v=>{
-      const dup = (byHash[v.idHash]||[]).filter(i=>i!==v.id);
-      return card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">${ulink(v.id,await uname(v.id))}</b>${statusBadge(v.status)}</div><p style="font-size:10px;color:var(--text-3);margin-bottom:6px">${v.createdAt?ago(v.createdAt):''}</p>${kycBody(v,v.id,dup.length?['نفس الهوية في '+dup.length+' حساب آخر']:[])}${v.status==='rejected'&&v.rejectReason?`<p style="font-size:10.5px;color:var(--danger-tx,#dc2626);margin-top:8px;font-weight:700">سبب الرفض: ${E(v.rejectReason)}</p>`:''}<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px">${op('مراجعة كاملة',()=>reviewKyc(v.id),'btn-primary')}${op('معلومات',()=>userInfo(v.id))}${v.status==='pending'?op('توثيق',async()=>{await approveKyc(v.id);ok('تم');await show(view)},'btn-success')+op('رفض',async()=>{await rejectKyc(v.id);ok('تم');await show(view)},'btn-danger'):''}</div>`);
-    }))).join('')||empty) + moreBtn(view, all.length, limit);
+    const all=(await fetchList('user_verifications', limit)).filter(v=>st('pending')==='all'||v.status===st('pending')); const a = all.slice(0, limit); 
+    return bar([['pending','معلقة'],['approved','موثقة'],['rejected','مرفوضة'],['all','الكل']], false) + ((await Promise.all(a.map(async v=>card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">${ulink(v.id,await uname(v.id))}</b>${statusBadge(v.status)}</div><p style="font-size:10px;color:var(--text-3);margin-bottom:6px">${ago(v.createdAt)}</p>${kycDetails(v)}<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${op('معلومات',()=>userInfo(v.id))}${v.status==='pending'?btn('توثيق',async()=>{await confirmPIN('توثيق');await claim('user_verifications/'+v.id,'pending','approved');await update(R('users/'+v.id),{verified:true});await notify(v.id,'تم التوثيق','يمكنك النشر الآن')},'btn-success','توثيق')+op('رفض',async()=>{const r=await reason('سبب الرفض');await confirmPIN('رفض توثيق');await claim('user_verifications/'+v.id,'pending','rejected');await notify(v.id,'رفض توثيق','السبب: '+r);await log('رفض توثيق',r);ok('تم');show(view)},'btn-danger'):''}</div>`)))).join('')||empty) + moreBtn(view, all.length, limit); 
 },
 async pay(){ const p=(await fetchList('pending_payouts',50)).filter(x=>x.status==='pending'); return p.map(x=>card(`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><b style="color:var(--text);display:block;margin-bottom:3px;font-size:12.5px">أرباح صفقة <span style="font-size:10px;color:var(--text-4)">#${E(x.id).slice(0,6)}</span></b><span style="color:var(--success-tx);font-weight:900;font-size:15px">${x.amount} ج</span></div><div style="display:flex;gap:5px;flex-wrap:wrap">${op('البائع',()=>userInfo(x.sellerId))}${btn('صرف',async()=>{await confirmPIN('صرف '+x.amount);await claim('pending_payouts/'+x.id,'pending','processed');await credit(x.sellerId,x.amount);await notify(x.sellerId,'تم الصرف',`+${x.amount} ج`)},'btn-success','صرف أرباح')}</div></div><div style="font-size:10px;color:var(--text-3);margin-top:6px">عمولة: ${x.commission} من ${x.grossAmount}</div>`)).join('')||empty; },
 async ref(){ const all = await fetchList('refund_queue',50); const pending = all.filter(x=>x.status==='pending'); if(pending.length === 0) return empty; const html = await Promise.all(pending.map(async f => { const deal = (await get(R('deals/'+f.id))).val() || {}; return card(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:6px"><b style="font-size:12.5px;color:var(--text)">نزاع <span style="font-size:10px;color:var(--text-4)" dir="ltr">#${E(f.id).slice(0,8)}</span></b><span style="color:var(--danger-tx);font-weight:900;font-size:13px">${f.amount} ج</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;font-size:11px"><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">المشتري</span>${ulink(f.buyerId,await uname(f.buyerId))}</div><div style="background:var(--surface-2);padding:6px;border-radius:8px"><span style="color:var(--text-4);display:block;margin-bottom:2px;font-size:9px;font-weight:800">البائع</span>${ulink(f.sellerId,await uname(f.sellerId))}</div></div><div style="background:var(--danger-bg);border:1px solid var(--danger-bd);color:var(--danger-tx);font-size:11px;padding:8px;border-radius:8px;margin-bottom:8px"><b>مقدم النزاع:</b> ${f.raisedByRole || '—'}<br><b>السبب:</b> ${E(f.reason)}</div><div style="display:flex;gap:5px;flex-wrap:wrap">${btn('استرداد',async()=>{await confirmPIN('استرداد '+f.amount);await claim('refund_queue/'+f.id,'pending','approved');await credit(f.buyerId,f.amount);const updates={};updates['deals/'+f.id+'/status']='refunded';if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='refunded'}await update(ref(db),updates);await notify(f.buyerId,'تم الاسترداد',`+${f.amount} ج`);await notify(f.sellerId,'استرداد صفقة','');if(deal.chatId)await set(push(R(`chats/${deal.chatId}/messages`)),{senderId:me.uid,type:'admin',text:'تم استرداد المبلغ',createdAt:Date.now()});await log('استرداد '+f.id,'')},'btn-success','استرداد')}${btn('رفض النزاع',async()=>{await confirmPIN('رفض');await claim('refund_queue/'+f.id,'pending','rejected');const com=Math.round(deal.amount*(Number(S.commission)||0)/100);const updates={};updates['deals/'+f.id+'/status']='completed';updates['pending_payouts/'+f.id]={sellerId:f.sellerId,buyerId:f.buyerId,amount:deal.amount-com,grossAmount:deal.amount,commission:com,status:'pending',createdAt:Date.now()};if(deal.chatId){updates['chats/'+deal.chatId+'/frozen']=false;updates['chats/'+deal.chatId+'/dealStatus']='completed'}await update(ref(db),updates);await notify(f.sellerId,'رفض النزاع','تم تحويل أرباحك');await notify(f.buyerId,'رفض النزاع','');await log('رفض نزاع '+f.id,'')},'btn-danger','رفض نزاع')}${op('بيانات',()=>viewPrivateInfo(deal.postId, deal.chatId))}</div>`); })); return html.join(''); },
