@@ -362,6 +362,7 @@ onAuthStateChanged(auth, async u => {
         me = {uid: u.uid, ...s.val()}; 
         userLoaded = true;
         $('bal').textContent = (me.balance || 0) + ' ج';
+        syncVerifyUI();
         
         if (me.suspended) {
           if (me.banUntil && Date.now() > me.banUntil) {
@@ -436,11 +437,22 @@ onAuthStateChanged(auth, async u => {
     
     GU.push(onValue(R('user_verifications/' + u.uid), s => { 
         VS = (s.val() || {}).status || ''; 
+        syncVerifyUI();
         if (view === 'me') profile(); 
     }));
     
   } catch(e) { console.error(e); }
 });
+
+/* إخفاء زر التوثيق من الهيدر بعد توثيق الحساب */
+function syncVerifyUI(){
+  const hide = !!(me && me.verified);
+  document.querySelectorAll('header button, header a').forEach(b => {
+    const oc = b.getAttribute('onclick') || '';
+    const isVerify = /verify\(|kyc\.html/.test(oc) || b.matches('[data-verify]') || !!b.querySelector('i.fa-id-badge, i.fa-id-card, i.fa-address-card');
+    if (isVerify) b.style.display = hide ? 'none' : '';
+  });
+}
 
 const PUB_FIELDS = ['name','photo','verified','isPro','proUntil','createdAt','followersCount','completedDeals','autoReplyText'];
 async function pubUser(uid) {
