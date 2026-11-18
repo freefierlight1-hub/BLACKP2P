@@ -668,6 +668,8 @@ window.deleteUserAccount = async (uid) => {
     try {
         const updates = {};
         updates[`users/${uid}`] = null; updates[`notifications/${uid}`] = null; updates[`user_chats/${uid}`] = null; updates[`user_verifications/${uid}`] = null;
+        const kycHash = (await get(R('user_verifications/'+uid+'/idHash'))).val();
+        if (kycHash && (await get(R('kyc_ids/'+kycHash))).val() === uid) updates[`kyc_ids/${kycHash}`] = null;
         const userPosts = await get(query(R('posts'), orderByChild('sellerId'), equalTo(uid)));
         if(userPosts.exists()) { Object.keys(userPosts.val()).forEach(pid => { updates[`posts/${pid}`] = null; updates[`post_private/${pid}`] = null; }); }
         await update(ref(db), updates);
