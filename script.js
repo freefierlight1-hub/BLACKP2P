@@ -444,9 +444,9 @@ onAuthStateChanged(auth, async u => {
   } catch(e) { console.error(e); }
 });
 
-/* إخفاء زر التوثيق من الهيدر بعد توثيق الحساب */
+/* إخفاء زر التوثيق من الهيدر عند التوثيق أو عندما يكون الطلب قيد المراجعة */
 function syncVerifyUI(){
-  const hide = !!(me && me.verified);
+  const hide = !!(me && me.verified) || VS === 'pending';
   document.querySelectorAll('header button, header a').forEach(b => {
     const oc = b.getAttribute('onclick') || '';
     const isVerify = /verify\(|kyc\.html/.test(oc) || b.matches('[data-verify]') || !!b.querySelector('i.fa-id-badge, i.fa-id-card, i.fa-address-card');
@@ -803,6 +803,41 @@ window.openPost = async (id, fromHistory = false) => {
         </div>
     ` : `<div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-4);font-size:32px;border-radius:12px"><i class="fa-regular fa-image"></i></div>`;
 
+    // ===== التفاوض =====
+    const negOn = !!(S.negotiationEnabled && p.negotiable && p.status === 'active');
+    let myOffer = null, offersHtml = '';
+    if (negOn && !mine) { try { myOffer = (await get(R(`offers/${id}/${me.uid}`))).val(); } catch (e) {} }
+    if (mine && p.negotiable) {
+      try {
+        const [oSnap, nSnap] = await Promise.all([get(R(`offers/${id}`)), get(R(`post_negotiation/${id}`))]);
+        const list = Object.entries(oSnap.val() || {}).map(([bid, o]) => ({ bid, ...o })).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        const stTxt = { pending: 'بانتظار ردك', accepted: 'تم القبول', rejected: 'مرفوض', used: 'تم الشراء' };
+        const stCls = { pending: 'badge-warning', accepted: 'badge-success', rejected: 'badge-danger', used: 'badge-success' };
+        const minP = nSnap.val() ? Number(nSnap.val().minPrice) : 0;
+        offersHtml = `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <b style="font-size:14px;font-weight:900;color:var(--text);display:block;margin-bottom:6px"><i class="fa-solid fa-handshake"></i> عروض المشترين (${list.length})</b>
+          ${minP ? `<p style="font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:8px">أدنى سعر حددته: ${minP} ج (سري عن المشترين)</p>` : ''}
+          ${list.length ? list.map(o => `<div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><b style="font-size:13px">${E(o.buyerName || 'مشتري')}</b><span class="badge ${stCls[o.status] || 'badge-neutral'}">${stTxt[o.status] || E(o.status)}</span></div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-2);margin-top:4px">يعرض <b>${Number(o.price) || 0} ج</b> · المحاولة ${Number(o.rounds) || 1}/3</div>
+            ${o.status === 'pending' ? `<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-primary" style="flex:1;padding:8px;font-size:12px" onclick="respondOffer('${id}','${E(o.bid)}',true)">قبول</button><button class="btn btn-ghost" style="flex:1;padding:8px;font-size:12px" onclick="respondOffer('${id}','${E(o.bid)}',false)">رفض</button></div>` : ''}
+          </div>`).join('') : '<p style="font-size:12px;color:var(--text-4);font-weight:700">لا توجد عروض بعد.</p>'}
+        </div>`;
+      } catch (e) { console.warn('offers', e); }
+    }
+    const offerValid = !!(myOffer && myOffer.status === 'accepted' && (myOffer.expiresAt || 0) > Date.now());
+    const buyStyle = 'padding:14px;font-size:16px;border-radius:12px;box-shadow:var(--shadow-lg);font-weight:900;';
+    const normalBuy = w => `<button class="btn btn-primary" style="${w};${buyStyle} ${p.isAutoBuy ? 'background:var(--gold-solid); color:#fff;' : ''}" onclick="buy('${id}', ${p.isAutoBuy||false})"><i class="fa-solid fa-shield-halved"></i> ${p.isAutoBuy ? 'شراء فوري' : 'شراء الآن'} (${p.price} ج)</button>`;
+    let buyBarHtml = normalBuy('width:100%');
+    if (offerValid) {
+      buyBarHtml = `<div style="font-size:11px;font-weight:800;color:var(--success-tx);text-align:center;margin-bottom:6px">قبل البائع عرضك — السعر المتفق عليه صالح حتى ${new Date(myOffer.expiresAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</div>
+        <button class="btn btn-primary" style="width:100%;${buyStyle}" onclick="buy('${id}', false, true)"><i class="fa-solid fa-handshake"></i> ادفع ${Number(myOffer.price)} ج (السعر المتفق عليه)</button>`;
+    } else if (negOn && !mine) {
+      const left = 3 - (myOffer ? (myOffer.rounds || 0) : 0);
+      const lbl = left <= 0 ? 'انتهت محاولاتك' : !myOffer ? 'تفاوض' : myOffer.status === 'pending' ? `عرضك ${Number(myOffer.price)} ج ⏳` : myOffer.status === 'rejected' ? 'رُفض عرضك — عدّله' : 'انتهت مهلة السعر — فاوض';
+      buyBarHtml = `<div style="display:flex;gap:8px"><button class="btn btn-ghost" style="flex:1;${buyStyle} font-size:13px" ${left <= 0 ? 'disabled' : ''} onclick="makeOffer('${id}')"><i class="fa-solid fa-handshake"></i> ${lbl}</button>${normalBuy('flex:2')}</div>`;
+    }
+
     $('app').innerHTML = `
     <button class="btn btn-ghost" onclick="history.back()" style="margin-bottom:10px;padding:7px 12px;font-size:11px"><i class="fa-solid fa-arrow-right"></i> العودة للسوق</button>
     
@@ -860,11 +895,12 @@ window.openPost = async (id, fromHistory = false) => {
             </div>
         </div>
       </div>
+    ${offersHtml}
     </div>
 
     ${p.status === 'active' && !mine ? `
     <div style="position:fixed;bottom:60px;left:0;right:0;padding:10px 15px;background:var(--glass-strong);backdrop-filter:blur(10px);border-top:1px solid var(--border);z-index:40;max-width:640px;margin:0 auto;">
-        <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;border-radius:12px;box-shadow:var(--shadow-lg);font-weight:900; ${p.isAutoBuy ? 'background:var(--gold-solid); color:#fff;' : ''}" onclick="buy('${id}', ${p.isAutoBuy||false})"><i class="fa-solid fa-shield-halved"></i> ${p.isAutoBuy ? 'شراء فوري' : 'شراء الآن'} (${p.price} ج)</button>
+        ${buyBarHtml}
     </div>` : `<p style="text-align:center;font-size:13px;font-weight:800;color:var(--text-4);padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:4px">${mine ? 'أنت صاحب هذا الإعلان' : 'الإعلان غير متاح'}</p>`}`;
     
     window._lk = {liked, n: p.likeCount || 0}; paintLike(liked, p.likeCount || 0);
@@ -874,20 +910,70 @@ window.openPost = async (id, fromHistory = false) => {
 const paintLike = (l, n) => { if($('lk')) $('lk').innerHTML = `<i class="fa-${l ? 'solid text-red' : 'regular'} fa-heart" style="${l ? 'color:#dc2626' : ''}"></i> ${n}`; };
 window.like = async id => { try { Security.limit('like', 20, 6e4); const {liked:l} = window._lk, r = R(`likes/${id}/${me.uid}`); const c = await runTransaction(R(`posts/${id}/likeCount`), v => v === null ? 0 : l ? (v > 0 ? v - 1 : undefined) : (v || 0) + 1); if (!c.committed) return; await (l ? remove(r) : set(r, true)); const n = c.snapshot.val(); window._lk = {liked: !l, n}; paintLike(!l, n); } catch(e) { bad(e); } };
 
-window.buy = async function(id, isAutoBuy) {
+window.makeOffer = async (postId) => {
+  if (!requireAuth()) return;
+  try {
+    if (!S.negotiationEnabled) throw new Error('التفاوض غير متاح حالياً');
+    const p = (await get(R('posts/' + postId))).val();
+    if (!p || p.status !== 'active' || !p.negotiable) throw new Error('التفاوض غير متاح على هذا الإعلان.');
+    if (p.sellerId === me.uid) throw new Error('لا يمكنك التفاوض على إعلانك.');
+    const r = R(`offers/${postId}/${me.uid}`);
+    const cur = (await get(r)).val();
+    if (cur && cur.status === 'accepted' && (cur.expiresAt || 0) > Date.now()) throw new Error('قبل البائع عرضك بالفعل، أكمل الدفع.');
+    const used = cur ? (cur.rounds || 0) : 0;
+    if (used >= 3) throw new Error('استنفدت محاولات التفاوض على هذا الإعلان (3 عروض).');
+    const { value: v } = await Swal.fire({
+      title: 'اعرض سعرك',
+      html: `<p style="font-size:12px;font-weight:700;margin-bottom:8px">سعر الإعلان: ${Number(p.price)} ج<br>المحاولات المتبقية: ${3 - used}</p>`,
+      input: 'number', inputAttributes: { min: 1, max: p.price - 1, step: 1 }, inputPlaceholder: 'المبلغ الذي ستدفعه (ج)',
+      showCancelButton: true, confirmButtonText: 'إرسال العرض', cancelButtonText: 'إلغاء'
+    });
+    if (v === undefined || v === '') return;
+    const price = Security.amount(v, 1, p.price - 1);
+    Security.limit('offer', 5, 6e4);
+    try {
+      await set(r, { price, status: 'pending', rounds: used + 1, sellerId: p.sellerId, buyerName: me.name, updatedAt: Date.now() });
+    } catch (e) {
+      if (/PERMISSION_DENIED/i.test(String((e && (e.code || e.message)) || ''))) throw new Error('تعذر إرسال العرض. جرّب مبلغاً أعلى.');
+      throw e;
+    }
+    notify(p.sellerId, 'عرض جديد على إعلانك', `${me.name} يعرض ${price} ج على ${p.game}`, 'info', { postId });
+    ok('تم إرسال عرضك للبائع');
+    openPost(postId, true);
+  } catch (e) { bad(e); }
+};
+
+window.respondOffer = async (postId, buyerId, accept) => {
+  try {
+    if (!await ask(accept ? 'قبول هذا العرض؟ سيتمكن المشتري من الشراء بهذا السعر لمدة 12 ساعة.' : 'رفض هذا العرض؟')) return;
+    const r = R(`offers/${postId}/${buyerId}`);
+    const cur = (await get(r)).val();
+    if (!cur || cur.status !== 'pending') throw new Error('هذا العرض لم يعد قيد الانتظار.');
+    const now = Date.now();
+    const upd = { ...cur, status: accept ? 'accepted' : 'rejected', updatedAt: now };
+    if (accept) { upd.acceptedAt = now; upd.expiresAt = now + 12 * 36e5; }
+    await set(r, upd);
+    const p = (await get(R('posts/' + postId))).val() || {};
+    notify(buyerId, accept ? 'تم قبول عرضك' : 'تم رفض عرضك', accept ? `قبل البائع ${cur.price} ج على ${p.game || 'الإعلان'}. أكمل الدفع خلال 12 ساعة.` : `رفض البائع عرضك على ${p.game || 'الإعلان'}.`, 'info', { postId });
+    ok(accept ? 'تم قبول العرض' : 'تم رفض العرض');
+    openPost(postId, true);
+  } catch (e) { bad(e); }
+};
+
+window.buy = async function(id, isAutoBuy, useOffer) {
   if(!requireAuth()) return;
   try {
     Security.limit('buy', 3, 6e4);
-    if (!await ask(isAutoBuy ? 'هل أنت متأكد من الشراء الفوري؟ سيتم خصم المبلغ وتحويلك للدردشة فوراً.' : 'هل أنت متأكد من الشراء؟ سيتم حجز المبلغ حتى تؤكد الاستلام.')) return;
+    if (!await ask(useOffer ? 'هل أنت متأكد من الشراء بالسعر المتفق عليه؟ سيتم حجز المبلغ حتى تؤكد الاستلام.' : isAutoBuy ? 'هل أنت متأكد من الشراء الفوري؟ سيتم خصم المبلغ وتحويلك للدردشة فوراً.' : 'هل أنت متأكد من الشراء؟ سيتم حجز المبلغ حتى تؤكد الاستلام.')) return;
     Swal.fire({title:'جاري تنفيذ الشراء بأمان...', didOpen:()=>Swal.showLoading(), showConfirmButton:false});
     const idToken = await auth.currentUser.getIdToken();
     // مفتاح عملية ثابت لهذه المحاولة: إعادة الإرسال (انقطاع شبكة/ضغط مزدوج) لا تخصم مرتين
-    const keyName = 'buyKey_' + id;
+    const keyName = 'buyKey_' + id + (useOffer ? '_offer' : '');
     let idemKey = sessionStorage.getItem(keyName);
     if (!idemKey) { idemKey = crypto.randomUUID(); sessionStorage.setItem(keyName, idemKey); }
     let response, result;
     try {
-      response = await fetch(WORKER_URL + "/buy", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: id, isAutoBuy: isAutoBuy, idempotencyKey: idemKey }) });
+      response = await fetch(WORKER_URL + "/buy", { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({ postId: id, isAutoBuy: isAutoBuy, useOffer: !!useOffer, idempotencyKey: idemKey }) });
       result = await response.json();
     } catch (netErr) {
       throw new Error('انقطع الاتصال. أعد المحاولة وسيتم استكمال العملية دون خصم مضاعف.');
@@ -939,6 +1025,14 @@ window.add = function() {
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">السيرفر</label><select id="a_s" style="margin-bottom:12px">${serversList.map(s => `<option value="${E(s)}">${E(s)}</option>`).join('')}</select>
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">وصف الحساب</label><textarea id="a_d" placeholder="اكتب تفاصيل الحساب..." rows="4" style="margin-bottom:12px"></textarea>
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">السعر (ج)</label><input id="a_p" type="number" placeholder="مثال: 500" style="margin-bottom:12px">
+    ${S.negotiationEnabled ? `
+    <label style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; margin-bottom:10px; background:var(--surface-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+        <input type="checkbox" id="a_neg" style="width:auto; margin:0;"> تفعيل زر «تفاوض» (يسمح للمشترين بعرض سعر أقل)
+    </label>
+    <div id="a_neg_box" class="hidden" style="margin-bottom:12px">
+        <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">أدنى سعر تقبله (ج) — سري ولا يراه المشترون</label>
+        <input id="a_min" type="number" placeholder="مثال: 400">
+    </div>` : ''}
     <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px">نوع الربط</label><select id="a_l" style="margin-bottom:12px" onchange="updateLinkInput()">${linkTypes.map(l => `<option value="${l}">${l}</option>`).join('')}</select>
     
     ${isPro ? `
@@ -956,6 +1050,7 @@ window.add = function() {
   window.updateLinkInput = () => { const type = $('a_l').value; const input = $('a_e'); if (type === 'Facebook') { input.type = 'tel'; input.placeholder = 'رقم الهاتف'; } else if (type === 'Google' || type === 'Apple' || type === 'Email') { input.type = 'email'; input.placeholder = 'البريد الإلكتروني'; } else { input.type = 'text'; input.placeholder = 'اسم الحساب'; } };
   updateLinkInput();
   
+  if ($('a_neg')) $('a_neg').onchange = e => $('a_neg_box').classList.toggle('hidden', !e.target.checked);
   $('a_f').onchange = e => { const len = e.target.files.length; if(len > 10) { bad(new Error('الحد الأقصى 10 صور')); e.target.value=''; $('file-count').textContent = ''; return; } $('file-count').textContent = `تم اختيار ${len} صور`; };
   
   $('a_b').onclick = async () => {
@@ -965,6 +1060,12 @@ window.add = function() {
       const g = Security.text($('a_g').value, 2, 40), sv = Security.text($('a_s').value, 1, 40), d = Security.text($('a_d').value, 10, 800), pr = Security.amount($('a_p').value, 1, 100000000), em = Security.text($('a_e').value, 3, 120), pw = Security.text($('a_w').value, 3, 120);
       const fs = [...$('a_f').files]; 
       if (fs.length === 0) throw new Error('ارفع صور الحساب');
+      const wantNeg = !!(S.negotiationEnabled && $('a_neg') && $('a_neg').checked);
+      let minPrice = 0;
+      if (wantNeg) {
+        minPrice = Math.round(Number($('a_min').value));
+        if (!Number.isFinite(minPrice) || minPrice < 1 || minPrice >= pr) throw new Error('أدنى سعر للتفاوض يجب أن يكون أقل من سعر الإعلان');
+      }
       
       $('a_b').disabled = true; $('a_b').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة ورفع الصور...';
       Swal.fire({title:'جاري رفع الصور للسيرفر...', didOpen:()=>Swal.showLoading(), showConfirmButton:false}); 
@@ -983,9 +1084,10 @@ window.add = function() {
       
       const isAutoBuyChecked = isPro && $('a_auto') ? $('a_auto').checked : false;
 
-      await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: isPro ? 'active' : 'pending', createdAt: Date.now(), featured: isPro ? true : false, isAutoBuy: isAutoBuyChecked });
+      await set(R('posts/' + id), { sellerId: me.uid, sellerName: me.name, sellerVerified: me.verified, sellerSince: me.createdAt, game: g, server: sv, desc: d, price: pr, linkType: $('a_l').value, photos, likeCount: 0, status: isPro ? 'active' : 'pending', createdAt: Date.now(), featured: isPro ? true : false, isAutoBuy: isAutoBuyChecked, negotiable: wantNeg });
       
       await set(R('post_private/' + id), {email: encData.encryptedEmail, password: encData.encryptedPass});
+      if (wantNeg) { try { await set(R('post_negotiation/' + id), { minPrice }); } catch (e) { await update(R('posts/' + id), { negotiable: false }).catch(() => {}); } }
       Swal.close(); 
       if(isPro) { ok('تم نشر إعلانك فوراً (عضوية VIP)'); } else { ok('تم الإرسال للمراجعة'); }
       go('feed');
