@@ -532,6 +532,7 @@ const state = {
 };
 
 function goStep(n){
+  if (n >= 2 && state.blocked) return;   // موثّق أو قيد المراجعة: لا تقديم جديد
   // لا يمكن تجاوز خطوة غير مكتملة
   if (n >= 3 && !isStep2Ready()) return;
   if (n >= 4 && !state.livenessDone) return;
@@ -793,6 +794,13 @@ async function submitKyc(){
 
   $('#s4btns').classList.add('hidden'); $('#submitLoader').classList.remove('hidden');
   try{
+    // تحقق من الحالة الحالية قبل أي رفع: الموثّق أو المعلّق لا يعيد التقديم
+    const cur = await KYC_HOOKS.existingStatus().catch(() => null);
+    if (cur === 'approved' || cur === 'pending'){
+      await checkExisting();
+      goStep(1);
+      return;
+    }
     const idNumber = $('#fId').value.trim().toUpperCase();
     const idHash = await sha256(idNumber);
 
@@ -823,7 +831,12 @@ async function submitKyc(){
     goStep(5);
   } catch (e){
     console.error(e);
-    alertBox.textContent = 'حدث خطأ أثناء الإرسال. تحقق من الاتصال وأعد المحاولة.';
+    const code = String((e && (e.code || e.message)) || '');
+    let msg;
+    if (/PERMISSION_DENIED/i.test(code)) msg = 'تعذر إرسال الطلب: حسابك موثّق بالفعل أو لديك طلب قيد المراجعة.';
+    else if (!navigator.onLine || /network|failed to fetch/i.test(code)) msg = 'تعذر الاتصال بالإنترنت. تحقق من الشبكة وأعد المحاولة.';
+    else msg = 'فشل الإرسال: ' + ((e && e.message) || 'خطأ غير معروف');
+    alertBox.textContent = msg;
     alertBox.classList.remove('hidden');
   } finally {
     $('#submitLoader').classList.add('hidden'); $('#s4btns').classList.remove('hidden');
@@ -841,7 +854,7 @@ async function submitKyc(){
   renderShots();
   goStep(1);
   window.addEventListener('pagehide', stopCamera);
-  window.addEventListener('DOMContentLoaded', checkExisting);
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', checkExisting); else checkExisting();
 })();
 
 /* إن كان للمستخدم طلب سابق: الموثّق والمعلّق لا يعيدان التقديم، والمرفوض يعيد */
@@ -849,6 +862,7 @@ async function checkExisting(){
   try{
     const st = await KYC_HOOKS.existingStatus();
     if (!st || st === 'rejected') return;
+    state.blocked = true;
     const approved = st === 'approved';
     $('#existingT').textContent = approved ? 'حسابك موثّق بالفعل' : 'طلبك قيد المراجعة';
     $('#existingP').textContent = approved ? 'لا حاجة لإعادة التوثيق.' : 'سنخبرك فور الانتهاء. المدة المقدّرة 15 دقيقة.';
