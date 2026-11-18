@@ -964,6 +964,8 @@ async set(){
             <div><label style="font-size:11px;color:var(--text-3);font-weight:800;display:block;margin-bottom:4px">رسالة الصيانة</label><input id="s_maintenanceMessage" value="${E(s.maintenanceMessage||'')}"></div>
         </div>
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin:10px 0 6px;color:var(--text-2)"><input type="checkbox" id="s_maintenanceMode" style="width:auto;margin:0" ${s.maintenanceMode?'checked':''}> تفعيل وضع الصيانة</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin:6px 0 2px;color:var(--text-2)"><input type="checkbox" id="s_negotiationEnabled" style="width:auto;margin:0" ${s.negotiationEnabled?'checked':''}> تفعيل ميزة التفاوض على الإعلانات</label>
+        <p style="font-size:10px;color:var(--warn-tx);font-weight:700;margin:0 0 8px">⚠️ لا تفعّلها قبل تحديث worker.js ليحسب السعر المتفق عليه عند الشراء.</p>
         
         ${btn('حفظ جميع الإعدادات',async()=>{
             const o={}; 
@@ -975,6 +977,7 @@ async set(){
             o.maxAdsPro = Number(o.maxAdsPro) || 50;
             o.refBonus = Number(o.refBonus) || 10;
             o.maintenanceMode=$('s_maintenanceMode').checked; 
+            o.negotiationEnabled=$('s_negotiationEnabled').checked; 
             o.games = $('s_games').value.split(',').map(x=>x.trim()).filter(Boolean); 
             o.servers = $('s_servers').value.split(',').map(x=>x.trim()).filter(Boolean); 
             await update(R('settings'),o); 
